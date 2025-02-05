@@ -1,100 +1,204 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  CircleCheck,
+  LogIn,
+  Store,
+  UserRoundPlus,
+  WalletMinimal,
+  Map,
+} from "lucide-react";
+import { MobileMenu } from "@/components/mobile-menu";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="bg-gray-50 text-gray-800">
+      <header className="bg-white shadow-md sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-primary">
+            Darius Delivery 🚀
+          </h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          <div className="md:hidden">
+            <MobileMenu />
+          </div>
+
+          <nav className="hidden md:flex gap-4">
+            <Link
+              href="#"
+              className="text-primary hover:text-secondary transition">
+              Início
+            </Link>
+            <Link
+              href="#planos"
+              className="text-primary hover:text-secondary transition">
+              Planos
+            </Link>
+            <Link
+              href="#vantagens"
+              className="text-primary hover:text-secondary transition">
+              Vantagens
+            </Link>
+          </nav>
+
+          <div className="hidden md:flex gap-3">
+            <Link href="/auth/sign-in">
+              <Button>
+                <LogIn className="text-sm" /> Login
+              </Button>
+            </Link>
+            <Link href="/auth/sign-up">
+              <Button variant="secondary">
+                <UserRoundPlus /> Registrar
+              </Button>
+            </Link>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </header>
+
+      <section className="bg-primary text-white text-center py-20">
+        <h1 className="text-4xl font-bold mb-4">
+          Darius Delivery - Feito de Dono para Dono!
+        </h1>
+        <p className="text-lg mb-6">
+          O sistema que você precisava para gerenciar seu delivery de forma
+          fácil e eficiente.
+        </p>
+        <Link
+          href="#planos"
+          className="bg-secondary text-primary px-8 py-3 rounded-lg text-lg font-semibold hover:bg-yellow-400 transition">
+          Conheça Nossos Planos
+        </Link>
+      </section>
+
+      <section id="vantagens" className="py-16 px-4 max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-10">
+          Vantagens do Nosso Sistema
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-md text-center">
+            <div className="flex justify-center">
+              <Map className="text-4xl text-primary mb-4" />
+            </div>
+            <h3 className="text-2xl font-semibold text-primary mb-3">
+              Otimização de Pedidos
+            </h3>
+            <p>
+              Roteirização inteligente para agilizar entregas e reduzir custos.
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-md text-center">
+            <div className="flex justify-center">
+              <Store className="text-4xl text-primary mb-4" />
+            </div>
+            <h3 className="text-2xl font-semibold text-primary mb-3">
+              Templates Personalizáveis
+            </h3>
+            <p>
+              Crie sua loja online do seu jeito com nossos modelos exclusivos.
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-md text-center">
+            <div className="flex justify-center">
+              <WalletMinimal className="text-4xl text-primary mb-4" />
+            </div>
+            <h3 className="text-2xl font-semibold text-primary mb-3">
+              Gestão Financeira Completa
+            </h3>
+            <p>
+              Controle total do seu caixa, fluxo de pedidos e relatórios
+              financeiros.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-secondary text-primary text-center py-12 px-4">
+        <h2 className="text-3xl font-bold mb-4">
+          Pronto para Transformar Seu Delivery?
+        </h2>
+        <p className="text-lg mb-6">
+          Experimente o Darius Delivery agora e veja a diferença na gestão do
+          seu negócio.
+        </p>
+        <Button>Faça um Teste Grátis 🚀</Button>
+      </section>
+
+      <section id="planos" className="bg-gray-100 py-16">
+        <h2 className="text-3xl font-bold text-center mb-10">
+          Compare Nossos Planos
+        </h2>
+        <div className="max-w-5xl mx-auto overflow-x-auto">
+          <table className="w-full text-center border-collapse">
+            <thead>
+              <tr>
+                <th className="p-4 border bg-primary text-white">Recursos</th>
+                <th className="p-4 border bg-primary text-white">Básico</th>
+                <th className="p-4 border bg-secondary text-primary">Pro</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              <tr>
+                <td className="p-4 border">Site com sua marca</td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-green-500 text-2xl" />
+                </td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-green-500 text-2xl" />
+                </td>
+              </tr>
+              <tr>
+                <td className="p-4 border">Gerenciamento de pedidos</td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-green-500 text-2xl" />
+                </td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-green-500 text-2xl" />
+                </td>
+              </tr>
+              <tr>
+                <td className="p-4 border">Controle de caixa</td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-green-500 text-2xl" />
+                </td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-green-500 text-2xl" />
+                </td>
+              </tr>
+              <tr>
+                <td className="p-4 border">Roteirização de entrega</td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-[var(--gray-check)] text-2xl" />
+                </td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-green-500 text-2xl" />
+                </td>
+              </tr>
+              <tr>
+                <td className="p-4 border">Controle financeiro</td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-[var(--gray-check)] text-2xl" />
+                </td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-green-500 text-2xl" />
+                </td>
+              </tr>
+              <tr>
+                <td className="p-4 border">Atendimento por IA</td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-[var(--gray-check)] text-2xl" />
+                </td>
+                <td className="p-4 border">
+                  <CircleCheck className="text-green-500 text-2xl" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer className="bg-primary text-white text-center py-6">
+        <p>&copy; 2025 Darius Delivery - Todos os direitos reservados.</p>
       </footer>
     </div>
   );
