@@ -11,11 +11,23 @@ import {
 import type { AdapterAccountType } from "next-auth/adapters";
 import { createId } from "@paralleldrive/cuid2";
 
-export const role = pgEnum("role", ["ADMIN", "USER"]);
+export const role = pgEnum("role", ["ADMIN", "USER", "CUSTOMER"]);
+
+export const subscriptionType = pgEnum("subscription_type", [
+  "BASIC",
+  "PREMIUM",
+]);
 
 export const paymentStatus = pgEnum("payment_status", [
   "PENDING",
   "PAID",
+  "CANCELLED",
+]);
+
+export const orderStatus = pgEnum("order_status", [
+  "PREPARING",
+  "IN_TRANSIT",
+  "DELIVERED",
   "CANCELLED",
 ]);
 
@@ -33,6 +45,7 @@ export const users = pgTable("user", {
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   phone: varchar("phone", { length: 255 }),
   role: role("role"),
+  subdomain: varchar("subdomain", { length: 255 }).unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
@@ -119,6 +132,8 @@ export const authenticator = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.credentialID] })]
 );
 
+/*  */
+
 export const categories = pgTable("categories", {
   id: text("id")
     .primaryKey()
@@ -128,4 +143,140 @@ export const categories = pgTable("categories", {
   image: text("image").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const products = pgTable("products", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId").references(() => users.id, { onDelete: "cascade" }),
+  category_id: text("category_id").references(() => categories.id, {
+    onDelete: "cascade",
+  }),
+  name: text("name").notNull(),
+  description: text("description"),
+  price: integer("price").notNull(),
+  image: text("image"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// Tabela de Combos
+export const combos = pgTable("combos", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  description: text("description"),
+  price: integer("price").notNull(),
+  user_id: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  image: text("image"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// Tabela Intermediária: Relaciona Produtos com Combos (Muitos-para-Muitos)
+export const comboProducts = pgTable("combo_products", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  combo_id: text("combo_id")
+    .notNull()
+    .references(() => combos.id, { onDelete: "cascade" }),
+  product_id: text("product_id")
+    .notNull()
+    .references(() => products.id, { onDelete: "cascade" }),
+});
+
+export const templates = pgTable("templates", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  description: text("description"),
+  preview_image: text("preview_image"), // Imagem de pré-visualização do template
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const customers = pgTable("customers", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId").references(() => users.id, { onDelete: "cascade" }),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  neighborhood: text("neighborhood").notNull(),
+  address: text("street").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const deliverers = pgTable("deliverers", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  user_id: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  phone: varchar("phone", { length: 255 }),
+  vehicle: varchar("vehicle", { length: 100 }).notNull(),
+  vehicle_plate: varchar("vehicle_plate", { length: 20 }).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(), // Criação automática
+});
+
+// Tabela de Personalização
+export const customizations = pgTable("customizations", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  user_id: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // Relacionado com usuário
+  template_id: text("template_id")
+    .notNull()
+    .references(() => templates.id, { onDelete: "cascade" }),
+  logo_desktop: text("logo_desktop"),
+  logo_mobile: text("logo_mobile"),
+  button_color: varchar("button_color", { length: 7 }), // Hexadecimal (ex: #FFFFFF)
+  header_color: varchar("header_color", { length: 7 }),
+  footer_color: varchar("footer_color", { length: 7 }),
+  active: boolean("active").default(false), // Substitui `tinyint(1)`
+});
+
+export const subscriptions = pgTable("subscriptions", {
+  id: text("id"),
+  user_id: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // Relacionamento com usuários
+  plan: subscriptionType("subscription_type"), // Planos de assinatura (ajustável conforme necessidade)
+  status: text("status").notNull(), // Status da assinatura
+  start_date: timestamp("start_date", { withTimezone: true }),
+  end_date: timestamp("end_date", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const orders = pgTable("orders", {
+  id: text("id").primaryKey(),
+  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  status: orderStatus("status"),
+  total_price: text("total_price").notNull(),
+  payment_status: text("payment_status").default("pending"), // "pending", "paid", "failed"
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const orderItems = pgTable("order_items", {
+  id: text("id").primaryKey(),
+  order_id: text("order_id").references(() => orders.id, {
+    onDelete: "cascade",
+  }),
+  product_id: text("product_id").references(() => products.id, {
+    onDelete: "cascade",
+  }),
+  quantity: text("quantity").notNull(),
+  price: text("price").notNull(),
 });

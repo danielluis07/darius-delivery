@@ -1,9 +1,11 @@
 import { z } from "zod";
-import { users, categories } from "@/db/schema";
+import { users, categories, products } from "@/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import { File } from "node-fetch";
 
 export const baseUserSchema = createInsertSchema(users);
+
+const baseCreateProductSchema = createInsertSchema(products);
 
 export const credentialsSignUpSchema = baseUserSchema
   .extend({
@@ -32,4 +34,12 @@ export const credentialsSignInSchema = baseUserSchema.extend({
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
 
-export const insertCategorySchema = createInsertSchema(categories);
+export const baseCategorySchema = createInsertSchema(categories);
+
+export const insertCategorySchema = baseCategorySchema.extend({
+  image: z.array(z.instanceof(File)).optional(),
+});
+
+export const insertProductSchema = baseCreateProductSchema.extend({
+  image: z.array(z.instanceof(File)).optional(),
+});

@@ -28,6 +28,8 @@ import {
   Printer,
   ChartPie,
   CreditCard,
+  Globe,
+  Sandwich,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -45,18 +47,18 @@ const items = [
     label: "Início",
   },
   {
-    url: "#",
+    url: "/dashboard/categories",
     icon: FolderClosed,
     label: "Categorias",
   },
   {
-    url: "#",
-    icon: Calendar,
+    url: "/dashboard/products",
+    icon: Sandwich,
     label: "Produtos",
   },
   {
     url: "#",
-    icon: LogOut,
+    icon: Globe,
     label: "Domínio",
   },
   {

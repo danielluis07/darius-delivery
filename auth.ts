@@ -38,7 +38,7 @@ export const {
       if (token.sub && session.user) {
         session.user.id = token.sub;
         session.user.image = token.image as string;
-        session.user.role = token.role as "ADMIN" | "USER";
+        session.user.role = token.role as "ADMIN" | "USER" | "CUSTOMER";
       }
 
       if (session.user) {

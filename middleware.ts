@@ -1,7 +1,12 @@
 import NextAuth from "next-auth";
 import { getToken } from "next-auth/jwt";
 import authConfig from "@/auth.config";
-import { publicRoutes, apiAuthPrefix, authRoutes } from "@/routes";
+import {
+  publicRoutes,
+  apiAuthPrefix,
+  authRoutes,
+  isPublicSubdomain,
+} from "@/routes";
 
 const { auth } = NextAuth(authConfig);
 
@@ -14,7 +19,19 @@ export default auth(async (req) => {
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-  const role = token?.role as "ADMIN" | "USER" | undefined;
+  // 🔹 Detecta o subdomínio
+  const hostname = req.headers.get("host") || "";
+  const subdomain = hostname.split(".")[0];
+
+  console.log("Hostname:", hostname);
+  console.log("Subdomínio:", subdomain);
+
+  // 🔹 Se for um subdomínio de restaurante, permite acesso público
+  if (isPublicSubdomain(hostname)) {
+    return undefined;
+  }
+
+  const role = token?.role as "ADMIN" | "USER" | "CUSTOMER" | undefined;
 
   if (isApiAuthRoute) {
     return undefined;

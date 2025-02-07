@@ -14,6 +14,7 @@ export default {
         foreground: "hsl(var(--foreground))",
         success: "var(--success)",
         error: "var(--error)",
+        skeleton: "hsl(var(--skeleton))",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

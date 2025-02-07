@@ -26,7 +26,8 @@ export default async function RootLayout({
   return (
     <SessionProvider session={session}>
       <html lang="en">
-        <body className={`${montserrat.className} antialiased`}>
+        <body
+          className={`${montserrat.className} antialiased container mx-auto`}>
           <QueryProvider>
             {children}
             <ExitProvider />

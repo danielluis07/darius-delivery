@@ -1,13 +1,23 @@
 /**
- * An array of routes that are accessible to the public
- * These routes do not require authentication
+ * Rotas acessíveis ao público
+ * Essas rotas não requerem autenticação
  * @type {string[]}
  */
 export const publicRoutes = ["/", "/auth/new-verification", "/api", "/test"];
 
 /**
- * An array of routes that are used for authentication
- * These routes will redirect logged in users to /settings
+ * Verifica se uma rota é um subdomínio de restaurante e, portanto, pública
+ */
+export function isPublicSubdomain(hostname: string): boolean {
+  const baseDomain = "seusite.com"; // Alterar para o seu domínio real
+  const subdomain = hostname.split(".")[0];
+
+  return subdomain !== "www" && subdomain !== baseDomain;
+}
+
+/**
+ * Rotas usadas para autenticação
+ * Essas rotas redirecionam usuários logados para /dashboard
  * @type {string[]}
  */
 export const authRoutes = [
@@ -20,14 +30,13 @@ export const authRoutes = [
 ];
 
 /**
- * The prefix for API authentication routes
- * Routes that start with this prefix are used for API authentication purposes
+ * Prefixo para rotas de API de autenticação
  * @type {string}
  */
 export const apiAuthPrefix = "/api";
 
 /**
- * The default redirect path after logging in
+ * Caminho padrão de redirecionamento após login
  * @type {string}
  */
-export const DEFAULT_LOGIN_REDIRECT = "/dashboard";
+export const DEFAULT_LOGIN_REDIRECT = "/";
