@@ -13,6 +13,13 @@ import { createId } from "@paralleldrive/cuid2";
 
 export const role = pgEnum("role", ["ADMIN", "USER", "CUSTOMER"]);
 
+export const templateName = pgEnum("template_name", [
+  "TEMPLATE_1",
+  "TEMPLATE_2",
+  "TEMPLATE_3",
+  "TEMPLATE_4",
+]);
+
 export const subscriptionType = pgEnum("subscription_type", [
   "BASIC",
   "PREMIUM",
@@ -194,10 +201,11 @@ export const templates = pgTable("templates", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull(),
+  name: templateName("name").notNull(),
   description: text("description"),
-  preview_image: text("preview_image"), // Imagem de pré-visualização do template
+  preview_image: text("preview_image"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
 export const customers = pgTable("customers", {
@@ -232,18 +240,18 @@ export const customizations = pgTable("customizations", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }), // Relacionado com usuário
+  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }), // Relacionado com usuário
   template_id: text("template_id")
     .notNull()
     .references(() => templates.id, { onDelete: "cascade" }),
+  store_name: text("store_name").notNull(),
   logo_desktop: text("logo_desktop"),
   logo_mobile: text("logo_mobile"),
+  banner: text("banner"),
   button_color: varchar("button_color", { length: 7 }), // Hexadecimal (ex: #FFFFFF)
   header_color: varchar("header_color", { length: 7 }),
   footer_color: varchar("footer_color", { length: 7 }),
-  active: boolean("active").default(false), // Substitui `tinyint(1)`
+  active: boolean("active").default(false).notNull(), // Substitui `tinyint(1)`
 });
 
 export const subscriptions = pgTable("subscriptions", {
@@ -264,7 +272,7 @@ export const orders = pgTable("orders", {
   user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   status: orderStatus("status"),
   total_price: text("total_price").notNull(),
-  payment_status: text("payment_status").default("pending"), // "pending", "paid", "failed"
+  payment_status: paymentStatus("payment_status"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

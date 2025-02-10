@@ -89,6 +89,30 @@ body,
   }
 }
 
+/* Personalização da Scrollbar */
+::-webkit-scrollbar {
+  height: 6px; /* Altura para rolagem horizontal */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #999; /* Cor do "thumb" */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 @layer base {
   * {
     @apply border-border;

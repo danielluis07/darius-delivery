@@ -62,7 +62,7 @@ const items = [
     label: "Domínio",
   },
   {
-    url: "#",
+    url: "/dashboard/customization",
     icon: Paintbrush,
     label: "Personalização",
   },

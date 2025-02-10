@@ -155,7 +155,7 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
           name="image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Banner</FormLabel>
+              <FormLabel>Imagem do Produto</FormLabel>
               <FormControl>
                 <FileUploader
                   value={field.value ?? []}
@@ -225,16 +225,14 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
             </FormItem>
           )}
         />
-        <DialogFooter>
-          <LoadingButton
-            label="Criar"
-            loadingLabel="Criando"
-            className="w-full"
-            disabled={isPending}
-            isPending={isPending}
-            type="submit"
-          />
-        </DialogFooter>
+        <LoadingButton
+          label="Criar"
+          loadingLabel="Criando"
+          className="w-full"
+          disabled={isPending}
+          isPending={isPending}
+          type="submit"
+        />
       </form>
     </Form>
   );

@@ -2,6 +2,7 @@ CREATE TYPE "public"."order_status" AS ENUM('PREPARING', 'IN_TRANSIT', 'DELIVERE
 CREATE TYPE "public"."payment_status" AS ENUM('PENDING', 'PAID', 'CANCELLED');--> statement-breakpoint
 CREATE TYPE "public"."role" AS ENUM('ADMIN', 'USER', 'CUSTOMER');--> statement-breakpoint
 CREATE TYPE "public"."subscription_type" AS ENUM('BASIC', 'PREMIUM');--> statement-breakpoint
+CREATE TYPE "public"."template_name" AS ENUM('TEMPLATE_1', 'TEMPLATE_2', 'TEMPLATE_3', 'TEMPLATE_4');--> statement-breakpoint
 CREATE TABLE "account" (
 	"userId" text NOT NULL,
 	"type" text NOT NULL,
@@ -69,14 +70,16 @@ CREATE TABLE "customers" (
 --> statement-breakpoint
 CREATE TABLE "customizations" (
 	"id" text PRIMARY KEY NOT NULL,
-	"user_id" text NOT NULL,
+	"user_id" text,
 	"template_id" text NOT NULL,
+	"store_name" text NOT NULL,
 	"logo_desktop" text,
 	"logo_mobile" text,
+	"banner" text,
 	"button_color" varchar(7),
 	"header_color" varchar(7),
 	"footer_color" varchar(7),
-	"active" boolean DEFAULT false
+	"active" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "deliverers" (
@@ -102,7 +105,7 @@ CREATE TABLE "orders" (
 	"user_id" text,
 	"status" "order_status",
 	"total_price" text NOT NULL,
-	"payment_status" text DEFAULT 'pending',
+	"payment_status" "payment_status",
 	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now()
 );
@@ -146,10 +149,11 @@ CREATE TABLE "subscriptions" (
 --> statement-breakpoint
 CREATE TABLE "templates" (
 	"id" text PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
+	"name" "template_name" NOT NULL,
 	"description" text,
 	"preview_image" text,
-	"created_at" timestamp with time zone DEFAULT now()
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE "two_factor_confirmation" (

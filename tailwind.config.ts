@@ -69,6 +69,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      backgroundImage: {
+        template1: "url('/blackbg.webp')",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

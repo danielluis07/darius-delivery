@@ -141,16 +141,14 @@ export const CreateCategoryForm = () => {
             </FormItem>
           )}
         />
-        <DialogFooter>
-          <LoadingButton
-            label="Criar"
-            loadingLabel="Criando"
-            className="w-full"
-            disabled={isPending}
-            isPending={isPending}
-            type="submit"
-          />
-        </DialogFooter>
+        <LoadingButton
+          label="Criar"
+          loadingLabel="Criando"
+          className="w-full"
+          disabled={isPending}
+          isPending={isPending}
+          type="submit"
+        />
       </form>
     </Form>
   );

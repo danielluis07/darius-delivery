@@ -3,24 +3,34 @@
 import { z } from "zod";
 import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
-import { users } from "@/db/schema";
-import { credentialsSignUpSchema } from "@/db/schemas";
+import { users, customers } from "@/db/schema";
+import { insertCustomerSchema } from "@/db/schemas";
 import bcrypt from "bcryptjs";
 import { signIn } from "@/auth";
 
 export const credentialsSignUp = async (
-  values: z.infer<typeof credentialsSignUpSchema>
+  values: z.infer<typeof insertCustomerSchema>
 ) => {
   try {
-    const validatedValues = credentialsSignUpSchema.safeParse(values);
+    const validatedValues = insertCustomerSchema.safeParse(values);
 
     if (!validatedValues.success) {
       return { success: false, message: "Campos inválidos" };
     }
 
-    const { name, email, phone, password } = validatedValues.data;
+    const { name, email, phone, password, address, city, neighborhood, state } =
+      validatedValues.data;
 
-    if (!name || !email || !phone || !password) {
+    if (
+      !name ||
+      !email ||
+      !phone ||
+      !password ||
+      !address ||
+      !city ||
+      !neighborhood ||
+      !state
+    ) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
 
@@ -42,15 +52,27 @@ export const credentialsSignUp = async (
       .insert(users)
       .values({
         name,
-        role: "USER",
+        role: "CUSTOMER",
         phone,
         email,
         password: hashedPassword,
       })
-      .returning({ id: users.id, role: users.role });
+      .returning({ id: users.id });
 
     if (!newUser) {
       return { success: false, message: "Erro ao criar usuário" };
+    }
+
+    const newCustomer = await db.insert(customers).values({
+      userId: newUser.id,
+      address,
+      city,
+      neighborhood,
+      state,
+    });
+
+    if (!newCustomer) {
+      return { success: false, message: "Erro ao criar cliente" };
     }
 
     await signIn("credentials", {
@@ -62,7 +84,6 @@ export const credentialsSignUp = async (
     return {
       success: true,
       message: "Usuário criado com sucesso",
-      url: "/dashboard",
     };
   } catch (error) {
     console.error("Error during user sign-up:", error);

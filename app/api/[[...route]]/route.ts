@@ -3,6 +3,8 @@ import { handle } from "hono/vercel";
 import users from "@/app/api/[[...route]]/users";
 import categories from "@/app/api/[[...route]]/categories";
 import products from "@/app/api/[[...route]]/products";
+import templates from "@/app/api/[[...route]]/templates";
+import customizations from "@/app/api/[[...route]]/customizations";
 
 export const runtime = "nodejs";
 
@@ -10,7 +12,9 @@ const app = new Hono().basePath("/api");
 const routes = app
   .route("/users", users)
   .route("/categories", categories)
-  .route("/products", products);
+  .route("/products", products)
+  .route("/templates", templates)
+  .route("/customizations", customizations);
 
 export const GET = handle(app);
 export const POST = handle(app);
