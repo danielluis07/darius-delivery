@@ -34,14 +34,9 @@ const nextConfig: NextConfig = {
   webpack: (config) => {
     config.experiments = { ...config.experiments, topLevelAwait: true };
 
-    config.externals = {
-      ...config.externals,
-      "node:fs": "commonjs node:fs",
-    };
-
     config.resolve.fallback = {
       ...config.resolve.fallback,
-      fs: false,
+      fs: false, // This prevents Webpack from trying to polyfill `fs`.
     };
 
     config.plugins.push(
