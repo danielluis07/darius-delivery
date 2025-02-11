@@ -14,7 +14,10 @@ export const baseUserSchema = createInsertSchema(users);
 const baseTemplateSchema = createInsertSchema(templates);
 
 export const insertTemplateSchema = baseTemplateSchema.extend({
-  preview_image: z.array(z.instanceof(File)).optional(),
+  preview_image:
+    typeof File !== "undefined"
+      ? z.array(z.instanceof(File)).optional()
+      : z.any().optional(),
 });
 
 const baseCreateProductSchema = createInsertSchema(products);
@@ -59,17 +62,32 @@ export const credentialsSignInSchema = baseUserSchema.extend({
 export const baseCategorySchema = createInsertSchema(categories);
 
 export const insertCategorySchema = baseCategorySchema.extend({
-  image: z.array(z.instanceof(File)).optional(),
+  image:
+    typeof File !== "undefined"
+      ? z.array(z.instanceof(File)).optional()
+      : z.any().optional(),
 });
 
 export const insertProductSchema = baseCreateProductSchema.extend({
-  image: z.array(z.instanceof(File)).optional(),
+  image:
+    typeof File !== "undefined"
+      ? z.array(z.instanceof(File)).optional()
+      : z.any().optional(),
 });
 
 export const insertCustomizationSchema = baseCreateCustomizationSchema.extend({
-  banner: z.array(z.instanceof(File)).optional(),
-  logo_desktop: z.array(z.instanceof(File)).optional(),
-  logo_mobile: z.array(z.instanceof(File)).optional(),
+  banner:
+    typeof File !== "undefined"
+      ? z.array(z.instanceof(File)).optional()
+      : z.any().optional(),
+  logo_desktop:
+    typeof File !== "undefined"
+      ? z.array(z.instanceof(File)).optional()
+      : z.any().optional(),
+  logo_mobile:
+    typeof File !== "undefined"
+      ? z.array(z.instanceof(File)).optional()
+      : z.any().optional(),
 });
 
 export const insertCustomerSchema = z

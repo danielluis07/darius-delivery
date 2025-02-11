@@ -12,7 +12,6 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { credentialsSignInSchema } from "@/db/schemas";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -22,11 +21,7 @@ import { useModalStore } from "@/hooks/use-modal-store";
 
 type FormData = z.infer<typeof credentialsSignInSchema>;
 
-export const SignInForm = ({
-  buttonColor,
-}: {
-  buttonColor: string | null | undefined;
-}) => {
+export const SignInForm = () => {
   const [isPending, startTransition] = useTransition();
   const { onClose } = useModalStore();
   const form = useForm<FormData>({

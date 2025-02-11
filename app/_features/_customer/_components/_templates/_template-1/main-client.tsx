@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { SignUpForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-up-form";
 import { Card } from "@/components/ui/card";
-import { ClipboardList, Key, UtensilsCrossed, X } from "lucide-react";
+import { ClipboardList, Key, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useModalStore } from "@/hooks/use-modal-store";
 import { SignInForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-in-form";
@@ -121,9 +121,9 @@ const ModalContent = ({
 }) => {
   switch (modalType) {
     case "signUp":
-      return <SignUpForm buttonColor="bg-primary" />;
+      return <SignUpForm />;
     case "signIn":
-      return <SignInForm buttonColor="bg-primary" />;
+      return <SignInForm />;
     case "products":
       return <ProductsList categoryId={categoryId} />;
     case "settings":

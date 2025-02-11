@@ -42,16 +42,10 @@ type CategoriesDataTableProps<TData, TValue> = {
 export function CategoriesDataTable<TData, TValue>({
   columns,
   data,
-  onDelete,
   searchKey,
 }: CategoriesDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
-  );
-
-  const [ConfirmDialog, confirm] = useConfirm(
-    "Tem certeza?",
-    "Você está prestes a deletar as categorias selecionadas"
   );
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -82,7 +76,6 @@ export function CategoriesDataTable<TData, TValue>({
 
   return (
     <>
-      <ConfirmDialog />
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Procurar..."

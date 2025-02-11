@@ -40,7 +40,6 @@ type OrdersDataTableProps<TData, TValue> = {
 export function OrdersDataTable<TData, TValue>({
   columns,
   data,
-  onDelete,
   searchKey,
 }: OrdersDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(

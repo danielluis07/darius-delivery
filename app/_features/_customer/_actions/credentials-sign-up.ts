@@ -5,8 +5,15 @@ import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { users, customers } from "@/db/schema";
 import { insertCustomerSchema } from "@/db/schemas";
-import bcrypt from "bcryptjs";
 import { signIn } from "@/auth";
+
+// Helper function to hash a password using SHA-256
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Buffer.from(hashBuffer).toString("hex");
+}
 
 export const credentialsSignUp = async (
   values: z.infer<typeof insertCustomerSchema>
@@ -46,7 +53,8 @@ export const credentialsSignUp = async (
       };
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash the password using SHA-256
+    const hashedPassword = await hashPassword(password);
 
     const [newUser] = await db
       .insert(users)

@@ -43,10 +43,10 @@ export const SignInForm = () => {
 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
-  const urlError =
+  /*   const urlError =
     searchParams.get("error") === "OAuthAccountNotLinked"
       ? "Esse email já está em uso com outro provedor!"
-      : "";
+      : ""; */
   const router = useRouter();
 
   const onInvalid = (errors: FieldErrors) => {

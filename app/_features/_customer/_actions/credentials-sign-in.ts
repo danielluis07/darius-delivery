@@ -5,9 +5,16 @@ import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
 import { credentialsSignInSchema } from "@/db/schemas";
-import bcrypt from "bcryptjs";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+
+// Helper function to hash a password using SHA-256
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Buffer.from(hashBuffer).toString("hex");
+}
 
 export const credentialsSignIn = async (
   values: z.infer<typeof credentialsSignInSchema>
@@ -34,12 +41,10 @@ export const credentialsSignIn = async (
       return { success: false, message: "Usuário não cadastrado!" };
     }
 
-    const passwordsMatch = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
+    // Hash the input password to compare with the stored hash
+    const hashedInputPassword = await hashPassword(password);
 
-    if (!passwordsMatch) {
+    if (hashedInputPassword !== existingUser.password) {
       return { success: false, message: "Senha incorreta!" };
     }
 

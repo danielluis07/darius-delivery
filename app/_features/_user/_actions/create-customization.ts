@@ -65,8 +65,6 @@ export const createCustomization = async (
   try {
     const session = await auth();
     const validatedValues = insertCustomizationSchema.safeParse(values);
-    const generateFileName = (bytes = 32) =>
-      crypto.randomBytes(bytes).toString("hex");
 
     if (!session || !session.user.id) {
       return { success: false, message: "Not authenticated" };

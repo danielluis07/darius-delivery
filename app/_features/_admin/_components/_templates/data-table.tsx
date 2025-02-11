@@ -27,7 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useConfirm } from "@/hooks/use-confirm";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
@@ -42,16 +41,10 @@ type TemplatesDataTableProps<TData, TValue> = {
 export function TemplatesDataTable<TData, TValue>({
   columns,
   data,
-  onDelete,
   searchKey,
 }: TemplatesDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
-  );
-
-  const [ConfirmDialog, confirm] = useConfirm(
-    "Tem certeza?",
-    "Você está prestes a deletar as categorias selecionadas"
   );
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -82,7 +75,6 @@ export function TemplatesDataTable<TData, TValue>({
 
   return (
     <>
-      <ConfirmDialog />
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Procurar..."

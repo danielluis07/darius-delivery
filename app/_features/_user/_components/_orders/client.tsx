@@ -8,7 +8,7 @@ import { client } from "@/lib/hono";
 import { OrdersDataTable } from "@/app/_features/_user/_components/_orders/data-table";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.orders)[":userId"]["$get"],
+  (typeof client.api.orders.user)[":userId"]["$get"],
   200
 >["data"];
 

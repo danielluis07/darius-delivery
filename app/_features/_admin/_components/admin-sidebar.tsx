@@ -9,14 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  ChevronUp,
-  House,
-  Lock,
-  User2,
-  FolderClosed,
-  LayoutTemplate,
-} from "lucide-react";
+import { ChevronUp, House, Lock, User2, LayoutTemplate } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

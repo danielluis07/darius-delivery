@@ -28,11 +28,7 @@ import { useModalStore } from "@/hooks/use-modal-store";
 
 type FormData = z.infer<typeof insertCustomerSchema>;
 
-export const SignUpForm = ({
-  buttonColor,
-}: {
-  buttonColor: string | null | undefined;
-}) => {
+export const SignUpForm = () => {
   const [isPending, startTransition] = useTransition();
   const { onClose } = useModalStore();
   const form = useForm<FormData>({
