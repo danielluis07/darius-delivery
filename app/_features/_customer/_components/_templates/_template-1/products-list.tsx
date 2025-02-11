@@ -1,8 +1,12 @@
 "use client";
 
-import { use, useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useTransition } from "react";
+import { useForm, FieldErrors } from "react-hook-form";
+import { insertOrderSchema } from "@/db/schemas";
 import { Card } from "@/components/ui/card";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
 import { useGetProducts } from "@/app/_features/_customer/_queries/use-get-products";
@@ -12,9 +16,26 @@ import { useGetUserByDomain } from "@/app/_features/_customer/_queries/use-get-u
 import { MoveLeft } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { createOrder } from "@/app/_features/_customer/_actions/create-order";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { useModalStore } from "@/hooks/use-modal-store";
+
+type FormData = z.infer<typeof insertOrderSchema>;
 
 export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
   const params = useParams<{ subdomain: string }>();
+  const { onClose } = useModalStore();
+  const [isPending, startTransition] = useTransition();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data, isLoading: isUserLoading } = useGetUserByDomain(
@@ -24,6 +45,15 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
     data?.userId,
     categoryId
   );
+  const form = useForm<FormData>({
+    resolver: zodResolver(insertOrderSchema),
+    defaultValues: {
+      productId: "",
+      user_id: data?.userId,
+      quantity: 1,
+      price: 0,
+    },
+  });
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -40,6 +70,40 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
 
   const handleBuyClick = () => {
     setShowOrderDetails(true);
+  };
+
+  console.log("selectedProduct price:", selectedProduct?.price);
+
+  const onInvalid = (errors: FieldErrors) => {
+    console.log(errors);
+  };
+
+  const onSubmit = (values: FormData) => {
+    const productId = selectedProduct?.id;
+    const price = selectedProduct?.price;
+
+    if (!productId || !price) {
+      toast.error("Produto inválido");
+      return;
+    }
+
+    startTransition(() => {
+      createOrder({ ...values, productId, price, user_id: data?.userId })
+        .then((res) => {
+          if (!res.success) {
+            toast.error(res.message);
+          }
+
+          if (res.success) {
+            toast.success(res.message);
+            onClose();
+          }
+        })
+        .catch((error) => {
+          console.error("Error creating category:", error);
+          toast.error("Erro ao criar categoria");
+        });
+    });
   };
 
   if (isUserLoading || isProductsLoading) {
@@ -68,37 +132,54 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
           <h2 className="text-2xl font-bold mb-4">Detalhes do Pedido</h2>
 
           {/* Order details form */}
-          <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">{selectedProduct?.name}</h3>
-              <p className="text-gray-600">
-                {formatCurrencyFromCents(selectedProduct?.price ?? 0)}
-              </p>
-            </div>
+          <Form {...form}>
+            <form
+              className="space-y-4"
+              onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-2">{selectedProduct?.name}</h3>
+                <p className="text-gray-600">
+                  {formatCurrencyFromCents(selectedProduct?.price ?? 0)}
+                </p>
+              </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quantidade
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  defaultValue="1"
-                  className="w-full p-2 border rounded-md"
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantidade</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="text-center"
+                          {...field}
+                          onChange={(e) => {
+                            const value = e.target.value
+                              ? parseInt(e.target.value, 10)
+                              : 0;
+                            field.onChange(isNaN(value) ? 0 : value);
+                          }}
+                          max={999}
+                          min={0}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Observações
-                </label>
-                <textarea className="w-full p-2 border rounded-md" rows={3} />
-              </div>
-            </div>
-
-            <Button className="w-full mt-6">Finalizar Pedido</Button>
-          </div>
+              <LoadingButton
+                type="submit"
+                className="w-full"
+                label="Finalizar Pedido"
+                loadingLabel="Finalizando Pedido..."
+                disabled={isPending}
+                isPending={isPending}
+              />
+            </form>
+          </Form>
         </motion.div>
       ) : selectedProduct ? (
         <motion.div

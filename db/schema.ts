@@ -212,7 +212,9 @@ export const customers = pgTable("customers", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("userId").references(() => users.id, { onDelete: "cascade" }),
+  userId: text("userId")
+    .references(() => users.id, { onDelete: "cascade" })
+    .unique(),
   city: text("city").notNull(),
   state: text("state").notNull(),
   neighborhood: text("neighborhood").notNull(),
@@ -268,17 +270,28 @@ export const subscriptions = pgTable("subscriptions", {
 });
 
 export const orders = pgTable("orders", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  customer_id: text("customer_id").references(() => customers.userId, {
+    onDelete: "cascade",
+  }),
   status: orderStatus("status"),
-  total_price: integer("price").notNull(),
+  total_price: integer("total_price"),
   payment_status: paymentStatus("payment_status"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 export const orderItems = pgTable("order_items", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   order_id: text("order_id").references(() => orders.id, {
     onDelete: "cascade",
   }),

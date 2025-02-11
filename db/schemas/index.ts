@@ -27,7 +27,7 @@ const baseOrderSchema = createInsertSchema(orders);
 export const insertOrderSchema = baseOrderSchema.extend({
   productId: z.string(),
   quantity: z.number().int().positive(),
-  price: z.number().int().positive(),
+  price: z.number().int(),
 });
 
 export const credentialsSignUpSchema = baseUserSchema

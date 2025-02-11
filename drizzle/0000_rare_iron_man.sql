@@ -65,7 +65,8 @@ CREATE TABLE "customers" (
 	"neighborhood" text NOT NULL,
 	"street" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now(),
-	"updated_at" timestamp with time zone DEFAULT now()
+	"updated_at" timestamp with time zone DEFAULT now(),
+	CONSTRAINT "customers_userId_unique" UNIQUE("userId")
 );
 --> statement-breakpoint
 CREATE TABLE "customizations" (
@@ -96,15 +97,16 @@ CREATE TABLE "order_items" (
 	"id" text PRIMARY KEY NOT NULL,
 	"order_id" text,
 	"product_id" text,
-	"quantity" text NOT NULL,
-	"price" text NOT NULL
+	"quantity" integer NOT NULL,
+	"price" integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "orders" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text,
+	"customer_id" text,
 	"status" "order_status",
-	"total_price" text NOT NULL,
+	"total_price" integer,
 	"payment_status" "payment_status",
 	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now()
@@ -206,6 +208,7 @@ ALTER TABLE "deliverers" ADD CONSTRAINT "deliverers_user_id_user_id_fk" FOREIGN 
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "orders" ADD CONSTRAINT "orders_customer_id_customers_userId_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("userId") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "products" ADD CONSTRAINT "products_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "products" ADD CONSTRAINT "products_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

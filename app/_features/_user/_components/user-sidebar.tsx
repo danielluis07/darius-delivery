@@ -70,7 +70,7 @@ const items = [
     label: "Entregadores",
   },
   {
-    url: "#",
+    url: "/dashboard/orders",
     icon: NotebookText,
     label: "Pedidos",
   },
