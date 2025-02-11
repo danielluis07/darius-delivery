@@ -27,7 +27,7 @@ export const MainClient = ({
   return (
     <div className="flex h-screen items-center justify-center relative">
       <div
-        className="relative h-[600px] w-[450px] overflow-hidden rounded-[40px] border-[12px] border-gray-800 bg-white shadow-2xl p-6"
+        className="relative h-[600px] w-[450px] overflow-hidden rounded-[40px] border-[12px] border-gray-800 bg-white shadow-2xl p-6 bg-cover"
         style={{
           backgroundImage: `url(${data?.customization.banner})`,
         }}>

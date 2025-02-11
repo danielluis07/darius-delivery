@@ -1,13 +1,34 @@
 import { z } from "zod";
-import { users, categories, products, customizations } from "@/db/schema";
+import {
+  users,
+  categories,
+  products,
+  customizations,
+  templates,
+  orders,
+} from "@/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import { File } from "node-fetch";
 
 export const baseUserSchema = createInsertSchema(users);
 
+const baseTemplateSchema = createInsertSchema(templates);
+
+export const insertTemplateSchema = baseTemplateSchema.extend({
+  preview_image: z.array(z.instanceof(File)).optional(),
+});
+
 const baseCreateProductSchema = createInsertSchema(products);
 
 const baseCreateCustomizationSchema = createInsertSchema(customizations);
+
+const baseOrderSchema = createInsertSchema(orders);
+
+export const insertOrderSchema = baseOrderSchema.extend({
+  productId: z.string(),
+  quantity: z.number().int().positive(),
+  price: z.number().int().positive(),
+});
 
 export const credentialsSignUpSchema = baseUserSchema
   .extend({
@@ -71,6 +92,13 @@ export const insertCustomerSchema = z
     message: "As senhas não coincidem",
     path: ["repeat_password"],
   });
+
+export const templateNames: Array<string> = [
+  "TEMPLATE_1",
+  "TEMPLATE_2",
+  "TEMPLATE_3",
+  "TEMPLATE_4",
+];
 
 export const state: Array<
   | "AC"

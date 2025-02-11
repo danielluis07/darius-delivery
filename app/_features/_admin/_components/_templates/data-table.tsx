@@ -31,7 +31,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
-type CategoriesDataTableProps<TData, TValue> = {
+type TemplatesDataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onDelete: (rows: Row<TData>[]) => void;
@@ -39,12 +39,12 @@ type CategoriesDataTableProps<TData, TValue> = {
   searchKey: string;
 };
 
-export function CategoriesDataTable<TData, TValue>({
+export function TemplatesDataTable<TData, TValue>({
   columns,
   data,
   onDelete,
   searchKey,
-}: CategoriesDataTableProps<TData, TValue>) {
+}: TemplatesDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -92,9 +92,9 @@ export function CategoriesDataTable<TData, TValue>({
           }
           className="w-1/2"
         />
-        <Link href="/dashboard/categories/new">
+        <Link href="/admin/templates/new">
           <Button>
-            Adicionar Categoria
+            Adicionar Template
             <Plus />
           </Button>
         </Link>

@@ -12,13 +12,6 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { insertCustomerSchema, state } from "@/db/schemas";
 import { credentialsSignUp } from "@/app/_features/_customer/_actions/credentials-sign-up";
 import { toast } from "sonner";
@@ -31,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useModalStore } from "@/hooks/use-modal-store";
 
 type FormData = z.infer<typeof insertCustomerSchema>;
 
@@ -40,6 +34,7 @@ export const SignUpForm = ({
   buttonColor: string | null | undefined;
 }) => {
   const [isPending, startTransition] = useTransition();
+  const { onClose } = useModalStore();
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomerSchema),
     defaultValues: {
@@ -95,6 +90,7 @@ export const SignUpForm = ({
           if (res.success) {
             toast.success(res.message);
             router.refresh();
+            onClose();
           }
         })
         .catch((error) => {
@@ -229,7 +225,10 @@ export const SignUpForm = ({
           name="state"
           render={({ field }) => (
             <FormItem>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                disabled={isPending}
+                onValueChange={field.onChange}
+                defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Estado" />

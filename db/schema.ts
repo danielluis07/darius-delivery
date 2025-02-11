@@ -271,7 +271,7 @@ export const orders = pgTable("orders", {
   id: text("id").primaryKey(),
   user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   status: orderStatus("status"),
-  total_price: text("total_price").notNull(),
+  total_price: integer("price").notNull(),
   payment_status: paymentStatus("payment_status"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -285,6 +285,6 @@ export const orderItems = pgTable("order_items", {
   product_id: text("product_id").references(() => products.id, {
     onDelete: "cascade",
   }),
-  quantity: text("quantity").notNull(),
-  price: text("price").notNull(),
+  quantity: integer("quantity").notNull(),
+  price: integer("price").notNull(),
 });

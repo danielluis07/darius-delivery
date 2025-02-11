@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
-import { insertCategorySchema } from "@/db/schemas";
+import { insertTemplateSchema, templateNames } from "@/db/schemas";
 import { CloudUpload } from "lucide-react";
 import { useState } from "react";
 import {
@@ -23,21 +23,28 @@ import {
   FileUploaderItem,
 } from "@/components/ui/file-upload";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { createCategory } from "@/app/_features/_user/_actions/create-category";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { createTemplate } from "@/app/_features/_admin/_actions/create-template";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-type FormData = z.infer<typeof insertCategorySchema>;
+type FormData = z.infer<typeof insertTemplateSchema>;
 
-export const CreateCategoryForm = () => {
+export const CreateTemplateForm = () => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
   const router = useRouter();
   const form = useForm<FormData>({
-    resolver: zodResolver(insertCategorySchema),
+    resolver: zodResolver(insertTemplateSchema),
     defaultValues: {
-      name: "",
-      image: [],
+      name: "TEMPLATE_1",
+      preview_image: [],
     },
   });
 
@@ -48,12 +55,12 @@ export const CreateCategoryForm = () => {
   };
 
   const onInvalid = (errors: FieldErrors) => {
-    console.log(errors);
+    toast.error("Campos inválidos");
   };
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      createCategory(values)
+      createTemplate(values)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -61,15 +68,16 @@ export const CreateCategoryForm = () => {
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard/categories");
+            router.push("/admin/templates");
           }
         })
         .catch((error) => {
-          console.error("Error creating category:", error);
-          toast.error("Erro ao criar categoria");
+          console.error("Error creating template:", error);
+          toast.error("Erro ao criar o template");
         });
     });
   };
+
   return (
     <Form {...form}>
       <form
@@ -80,17 +88,28 @@ export const CreateCategoryForm = () => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Título</FormLabel>
-              <FormControl>
-                <Input {...field} value={field.value} />
-              </FormControl>
+              <FormLabel>Nome do Template</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o nome do template" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {templateNames.map((name, i) => (
+                    <SelectItem key={i} value={name}>
+                      {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="image"
+          name="preview_image"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Banner</FormLabel>

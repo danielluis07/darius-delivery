@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useDeleteCategory } from "@/app/_features/_user/_queries/_categories/use-delete-category";
-import { Ellipsis, Pencil, Trash2 } from "lucide-react";
+import { Ellipsis, Pencil } from "lucide-react";
 
 export const CategoriesCellAction = ({ id }: { id: string }) => {
   const deleteMutation = useDeleteCategory(id);

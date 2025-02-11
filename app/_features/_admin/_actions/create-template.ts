@@ -3,8 +3,8 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { categories } from "@/db/schema";
-import { insertCategorySchema } from "@/db/schemas";
+import { categories, templates } from "@/db/schema";
+import { insertTemplateSchema } from "@/db/schemas";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { revalidatePath } from "next/cache";
@@ -18,12 +18,12 @@ const s3 = new S3Client({
   },
 });
 
-export const createCategory = async (
-  values: z.infer<typeof insertCategorySchema>
+export const createTemplate = async (
+  values: z.infer<typeof insertTemplateSchema>
 ) => {
   try {
     const session = await auth();
-    const validatedValues = insertCategorySchema.safeParse(values);
+    const validatedValues = insertTemplateSchema.safeParse(values);
     const generateFileName = (bytes = 32) =>
       crypto.randomBytes(bytes).toString("hex");
 
@@ -35,15 +35,15 @@ export const createCategory = async (
       return { success: false, message: "Campos inválidos" };
     }
 
-    const { name, image } = validatedValues.data;
+    const { name, preview_image } = validatedValues.data;
 
-    if (!name || !image) {
+    if (!name || !preview_image) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
 
     /* Image Upload */
 
-    const imageFile = image[0];
+    const imageFile = preview_image[0];
 
     if (!imageFile) {
       return {
@@ -95,26 +95,25 @@ export const createCategory = async (
       };
     }
 
-    const category = await db.insert(categories).values({
+    const category = await db.insert(templates).values({
       name,
-      image: signedURL.split("?")[0],
-      userId: session.user.id,
+      preview_image: signedURL.split("?")[0],
     });
 
     if (!category) {
       return {
         success: false,
-        message: "Falha ao criar a categoria",
+        message: "Falha ao criar o template",
       };
     }
 
-    revalidatePath("/dashboard/categories");
-    return { success: true, message: "Categoria criada com sucesso" };
+    revalidatePath("/admin/templates");
+    return { success: true, message: "Template criado com sucesso" };
   } catch (error) {
     console.error(error);
     return {
       success: false,
-      message: "Erro inesperado ao criar a categoria",
+      message: "Erro inesperado ao criar o template",
     };
   }
 };

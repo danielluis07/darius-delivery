@@ -50,9 +50,17 @@ export const credentialsSignIn = async (
       redirect: false,
     });
 
+    let url;
+
+    if (existingUser.role === "ADMIN") {
+      url = "/admin";
+    } else {
+      url = "/dashboard";
+    }
+
     return {
       success: true,
-      url: callbackUrl || "/dashboard",
+      url: callbackUrl || url,
     };
   } catch (error) {
     if (error instanceof AuthError) {

@@ -15,19 +15,7 @@ import {
   Lock,
   User2,
   FolderClosed,
-  Paintbrush,
-  Truck,
-  NotebookText,
-  Route,
-  ShoppingBasket,
-  Users,
-  CircleDollarSign,
-  MapPin,
-  Printer,
-  ChartPie,
-  CreditCard,
-  Globe,
-  Sandwich,
+  LayoutTemplate,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -40,83 +28,18 @@ import Image from "next/image";
 
 const items = [
   {
-    url: "/dashboard/user",
+    url: "/admin",
     icon: House,
     label: "Início",
   },
   {
-    url: "/dashboard/categories",
-    icon: FolderClosed,
-    label: "Categorias",
-  },
-  {
-    url: "/dashboard/products",
-    icon: Sandwich,
-    label: "Produtos",
-  },
-  {
-    url: "#",
-    icon: Globe,
-    label: "Domínio",
-  },
-  {
-    url: "/dashboard/customization",
-    icon: Paintbrush,
-    label: "Personalização",
-  },
-  {
-    url: "#",
-    icon: Truck,
-    label: "Entregadores",
-  },
-  {
-    url: "#",
-    icon: NotebookText,
-    label: "Pedidos",
-  },
-  {
-    url: "#",
-    icon: Route,
-    label: "Roteirização de Pedidos",
-  },
-  {
-    url: "#",
-    icon: ShoppingBasket,
-    label: "Combos",
-  },
-  {
-    url: "#",
-    icon: Users,
-    label: "Clientes",
-  },
-  {
-    url: "#",
-    icon: CircleDollarSign,
-    label: "Financeiro",
-  },
-  {
-    url: "#",
-    icon: MapPin,
-    label: "Área de Entrega",
-  },
-  {
-    url: "#",
-    icon: Printer,
-    label: "Impressão de Comandas",
-  },
-  {
-    url: "#",
-    icon: ChartPie,
-    label: "Pixels",
-  },
-  {
-    url: "#",
-    icon: CreditCard,
-    label: "Formas de Pagamento",
+    url: "/admin/templates",
+    icon: LayoutTemplate,
+    label: "Templates",
   },
 ];
 
-export function UserSidebar() {
+export function AdminSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
