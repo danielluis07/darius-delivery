@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import webpack from "webpack";
 
 const nextConfig: NextConfig = {
   images: {
@@ -30,22 +29,6 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "5mb",
     },
-  },
-  webpack: (config) => {
-    config.experiments = { ...config.experiments, topLevelAwait: true };
-
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false, // This prevents Webpack from trying to polyfill `fs`.
-    };
-
-    config.plugins.push(
-      new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
-        resource.request = resource.request.replace(/^node:/, "");
-      })
-    );
-
-    return config;
   },
 };
 

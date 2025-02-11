@@ -8,7 +8,6 @@ import {
   orders,
 } from "@/db/schema";
 import { createInsertSchema } from "drizzle-zod";
-import { File } from "node-fetch";
 
 export const baseUserSchema = createInsertSchema(users);
 
