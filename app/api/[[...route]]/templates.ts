@@ -1,14 +1,13 @@
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
 import { templates } from "@/db/schema";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import crypto from "crypto";
+import { S3Client } from "@aws-sdk/client-s3";
 
 const s3 = new S3Client({
-  region: process.env.AWS_BUCKET_REGION!,
+  region: process.env.AWS_REGION!,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY!,
-    secretAccessKey: process.env.AWS_KEY!,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
 });
 
