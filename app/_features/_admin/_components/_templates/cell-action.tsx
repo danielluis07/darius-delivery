@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Ellipsis, Pencil } from "lucide-react";
 
 export const TemplatesCellAction = ({ id }: { id: string }) => {
+  console.log(id);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

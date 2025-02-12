@@ -23,4 +23,5 @@ export const POST = handle(app);
 export const PATCH = handle(app);
 export const DELETE = handle(app);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AppType = typeof routes;

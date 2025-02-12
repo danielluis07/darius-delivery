@@ -54,6 +54,7 @@ export const CreateTemplateForm = () => {
   };
 
   const onInvalid = (errors: FieldErrors) => {
+    console.log(errors);
     toast.error("Campos inválidos");
   };
 

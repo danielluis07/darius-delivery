@@ -42,16 +42,10 @@ type ProductsDataTableProps<TData, TValue> = {
 export function ProductsDataTable<TData, TValue>({
   columns,
   data,
-  onDelete,
   searchKey,
 }: ProductsDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
-  );
-
-  const [ConfirmDialog, confirm] = useConfirm(
-    "Tem certeza?",
-    "Você está prestes a deletar as categorias selecionadas"
   );
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -82,7 +76,6 @@ export function ProductsDataTable<TData, TValue>({
 
   return (
     <>
-      <ConfirmDialog />
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Procurar..."
