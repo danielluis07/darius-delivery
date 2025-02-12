@@ -1,4 +1,3 @@
-import { DrawerProvider } from "@/providers/drawer-provider";
 import { getCustomizationByDomain } from "@/app/_features/_customer/_queries/get-customization";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +18,6 @@ export default async function SubdomainLayout({
         "size-full",
         data?.templateName === "TEMPLATE_1" && "bg-template1"
       )}>
-      <DrawerProvider />
       {children}
     </main>
   );
