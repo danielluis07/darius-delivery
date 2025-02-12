@@ -6,6 +6,7 @@ import {
   customizations,
   templates,
   orders,
+  deliveryAreasKm,
 } from "@/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 
@@ -18,6 +19,17 @@ export const insertTemplateSchema = baseTemplateSchema.extend({
     typeof File !== "undefined"
       ? z.array(z.instanceof(File)).optional()
       : z.any().optional(),
+});
+
+const baseDeliveryAreaKmSchema = createInsertSchema(deliveryAreasKm);
+
+export const insertDeliveryAreaKmSchema = baseDeliveryAreaKmSchema.extend({
+  fees: z.array(
+    z.object({
+      distance: z.number(),
+      price: z.number(),
+    })
+  ),
 });
 
 const baseCreateProductSchema = createInsertSchema(products);

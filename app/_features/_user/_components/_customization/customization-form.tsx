@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,7 +25,6 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ColorPicker } from "@/components/color-picker";
-import { Switch } from "@/components/ui/switch";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import Image from "next/image";
@@ -107,8 +105,8 @@ export const CustomizationForm = ({
           }
         })
         .catch((error) => {
-          console.error("Error creating category:", error);
-          toast.error("Erro ao criar categoria");
+          console.error("Error creating customization:", error);
+          toast.error("Erro ao criar a customização");
         });
     });
   };
@@ -425,26 +423,6 @@ export const CustomizationForm = ({
                 />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="active"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-              <div className="space-y-0.5">
-                <FormLabel>Ativar Personalização</FormLabel>
-                <FormDescription>
-                  Receive emails about new products, features, and more.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
             </FormItem>
           )}
         />

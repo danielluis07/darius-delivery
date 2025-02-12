@@ -77,7 +77,6 @@ export const createCustomization = async (
     const {
       store_name,
       template_id,
-      active,
       banner,
       button_color,
       footer_color,
@@ -89,7 +88,6 @@ export const createCustomization = async (
     if (
       !store_name ||
       !template_id ||
-      !active ||
       !banner ||
       !button_color ||
       !footer_color ||
@@ -129,7 +127,6 @@ export const createCustomization = async (
     const customization = await db.insert(customizations).values({
       store_name,
       template_id,
-      active,
       banner: bannerUrl,
       button_color,
       footer_color,
