@@ -55,6 +55,7 @@ export const columns: ColumnDef<ResponseType>[] = [
           src={row.original.image || placeholder}
           alt={row.original.name}
           fill
+          sizes="80px"
           className="object-cover"
         />
       </div>

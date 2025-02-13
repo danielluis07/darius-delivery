@@ -14,24 +14,27 @@ import {
 import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
 import { insertCategorySchema } from "@/db/schemas";
-import { CloudUpload } from "lucide-react";
+import { CloudUpload, Trash2 } from "lucide-react";
 import { useState } from "react";
 import {
   FileInput,
   FileUploader,
   FileUploaderContent,
   FileUploaderItem,
+  useFileUpload,
 } from "@/components/ui/file-upload";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { createCategory } from "@/app/_features/_user/_actions/create-category";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type FormData = z.infer<typeof insertCategorySchema>;
 
 export const CreateCategoryForm = () => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(insertCategorySchema),
@@ -88,6 +91,7 @@ export const CreateCategoryForm = () => {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="image"
@@ -101,10 +105,13 @@ export const CreateCategoryForm = () => {
                     if (newFiles && newFiles.length > 0) {
                       const selectedFile = newFiles[0]; // Keep only one file
                       field.onChange([selectedFile]); // Update form state
+                      const newPreviewUrl = URL.createObjectURL(selectedFile);
                       setFiles([selectedFile]); // Update local state for UI
+                      setImagePreview(newPreviewUrl);
                     } else {
-                      field.onChange(null); // Clear form state if no files
-                      setFiles([]); // Clear local state
+                      field.onChange(null);
+                      setFiles([]);
+                      setImagePreview(null);
                     }
                   }}
                   dropzoneOptions={dropZoneConfig}
@@ -117,8 +124,8 @@ export const CreateCategoryForm = () => {
                       <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
                         <span className="font-semibold">
                           Clique para fazer o upload
-                        </span>
-                        &nbsp; ou arraste e solte um arquivo aqui.
+                        </span>{" "}
+                        ou arraste e solte um arquivo aqui.
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
                         SVG, PNG, JPG or GIF
@@ -133,6 +140,29 @@ export const CreateCategoryForm = () => {
                           <span>{file.name}</span>
                         </FileUploaderItem>
                       ))}
+                    {/* Image Preview */}
+                    {imagePreview && (
+                      <div className="mt-4">
+                        <p className="text-sm font-semibold mb-2">Preview:</p>
+                        <div className="relative w-full h-80 rounded-lg overflow-hidden">
+                          <Image
+                            src={imagePreview}
+                            fill
+                            className="object-cover"
+                            alt="preview"
+                          />
+                          <div
+                            onClick={() => {
+                              setImagePreview(null);
+                              setFiles([]);
+                              form.setValue("image", null);
+                            }}
+                            className="absolute top-1 right-1 p-1 bg-error rounded-lg text-white cursor-pointer">
+                            <Trash2 />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </FileUploaderContent>
                 </FileUploader>
               </FormControl>
@@ -140,6 +170,7 @@ export const CreateCategoryForm = () => {
             </FormItem>
           )}
         />
+
         <LoadingButton
           label="Criar"
           loadingLabel="Criando"

@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
 import { insertProductSchema } from "@/db/schemas";
-import { CloudUpload } from "lucide-react";
+import { CloudUpload, Trash2 } from "lucide-react";
 import { useState } from "react";
 import {
   FileInput,
@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createProduct } from "@/app/_features/_user/_actions/create-product";
+import Image from "next/image";
 
 type ResponseType = InferResponseType<
   (typeof client.api.categories)[":userId"]["$get"],
@@ -48,6 +49,7 @@ type FormData = z.infer<typeof insertProductSchema>;
 export const CreateProductForm = ({ data }: { data: ResponseType }) => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(insertProductSchema),
@@ -160,12 +162,14 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
                   value={field.value ?? []}
                   onValueChange={(newFiles: File[] | null) => {
                     if (newFiles && newFiles.length > 0) {
-                      const selectedFile = newFiles[0]; // Keep only one file
-                      field.onChange([selectedFile]); // Update form state
-                      setFiles([selectedFile]); // Update local state for UI
+                      const selectedFile = newFiles[0];
+                      field.onChange([selectedFile]);
+                      const newPreviewUrl = URL.createObjectURL(selectedFile);
+                      setFiles([selectedFile]);
+                      setImagePreview(newPreviewUrl);
                     } else {
-                      field.onChange(null); // Clear form state if no files
-                      setFiles([]); // Clear local state
+                      field.onChange(null);
+                      setFiles([]);
                     }
                   }}
                   dropzoneOptions={dropZoneConfig}
@@ -194,6 +198,28 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
                           <span>{file.name}</span>
                         </FileUploaderItem>
                       ))}
+                    {imagePreview && (
+                      <div className="mt-4">
+                        <p className="text-sm font-semibold mb-2">Preview:</p>
+                        <div className="relative w-full h-80 rounded-lg overflow-hidden">
+                          <Image
+                            src={imagePreview}
+                            fill
+                            className="object-cover"
+                            alt="preview"
+                          />
+                          <div
+                            onClick={() => {
+                              setImagePreview(null);
+                              setFiles([]);
+                              form.setValue("image", null);
+                            }}
+                            className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer text-white">
+                            <Trash2 />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </FileUploaderContent>
                 </FileUploader>
               </FormControl>

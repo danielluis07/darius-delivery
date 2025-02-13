@@ -21,6 +21,7 @@ export const Navbar = ({ user }: { user: ExtendedUser }) => {
             src={user.image || placeholder}
             alt="Usuário"
             fill
+            sizes="40px"
             className="object-cover"
           />
         </div>

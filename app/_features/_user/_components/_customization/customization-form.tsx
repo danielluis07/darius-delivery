@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import placeholder from "@/public/placeholder-image.jpg";
 import { createCustomization } from "../../_actions/create-customization";
 import { Input } from "@/components/ui/input";
+import { log } from "console";
 
 type TemplatesResponseType = InferResponseType<
   typeof client.api.templates.$get,
@@ -57,6 +58,9 @@ export const CustomizationForm = ({
   const [bannerfiles, setBannerFiles] = useState<File[] | null>(null);
   const [desktopfiles, setDesktopFiles] = useState<File[] | null>(null);
   const [mobilefiles, setMobileFiles] = useState<File[] | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [desktopPreview, setDesktopPreview] = useState<string | null>(null);
+  const [mobilePreview, setMobilePreview] = useState<string | null>(null);
 
   const [bannerUrl, setBannerUrl] = useState(customization?.banner || null);
   const [desktopUrl, setDesktopUrl] = useState(
@@ -181,7 +185,13 @@ export const CustomizationForm = ({
           <div>
             <FormLabel>Banner</FormLabel>
             <div className="relative w-full h-52 rounded-md overflow-hidden">
-              <Image src={bannerUrl || placeholder} alt="banner" fill />
+              <Image
+                src={bannerUrl || placeholder}
+                alt="banner"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
+                className="object-cover"
+              />
               <div
                 onClick={() => setBannerUrl(null)}
                 className="absolute top-2 right-2 bg-error text-white rounded-md p-1 cursor-pointer">
@@ -201,12 +211,14 @@ export const CustomizationForm = ({
                     value={field.value ?? []}
                     onValueChange={(newFiles: File[] | null) => {
                       if (newFiles && newFiles.length > 0) {
-                        const selectedFile = newFiles[0]; // Keep only one file
-                        field.onChange([selectedFile]); // Update form state
-                        setBannerFiles([selectedFile]); // Update local state for UI
+                        const selectedFile = newFiles[0];
+                        field.onChange([selectedFile]);
+                        const newPreviewUrl = URL.createObjectURL(selectedFile);
+                        setBannerFiles([selectedFile]);
+                        setBannerPreview(newPreviewUrl);
                       } else {
-                        field.onChange(null); // Clear form state if no files
-                        setBannerFiles([]); // Clear local state
+                        field.onChange(null);
+                        setBannerFiles([]);
                       }
                     }}
                     dropzoneOptions={dropZoneConfig}
@@ -235,6 +247,28 @@ export const CustomizationForm = ({
                             <span>{file.name}</span>
                           </FileUploaderItem>
                         ))}
+                      {bannerPreview && (
+                        <div className="mt-4">
+                          <p className="text-sm font-semibold mb-2">Preview:</p>
+                          <div className="relative w-full h-80 rounded-lg overflow-hidden">
+                            <Image
+                              src={bannerPreview}
+                              fill
+                              className="object-cover"
+                              alt="preview"
+                            />
+                            <div
+                              onClick={() => {
+                                setBannerPreview(null);
+                                setBannerFiles([]);
+                                form.setValue("banner", null);
+                              }}
+                              className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer">
+                              <Trash2 />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </FileUploaderContent>
                   </FileUploader>
                 </FormControl>
@@ -247,7 +281,13 @@ export const CustomizationForm = ({
           <div>
             <FormLabel>Logo Desktop</FormLabel>
             <div className="relative size-32 rounded-md overflow-hidden">
-              <Image src={desktopUrl || placeholder} alt="logo" fill />
+              <Image
+                src={desktopUrl || placeholder}
+                alt="logo"
+                fill
+                sizes="128px"
+                className="object-cover"
+              />
               <div
                 onClick={() => setDesktopUrl(null)}
                 className="absolute top-2 right-2 bg-error text-white rounded-md p-1 cursor-pointer">
@@ -267,12 +307,14 @@ export const CustomizationForm = ({
                     value={field.value ?? []}
                     onValueChange={(newFiles: File[] | null) => {
                       if (newFiles && newFiles.length > 0) {
-                        const selectedFile = newFiles[0]; // Keep only one file
-                        field.onChange([selectedFile]); // Update form state
-                        setDesktopFiles([selectedFile]); // Update local state for UI
+                        const selectedFile = newFiles[0];
+                        field.onChange([selectedFile]);
+                        const newPreviewUrl = URL.createObjectURL(selectedFile);
+                        setDesktopFiles([selectedFile]);
+                        setDesktopPreview(newPreviewUrl);
                       } else {
-                        field.onChange(null); // Clear form state if no files
-                        setDesktopFiles([]); // Clear local state
+                        field.onChange(null);
+                        setDesktopFiles([]);
                       }
                     }}
                     dropzoneOptions={dropZoneConfig}
@@ -301,6 +343,28 @@ export const CustomizationForm = ({
                             <span>{file.name}</span>
                           </FileUploaderItem>
                         ))}
+                      {desktopPreview && (
+                        <div className="mt-4">
+                          <p className="text-sm font-semibold mb-2">Preview:</p>
+                          <div className="relative w-full h-80 rounded-lg overflow-hidden">
+                            <Image
+                              src={desktopPreview}
+                              fill
+                              className="object-cover"
+                              alt="preview"
+                            />
+                            <div
+                              onClick={() => {
+                                setDesktopPreview(null);
+                                setDesktopFiles([]);
+                                form.setValue("logo_desktop", null);
+                              }}
+                              className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer text-white">
+                              <Trash2 />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </FileUploaderContent>
                   </FileUploader>
                 </FormControl>
@@ -309,72 +373,82 @@ export const CustomizationForm = ({
             )}
           />
         )}
-        {mobileUrl ? (
-          <div>
-            <FormLabel>Logo Mobile</FormLabel>
-            <div className="relative size-32 rounded-md overflow-hidden">
-              <Image src={mobileUrl || placeholder} alt="logo" fill />
-              <div
-                onClick={() => setMobileUrl(null)}
-                className="absolute top-2 right-2 bg-error text-white rounded-md p-1 cursor-pointer">
-                <Trash2 />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <FormField
-            control={form.control}
-            name="logo_mobile"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Logo Mobile</FormLabel>
-                <FormControl>
-                  <FileUploader
-                    value={field.value ?? []}
-                    onValueChange={(newFiles: File[] | null) => {
-                      if (newFiles && newFiles.length > 0) {
-                        const selectedFile = newFiles[0]; // Keep only one file
-                        field.onChange([selectedFile]); // Update form state
-                        setMobileFiles([selectedFile]); // Update local state for UI
-                      } else {
-                        field.onChange(null); // Clear form state if no files
-                        setMobileFiles([]); // Clear local state
-                      }
-                    }}
-                    dropzoneOptions={dropZoneConfig}
-                    className="relative bg-background rounded-lg p-5">
-                    <FileInput
-                      id="fileInput"
-                      className="outline-dashed outline-1 outline-slate-500">
-                      <div className="flex items-center justify-center flex-col p-8 w-full ">
-                        <CloudUpload className="text-gray-500 w-10 h-10" />
-                        <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-semibold">
-                            Clique para fazer o upload
-                          </span>
-                          &nbsp; ou arraste e solte um arquivo aqui.
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          SVG, PNG, JPG or GIF
-                        </p>
+        <FormField
+          control={form.control}
+          name="logo_mobile"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Logo Mobile</FormLabel>
+              <FormControl>
+                <FileUploader
+                  value={field.value ?? []}
+                  onValueChange={(newFiles: File[] | null) => {
+                    if (newFiles && newFiles.length > 0) {
+                      const selectedFile = newFiles[0];
+                      field.onChange([selectedFile]);
+                      const newPreviewUrl = URL.createObjectURL(selectedFile);
+                      setMobileFiles([selectedFile]);
+                      setMobilePreview(newPreviewUrl);
+                    } else {
+                      field.onChange(null);
+                      setMobileFiles([]);
+                    }
+                  }}
+                  dropzoneOptions={dropZoneConfig}
+                  className="relative bg-background rounded-lg p-5">
+                  <FileInput
+                    id="fileInput"
+                    className="outline-dashed outline-1 outline-slate-500">
+                    <div className="flex items-center justify-center flex-col p-8 w-full ">
+                      <CloudUpload className="text-gray-500 w-10 h-10" />
+                      <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">
+                          Clique para fazer o upload
+                        </span>
+                        &nbsp; ou arraste e solte um arquivo aqui.
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        SVG, PNG, JPG or GIF
+                      </p>
+                    </div>
+                  </FileInput>
+                  <FileUploaderContent>
+                    {mobilefiles &&
+                      mobilefiles.length > 0 &&
+                      mobilefiles.map((file, i) => (
+                        <FileUploaderItem key={i} index={i}>
+                          <span>{file.name}</span>
+                        </FileUploaderItem>
+                      ))}
+                    {mobilePreview && (
+                      <div className="mt-4">
+                        <p className="text-sm font-semibold mb-2">Preview:</p>
+                        <div className="relative w-full h-80 rounded-lg overflow-hidden">
+                          <Image
+                            src={mobilePreview}
+                            fill
+                            className="object-cover"
+                            alt="preview"
+                          />
+                          <div
+                            onClick={() => {
+                              setMobilePreview(null);
+                              setMobileFiles([]);
+                              form.setValue("logo_mobile", null);
+                            }}
+                            className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer text-white">
+                            <Trash2 />
+                          </div>
+                        </div>
                       </div>
-                    </FileInput>
-                    <FileUploaderContent>
-                      {mobilefiles &&
-                        mobilefiles.length > 0 &&
-                        mobilefiles.map((file, i) => (
-                          <FileUploaderItem key={i} index={i}>
-                            <span>{file.name}</span>
-                          </FileUploaderItem>
-                        ))}
-                    </FileUploaderContent>
-                  </FileUploader>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+                    )}
+                  </FileUploaderContent>
+                </FileUploader>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="header_color"

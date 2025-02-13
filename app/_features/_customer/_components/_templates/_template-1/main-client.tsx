@@ -72,6 +72,8 @@ export const MainClient = ({
                 src={data?.customization.logo_desktop || placeholder}
                 alt="logo"
                 fill
+                sizes="(max-width: 768px) 25vw, (max-width: 1200px) 10vw, 200px"
+                className="object-contain"
               />
             </div>
 
