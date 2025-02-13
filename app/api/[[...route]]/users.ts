@@ -16,22 +16,44 @@ const app = new Hono()
     return c.json({ data });
   })
   .get(
-    "/:id",
-    zValidator("param", z.object({ id: z.string().optional() })),
+    "/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
     async (c) => {
-      const { id } = c.req.valid("param");
+      const { userId } = c.req.valid("param");
 
-      if (!id) {
+      if (!userId) {
         return c.json({ error: "Missing id" }, 400);
       }
 
-      const [data] = await db.select().from(users).where(eq(users.id, id));
+      const [data] = await db.select().from(users).where(eq(users.id, userId));
 
       if (!data) {
         return c.json({ error: "User not found" }, 404);
       }
 
-      return c.json({ data }, 200);
+      return c.json({ data });
+    }
+  )
+  .get(
+    "/googleapikey/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
+    async (c) => {
+      const { userId } = c.req.valid("param");
+
+      if (!userId) {
+        return c.json({ error: "Missing id" }, 400);
+      }
+
+      const [data] = await db
+        .select({ googleApiKey: users.googleApiKey })
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (!data) {
+        return c.json({ error: "User not found" }, 404);
+      }
+
+      return c.json({ data });
     }
   );
 

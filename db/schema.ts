@@ -8,7 +8,6 @@ import {
   varchar,
   primaryKey,
   real,
-  json,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 import { createId } from "@paralleldrive/cuid2";
@@ -54,6 +53,7 @@ export const users = pgTable("user", {
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   phone: varchar("phone", { length: 255 }),
   role: role("role"),
+  googleApiKey: varchar("google_api_key", { length: 255 }),
   subdomain: varchar("subdomain", { length: 255 }).unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -323,11 +323,23 @@ export const deliveryAreasKm = pgTable("delivery_areas_km", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
-  apiKey: varchar("api_key", { length: 255 }).notNull(),
   latitude: real("latitude"),
   longitude: real("longitude"),
-  radius: real("radius").notNull(),
-  fees: json("fees").notNull(),
+  radius: real("radius"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const deliveryAreasKmFees = pgTable("delivery_areas_km_fees", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  deliveryAreaId: text("delivery_area_id").references(
+    () => deliveryAreasKm.id,
+    { onDelete: "cascade" }
+  ),
+  distance: real("distance"),
+  price: integer("price"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -350,7 +362,7 @@ export const freeTests = pgTable("free_tests", {
     .$defaultFn(() => crypto.randomUUID()),
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull(),
-  domain: varchar("domain", { length: 255 }).notNull(),
+  subdomain: varchar("subdomain", { length: 255 }).notNull(),
   whatsapp: varchar("whatsapp", { length: 20 }).notNull(),
   password: varchar("password", { length: 255 }).notNull(),
   request_date: timestamp("request_date").defaultNow(),

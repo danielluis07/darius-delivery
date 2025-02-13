@@ -1,5 +1,5 @@
 {
-  "id": "c445a2d8-3be3-40f4-aa31-6c649a54f803",
+  "id": "8933e7d3-8339-4447-b37d-aa17db8500e9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -744,12 +744,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "api_key": {
-          "name": "api_key",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
         "latitude": {
           "name": "latitude",
           "type": "real",
@@ -766,13 +760,7 @@
           "name": "radius",
           "type": "real",
           "primaryKey": false,
-          "notNull": true
-        },
-        "fees": {
-          "name": "fees",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -811,6 +799,71 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.delivery_areas_km_fees": {
+      "name": "delivery_areas_km_fees",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "delivery_area_id": {
+          "name": "delivery_area_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "distance": {
+          "name": "distance",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "delivery_areas_km_fees_delivery_area_id_delivery_areas_km_id_fk": {
+          "name": "delivery_areas_km_fees_delivery_area_id_delivery_areas_km_id_fk",
+          "tableFrom": "delivery_areas_km_fees",
+          "tableTo": "delivery_areas_km",
+          "columnsFrom": [
+            "delivery_area_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.free_tests": {
       "name": "free_tests",
       "schema": "",
@@ -833,8 +886,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "domain": {
-          "name": "domain",
+        "subdomain": {
+          "name": "subdomain",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -1563,6 +1616,12 @@
           "name": "role",
           "type": "role",
           "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "google_api_key": {
+          "name": "google_api_key",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },

@@ -1,6 +1,7 @@
 "use client";
 
 import { z } from "zod";
+import { useTransition } from "react";
 import { GoogleMapComponent } from "@/components/google-map";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,19 +17,42 @@ import { useForm, FieldErrors, useFieldArray } from "react-hook-form";
 import { insertDeliveryAreaKmSchema } from "@/db/schemas";
 import { Plus, X } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { client } from "@/lib/hono";
+import { InferResponseType } from "hono";
+import { createDeliveryAreasKm } from "@/app/_features/_user/_actions/create-delivery-areas-km";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { LoadingButton } from "@/components/ui/loading-button";
+
+type ResponseType = InferResponseType<
+  (typeof client.api.deliveryareas.km)[":userId"]["$get"],
+  200
+>["data"];
 
 type FormData = z.infer<typeof insertDeliveryAreaKmSchema>;
 
-export const DeliveryAreasKmForm = () => {
+export const DeliveryAreasKmForm = ({
+  data,
+  apikey,
+}: {
+  data: ResponseType | null;
+  apikey: string;
+}) => {
+  const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
     resolver: zodResolver(insertDeliveryAreaKmSchema),
     defaultValues: {
-      apiKey: "",
-      latitude: null,
-      longitude: null,
-      fees: [{ distance: 1, price: 0 }],
+      latitude: data?.latitude || null,
+      longitude: data?.longitude || null,
+      fees:
+        data?.fees?.map((fee) => ({
+          distance: fee.distance ?? 0,
+          price: fee.price ?? 0,
+        })) || [],
     },
   });
+
+  const router = useRouter();
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -45,7 +69,23 @@ export const DeliveryAreasKmForm = () => {
   };
 
   const onSubmit = (values: FormData) => {
-    console.log(values);
+    startTransition(() => {
+      createDeliveryAreasKm(values)
+        .then((res) => {
+          if (!res.success) {
+            toast.error(res.message);
+          }
+
+          if (res.success) {
+            toast.success(res.message);
+            router.push("/dashboard");
+          }
+        })
+        .catch((error) => {
+          console.error("Error creating category:", error);
+          toast.error("Erro ao criar categoria");
+        });
+    });
   };
 
   return (
@@ -53,22 +93,10 @@ export const DeliveryAreasKmForm = () => {
       <form
         className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md"
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
-        <FormField
-          control={form.control}
-          name="apiKey"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input {...field} placeholder="Chave do Google Maps" required />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <div className="mt-4">
           <GoogleMapComponent
-            apiKey={form.watch("apiKey")}
+            key={radiusKmList.length}
+            apiKey={apikey}
             setLatitude={(lat) => form.setValue("latitude", lat)}
             setLongitude={(lng) => form.setValue("longitude", lng)}
             radiusKmList={radiusKmList}
@@ -142,9 +170,14 @@ export const DeliveryAreasKmForm = () => {
           </Button>
         </div>
 
-        <Button type="submit" variant="secondary" className="mt-6 w-full">
-          Salvar
-        </Button>
+        <LoadingButton
+          type="submit"
+          label="Salvar"
+          loadingLabel="Salvando"
+          className="w-full mt-5"
+          disabled={isPending}
+          isPending={isPending}
+        />
       </form>
     </Form>
   );

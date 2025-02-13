@@ -6,6 +6,7 @@ import products from "@/app/api/[[...route]]/products";
 import templates from "@/app/api/[[...route]]/templates";
 import customizations from "@/app/api/[[...route]]/customizations";
 import orders from "@/app/api/[[...route]]/orders";
+import deliveryAreas from "@/app/api/[[...route]]/delivery-areas";
 
 export const runtime = "nodejs";
 
@@ -18,7 +19,8 @@ const routes = app
   .route("/products", products)
   .route("/templates", templates)
   .route("/customizations", customizations)
-  .route("/orders", orders);
+  .route("/orders", orders)
+  .route("/deliveryareas", deliveryAreas);
 
 export const GET = handle(app);
 export const POST = handle(app);

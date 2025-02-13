@@ -106,11 +106,18 @@ CREATE TABLE "delivery_areas" (
 CREATE TABLE "delivery_areas_km" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text,
-	"api_key" varchar(255) NOT NULL,
 	"latitude" real,
 	"longitude" real,
-	"radius" real NOT NULL,
-	"fees" json NOT NULL,
+	"radius" real,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "delivery_areas_km_fees" (
+	"id" text PRIMARY KEY NOT NULL,
+	"delivery_area_id" text,
+	"distance" real,
+	"price" integer,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -119,7 +126,7 @@ CREATE TABLE "free_tests" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,
-	"domain" varchar(255) NOT NULL,
+	"subdomain" varchar(255) NOT NULL,
 	"whatsapp" varchar(20) NOT NULL,
 	"password" varchar(255) NOT NULL,
 	"request_date" timestamp DEFAULT now(),
@@ -224,6 +231,7 @@ CREATE TABLE "user" (
 	"emailVerified" timestamp,
 	"phone" varchar(255),
 	"role" "role",
+	"google_api_key" varchar(255),
 	"subdomain" varchar(255),
 	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now(),
@@ -250,6 +258,7 @@ ALTER TABLE "customizations" ADD CONSTRAINT "customizations_template_id_template
 ALTER TABLE "deliverers" ADD CONSTRAINT "deliverers_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "delivery_areas" ADD CONSTRAINT "delivery_areas_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "delivery_areas_km" ADD CONSTRAINT "delivery_areas_km_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "delivery_areas_km_fees" ADD CONSTRAINT "delivery_areas_km_fees_delivery_area_id_delivery_areas_km_id_fk" FOREIGN KEY ("delivery_area_id") REFERENCES "public"."delivery_areas_km"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

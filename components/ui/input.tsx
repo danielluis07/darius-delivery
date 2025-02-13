@@ -2,6 +2,11 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+// Custom props interface
+export type InputProps = React.ComponentProps<"input"> & {
+  customProp?: string; // Add any custom props here
+};
+
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
     return (

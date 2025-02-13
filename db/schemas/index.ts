@@ -14,6 +14,10 @@ export const baseUserSchema = createInsertSchema(users);
 
 const baseTemplateSchema = createInsertSchema(templates);
 
+export const insertApiKeySchema = z.object({
+  apiKey: z.string(),
+});
+
 export const insertTemplateSchema = baseTemplateSchema.extend({
   preview_image:
     typeof File !== "undefined"

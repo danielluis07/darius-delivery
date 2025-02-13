@@ -12,7 +12,6 @@ import {
 import {
   ChevronUp,
   House,
-  Lock,
   User2,
   FolderClosed,
   Paintbrush,
@@ -28,6 +27,7 @@ import {
   CreditCard,
   Globe,
   Sandwich,
+  Settings,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOutButton } from "@/components/logout-button";
 import Image from "next/image";
+import Link from "next/link";
 
 const items = [
   {
@@ -95,9 +96,9 @@ const items = [
     label: "Financeiro",
   },
   {
-    url: "#",
+    url: "/dashboard/delivery-areas",
     icon: MapPin,
-    label: "Área de Entrega",
+    label: "Áreas de Entrega",
   },
   {
     url: "#",
@@ -160,10 +161,12 @@ export function UserSidebar() {
               <DropdownMenuContent
                 side="top"
                 className="w-[--radix-popper-anchor-width]">
-                <DropdownMenuItem>
-                  <Lock />
-                  <span>Mudar Senha</span>
-                </DropdownMenuItem>
+                <Link href="/dashboard/settings">
+                  <DropdownMenuItem>
+                    <Settings />
+                    <span>Configurações</span>
+                  </DropdownMenuItem>
+                </Link>
                 <DropdownMenuItem>
                   <LogOutButton />
                 </DropdownMenuItem>

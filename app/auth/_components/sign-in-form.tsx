@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { credentialsSignIn } from "../_actions/credentials-sign-in";
 import { cn } from "@/lib/utils";
 import { LoadingButton } from "@/components/ui/loading-button";
+import { PasswordInput } from "@/components/ui/password-input";
 
 type FormData = z.infer<typeof credentialsSignInSchema>;
 
@@ -113,13 +114,7 @@ export const SignInForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
-                      disabled={isPending}
-                      type="password"
-                      {...field}
-                      value={field.value}
-                      placeholder="Senha"
-                    />
+                    <PasswordInput placeholder="Senha" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

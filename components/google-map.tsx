@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
   GoogleMap,
   useLoadScript,
@@ -36,9 +36,13 @@ export const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     lng: -46.633308,
   });
 
-  // Use navigator.geolocation to get the user's current position
+  // Use navigator.geolocation to get the user's current position (only if markerPosition is still the default)
   useEffect(() => {
-    if (navigator.geolocation) {
+    if (
+      markerPosition.lat === -23.55052 &&
+      markerPosition.lng === -46.633308 &&
+      navigator.geolocation
+    ) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
@@ -53,16 +57,22 @@ export const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         }
       );
     }
-  }, [setLatitude, setLongitude]);
+  }, [markerPosition, setLatitude, setLongitude]);
 
-  const handleMapClick = (e: google.maps.MapMouseEvent) => {
-    const lat = e.latLng?.lat() ?? 0;
-    const lng = e.latLng?.lng() ?? 0;
+  // Handle map clicks and update state only if the position changes
+  const handleMapClick = useCallback(
+    (e: google.maps.MapMouseEvent) => {
+      const lat = e.latLng?.lat() ?? 0;
+      const lng = e.latLng?.lng() ?? 0;
 
-    setLatitude(lat);
-    setLongitude(lng);
-    setMarkerPosition({ lat, lng });
-  };
+      if (lat !== markerPosition.lat || lng !== markerPosition.lng) {
+        setMarkerPosition({ lat, lng });
+        setLatitude(lat);
+        setLongitude(lng);
+      }
+    },
+    [markerPosition, setLatitude, setLongitude]
+  );
 
   if (loadError)
     return (
@@ -76,7 +86,7 @@ export const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     <GoogleMap
       mapContainerStyle={mapContainerStyle}
       center={markerPosition}
-      zoom={15}
+      zoom={12}
       onClick={handleMapClick}
       onLoad={(map) => {
         mapRef.current = map;
@@ -89,10 +99,10 @@ export const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           center={markerPosition}
           radius={radius * 1000}
           options={{
-            fillColor: `rgba(255, 0, 0, ${0.1 + index * 0.1})`, // Gradual opacity
+            fillOpacity: 0,
             strokeColor: "#FF0000",
-            strokeOpacity: 0.6,
-            strokeWeight: 1,
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
           }}
         />
       ))}
