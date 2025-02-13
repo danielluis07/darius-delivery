@@ -21,7 +21,6 @@ import {
   FileUploader,
   FileUploaderContent,
   FileUploaderItem,
-  useFileUpload,
 } from "@/components/ui/file-upload";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { createCategory } from "@/app/_features/_user/_actions/create-category";

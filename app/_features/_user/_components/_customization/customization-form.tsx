@@ -33,7 +33,6 @@ import { cn } from "@/lib/utils";
 import placeholder from "@/public/placeholder-image.jpg";
 import { createCustomization } from "../../_actions/create-customization";
 import { Input } from "@/components/ui/input";
-import { log } from "console";
 
 type TemplatesResponseType = InferResponseType<
   typeof client.api.templates.$get,
@@ -61,15 +60,10 @@ export const CustomizationForm = ({
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [desktopPreview, setDesktopPreview] = useState<string | null>(null);
   const [mobilePreview, setMobilePreview] = useState<string | null>(null);
-
   const [bannerUrl, setBannerUrl] = useState(customization?.banner || null);
   const [desktopUrl, setDesktopUrl] = useState(
     customization?.logo_desktop || null
   );
-  const [mobileUrl, setMobileUrl] = useState(
-    customization?.logo_mobile || null
-  );
-
   const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomizationSchema),
