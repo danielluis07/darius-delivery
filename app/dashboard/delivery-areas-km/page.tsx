@@ -27,12 +27,7 @@ const DeliveryAreaKmPage = async () => {
     );
   }
 
-  return (
-    <div className="space-y-4">
-      <DeliveryAreasForm />
-      <DeliveryAreasKmForm data={data} apikey={apiKey.googleApiKey} />
-    </div>
-  );
+  return <DeliveryAreasKmForm data={data} apikey={apiKey.googleApiKey} />;
 };
 
 export default DeliveryAreaKmPage;
