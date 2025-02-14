@@ -14,6 +14,7 @@ export const runtime = "nodejs";
 
 const app = new Hono().basePath("/api");
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use(
   "*",
   initAuthConfig((c) => ({

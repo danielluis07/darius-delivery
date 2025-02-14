@@ -10,6 +10,10 @@ type RequestType = InferRequestType<
   (typeof client.api.deliveryareas)["delete"]["$post"]
 >["json"];
 
+type Data = InferResponseType<
+  (typeof client.api.deliveryareas.user)[":userId"]["$get"],
+  200
+>["data"];
 export const useDeleteDeliveryAreas = () => {
   const queryClient = useQueryClient();
 
@@ -22,7 +26,7 @@ export const useDeleteDeliveryAreas = () => {
     },
     onSuccess: (response, variables) => {
       // Get current cache data
-      const currentData = queryClient.getQueryData(["delivery-areas"]) as any[];
+      const currentData = queryClient.getQueryData(["delivery-areas"]) as Data;
 
       // If the number of IDs being deleted matches the total number of items
       if (variables.ids?.length === currentData?.length) {

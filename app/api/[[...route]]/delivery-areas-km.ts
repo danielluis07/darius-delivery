@@ -2,11 +2,7 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import {
-  deliveryAreas,
-  deliveryAreasKm,
-  deliveryAreasKmFees,
-} from "@/db/schema";
+import { deliveryAreasKm, deliveryAreasKmFees } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 const app = new Hono().get(
