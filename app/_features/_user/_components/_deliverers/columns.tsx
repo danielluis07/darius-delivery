@@ -5,7 +5,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import { DeliverersCellAction } from "@/app/_features/_user/_components/_deliverers/cell-action";
-import { formatCurrencyFromCents } from "@/lib/utils";
 import { format } from "date-fns";
 
 export type ResponseType = InferResponseType<
