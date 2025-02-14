@@ -113,6 +113,21 @@ body,
   scrollbar-width: none; /* Firefox */
 }
 
+/* Custom Sidebar Scrollbar */
+.custom-sidebar::-webkit-scrollbar {
+  height: 4px;
+  width: 6px; /* Smaller width */
+}
+
+.custom-sidebar::-webkit-scrollbar-thumb {
+  background-color: #999; /* Same color */
+  border-radius: 4px;
+}
+
+.custom-sidebar::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
 @layer base {
   * {
     @apply border-border;

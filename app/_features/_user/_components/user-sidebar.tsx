@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Sidebar,
   SidebarContent,
@@ -8,6 +10,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   ChevronUp,
@@ -37,7 +42,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOutButton } from "@/components/logout-button";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const items = [
   {
@@ -118,32 +128,85 @@ const items = [
 ];
 
 export function UserSidebar() {
+  const { open } = useSidebar();
+  const router = useRouter();
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Image
-          src="/darius.png"
-          width={180}
-          height={180}
-          alt="logo"
-          className="mx-auto"
-          priority
-        />
+        {open ? (
+          <div className="relative w-5/6 h-16 mx-auto">
+            <Image
+              src="/darius.png"
+              fill
+              alt="logo"
+              priority
+              sizes="(max-width: 768px) 90vw, (max-width: 1200px) 75vw, 256px"
+            />
+          </div>
+        ) : (
+          <div className="relative w-5/6 h-8 mx-auto">
+            <Image
+              src="/darius-mini.png"
+              fill
+              alt="logo"
+              priority
+              sizes="48px"
+            />
+          </div>
+        )}
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="custom-sidebar">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                if (item.label === "Áreas de Entrega") {
+                  return (
+                    <Collapsible
+                      key={item.label}
+                      defaultOpen={false}
+                      className="group/collapsible">
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton>
+                            <item.icon />
+                            <span>{item.label}</span>
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub className="space-y-1">
+                            <SidebarMenuSubItem
+                              onClick={() =>
+                                router.push("/dashboard/delivery-areas")
+                              }
+                              className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
+                              Por Endereço
+                            </SidebarMenuSubItem>
+                            <SidebarMenuSubItem
+                              onClick={() =>
+                                router.push("/dashboard/delivery-areas-km")
+                              }
+                              className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
+                              Por Km
+                            </SidebarMenuSubItem>
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
+                return (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -161,12 +224,11 @@ export function UserSidebar() {
               <DropdownMenuContent
                 side="top"
                 className="w-[--radix-popper-anchor-width]">
-                <Link href="/dashboard/settings">
-                  <DropdownMenuItem>
-                    <Settings />
-                    <span>Configurações</span>
-                  </DropdownMenuItem>
-                </Link>
+                <DropdownMenuItem
+                  onClick={() => router.push("/dashboard/settings")}>
+                  <Settings />
+                  <span>Configurações</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem>
                   <LogOutButton />
                 </DropdownMenuItem>

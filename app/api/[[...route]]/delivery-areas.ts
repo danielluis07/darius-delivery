@@ -2,19 +2,23 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import {
-  deliveryAreas,
-  deliveryAreasKm,
-  deliveryAreasKmFees,
-} from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { deliveryAreas } from "@/db/schema";
+import { insertDeliveryAreasSchema } from "@/db/schemas";
+import { eq, inArray } from "drizzle-orm";
+import { verifyAuth } from "@hono/auth-js";
 
 const app = new Hono()
   .get(
-    "/:userId",
+    "/user/:userId",
+    verifyAuth(),
     zValidator("param", z.object({ userId: z.string().optional() })),
     async (c) => {
       const { userId } = c.req.valid("param");
+      const auth = c.get("authUser");
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
 
       if (!userId) {
         return c.json({ error: "Missing user id" }, 400);
@@ -32,43 +36,91 @@ const app = new Hono()
       return c.json({ data });
     }
   )
-  .get(
-    "/km/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+  .post(
+    "/",
+    verifyAuth(),
+    zValidator("json", insertDeliveryAreasSchema),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const auth = c.get("authUser");
+      const values = c.req.valid("json");
 
-      if (!userId) {
-        return c.json({ error: "Missing user id" }, 400);
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
       }
 
-      // First get the delivery area
-      const [deliveryArea] = await db
-        .select()
-        .from(deliveryAreasKm)
-        .where(eq(deliveryAreasKm.userId, userId));
-
-      if (!deliveryArea) {
-        return c.json({ error: "No delivery area per km found" }, 404);
+      if (!values) {
+        return c.json({ error: "Missing data" }, 400);
       }
 
-      // Then get all fees for this delivery area
-      const fees = await db
-        .select({
-          distance: deliveryAreasKmFees.distance,
-          price: deliveryAreasKmFees.price,
-        })
-        .from(deliveryAreasKmFees)
-        .where(eq(deliveryAreasKmFees.deliveryAreaId, deliveryArea.id))
-        .orderBy(deliveryAreasKmFees.distance);
+      const data = await db
+        .insert(deliveryAreas)
+        .values({ ...values, user_id: auth.token.sub });
 
-      // Return combined data
-      return c.json({
-        data: {
-          ...deliveryArea,
-          fees,
-        },
-      });
+      if (!data) {
+        return c.json({ error: "Failed to insert data" }, 500);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .post(
+    "/delete",
+    verifyAuth(),
+    zValidator(
+      "json",
+      z.object({
+        ids: z.array(z.string()),
+      })
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+      const values = c.req.valid("json");
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const data = await db
+        .delete(deliveryAreas)
+        .where(inArray(deliveryAreas.id, values.ids));
+
+      if (!data) {
+        return c.json({ error: "Failed to delete delivery areas" }, 500);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .delete(
+    "/:id",
+    verifyAuth(),
+    zValidator(
+      "param",
+      z.object({
+        id: z.string().optional(),
+      })
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { id } = c.req.valid("param");
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!id) {
+        return c.json({ error: "Missing id" }, 400);
+      }
+
+      const data = await db
+        .delete(deliveryAreas)
+        .where(eq(deliveryAreas.id, id));
+
+      if (!data) {
+        return c.json({ error: "Failed to delete delivery area" }, 500);
+      }
+
+      return c.json({ data });
     }
   );
 export default app;

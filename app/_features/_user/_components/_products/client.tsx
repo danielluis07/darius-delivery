@@ -2,7 +2,6 @@
 
 import { columns } from "@/app/_features/_user/_components/_products/columns";
 
-import { Card } from "@/components/ui/card";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import { ProductsDataTable } from "@/app/_features/_user/_components/_products/data-table";
@@ -20,7 +19,7 @@ export const ProductsClient = ({ data }: ProductsProps) => {
   /* Create category dialog */
 
   return (
-    <Card className="w-full">
+    <div className="w-full">
       <h1 className="text-xl font-bold">Categorias</h1>
       <ProductsDataTable
         columns={columns}
@@ -28,6 +27,6 @@ export const ProductsClient = ({ data }: ProductsProps) => {
         onDelete={() => {}}
         searchKey="name"
       />
-    </Card>
+    </div>
   );
 };

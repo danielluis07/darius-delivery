@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 import { LoadingButton } from "@/components/ui/loading-button";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.deliveryareas.km)[":userId"]["$get"],
+  (typeof client.api.deliveryareaskm.user)[":userId"]["$get"],
   200
 >["data"];
 
@@ -90,9 +90,7 @@ export const DeliveryAreasKmForm = ({
 
   return (
     <Form {...form}>
-      <form
-        className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md"
-        onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
         <div className="mt-4">
           <GoogleMapComponent
             key={radiusKmList.length}

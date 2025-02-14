@@ -2,11 +2,11 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.deliveryareas.km)[":userId"]["$get"],
+  (typeof client.api.deliveryareaskm.user)[":userId"]["$get"],
   200
 >["data"];
 
-const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/deliveryareas/km`;
+const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/deliveryareaskm/user`;
 
 export const getDeliveryAreasKm = async (
   userId: string
