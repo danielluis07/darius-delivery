@@ -8,6 +8,7 @@ import {
   orders,
   deliveryAreasKm,
   deliveryAreas,
+  deliverers,
 } from "@/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 
@@ -18,6 +19,8 @@ const baseTemplateSchema = createInsertSchema(templates);
 export const insertApiKeySchema = z.object({
   apiKey: z.string(),
 });
+
+export const insertDeliverersSchema = createInsertSchema(deliverers);
 
 export const insertDeliveryAreasSchema = createInsertSchema(deliveryAreas);
 

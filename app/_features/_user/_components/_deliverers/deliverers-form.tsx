@@ -11,29 +11,22 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
-import { insertDeliveryAreasSchema, state } from "@/db/schemas";
+import { insertDeliverersSchema } from "@/db/schemas";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { useCreateDeliveryArea } from "@/app/_features/_user/_queries/_delivery-areas/use-create-delivery-area";
-import { formatCurrency } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useCreateDeliverer } from "@/app/_features/_user/_queries/_deliverers/use-create-deliverer";
+import { formatPhoneNumber } from "@/lib/utils";
 
-type FormData = z.infer<typeof insertDeliveryAreasSchema>;
+type FormData = z.infer<typeof insertDeliverersSchema>;
 
-export const DeliveryAreasForm = ({ isLoading }: { isLoading: boolean }) => {
-  const { mutate, isPending } = useCreateDeliveryArea();
+export const DeliverersForm = ({ isLoading }: { isLoading: boolean }) => {
+  const { mutate, isPending } = useCreateDeliverer();
   const form = useForm<FormData>({
-    resolver: zodResolver(insertDeliveryAreasSchema),
+    resolver: zodResolver(insertDeliverersSchema),
     defaultValues: {
-      city: "",
-      state: "",
-      neighborhood: "",
-      delivery_fee: 0,
+      name: "",
+      phone: "",
+      vehicle: "",
+      vehicle_plate: "",
     },
   });
 
@@ -52,13 +45,13 @@ export const DeliveryAreasForm = ({ isLoading }: { isLoading: boolean }) => {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="city"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Cidade"
+                      placeholder="Nome"
                       required
                       disabled={isPending || isLoading}
                     />
@@ -72,70 +65,72 @@ export const DeliveryAreasForm = ({ isLoading }: { isLoading: boolean }) => {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="neighborhood"
+              name="phone"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Bairro"
-                      required
-                      disabled={isPending || isLoading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="state"
-              render={({ field }) => (
-                <FormItem>
-                  <Select
-                    disabled={isPending || isLoading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Estado" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="">
-                      {state.map((state, index) => (
-                        <SelectItem key={index} value={state}>
-                          {state}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="delivery_fee"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={formatCurrency(field.value)}
-                      placeholder="R$ 0,00"
-                      onChange={(e) => {
-                        const rawValue = e.target.value.replace(/\D/g, "");
-                        const numericValue = rawValue
-                          ? parseInt(rawValue, 10)
-                          : 0;
-                        field.onChange(numericValue);
+                      value={field.value ?? ""}
+                      onChange={(event) => {
+                        const formattedPhoneNumber = formatPhoneNumber(
+                          event.target.value
+                        );
+                        field.onChange(formattedPhoneNumber);
                       }}
+                      disabled={isPending || isLoading}
+                      placeholder="Telefone"
+                      required
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="w-full">
+            <FormField
+              control={form.control}
+              name="vehicle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Veículo"
+                      required
+                      disabled={isPending || isLoading}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="w-full">
+            <FormField
+              control={form.control}
+              name="vehicle_plate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Placa do veículo"
+                      maxLength={7} // Limita a 7 caracteres
+                      onChange={(e) => {
+                        let value = e.target.value
+                          .toUpperCase()
+                          .replace(/[^A-Z0-9]/g, ""); // Remove caracteres inválidos
+                        value = value.replace(
+                          /^([A-Z]{3})([0-9]{1})([A-Z]{1})([0-9]{2})$/,
+                          "$1$2$3$4"
+                        ); // Mantém no padrão Mercosul
+                        field.onChange(value); // Atualiza o campo formatado
+                      }}
+                      required
                       disabled={isPending || isLoading}
                     />
                   </FormControl>

@@ -1,5 +1,5 @@
 import { DeliveryAreasKmForm } from "@/app/_features/_user/_components/_delivery-areas-km/delivery-areas-km-form";
-import { getDeliveryAreasKm } from "@/app/_features/_user/_queries/_delivery-areas/get-delivery-areas-km";
+import { getDeliveryAreasKm } from "@/app/_features/_user/_queries/_delivery-areas-km/get-delivery-areas-km";
 import { getGoogleApiKey } from "@/app/_features/_user/_queries/get-google-api-key";
 import { auth } from "@/auth";
 

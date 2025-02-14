@@ -76,7 +76,7 @@ const items = [
     label: "Personalização",
   },
   {
-    url: "#",
+    url: "/dashboard/deliverers",
     icon: Truck,
     label: "Entregadores",
   },

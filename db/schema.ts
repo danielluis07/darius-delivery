@@ -229,14 +229,17 @@ export const deliverers = pgTable("deliverers", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  phone: varchar("phone", { length: 255 }),
+  phone: varchar("phone", { length: 20 }).notNull(),
   vehicle: varchar("vehicle", { length: 100 }).notNull(),
-  vehicle_plate: varchar("vehicle_plate", { length: 20 }).notNull(),
-  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(), // Criação automática
+  vehicle_plate: varchar("vehicle_plate", { length: 7 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 // Tabela de Personalização
@@ -325,7 +328,6 @@ export const deliveryAreasKm = pgTable("delivery_areas_km", {
   userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   latitude: real("latitude"),
   longitude: real("longitude"),
-  radius: real("radius"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -365,6 +367,6 @@ export const freeTests = pgTable("free_tests", {
   subdomain: varchar("subdomain", { length: 255 }).notNull(),
   whatsapp: varchar("whatsapp", { length: 20 }).notNull(),
   password: varchar("password", { length: 255 }).notNull(),
-  request_date: timestamp("request_date").defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
   expiration_date: timestamp("expiration_date").notNull(),
 });

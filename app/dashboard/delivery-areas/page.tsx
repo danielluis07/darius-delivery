@@ -8,8 +8,6 @@ const DeliveryAreasPage = async () => {
     return <div>Você nãa está autorizado a acessar essa página</div>;
   }
 
-  console.log("user id on the server:", session.user.id);
-
   return <DeliveryAreasClient userId={session.user.id} />;
 };
 
