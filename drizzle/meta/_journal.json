@@ -29,6 +29,20 @@
       "when": 1739567706229,
       "tag": "0003_bored_junta",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1739580302473,
+      "tag": "0004_first_justice",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1739619452888,
+      "tag": "0005_slow_green_goblin",
+      "breakpoints": true
     }
   ]
 }

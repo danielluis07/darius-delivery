@@ -39,6 +39,8 @@ export const orderStatus = pgEnum("order_status", [
   "CANCELLED",
 ]);
 
+export const orderType = pgEnum("order_type", ["LOCAL", "ONLINE"]);
+
 // TABLES
 
 export const users = pgTable("user", {
@@ -55,8 +57,12 @@ export const users = pgTable("user", {
   role: role("role"),
   googleApiKey: varchar("google_api_key", { length: 255 }),
   subdomain: varchar("subdomain", { length: 255 }).unique(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 export const account = pgTable(
@@ -216,13 +222,14 @@ export const customers = pgTable("customers", {
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("userId")
     .references(() => users.id, { onDelete: "cascade" })
-    .unique(),
+    .unique(), // Ensures each customer has one record in customers
+  restaurantOwnerId: text("restaurantOwnerId").references(() => users.id, {
+    onDelete: "cascade",
+  }),
   city: text("city").notNull(),
   state: text("state").notNull(),
   neighborhood: text("neighborhood").notNull(),
   address: text("street").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
 export const deliverers = pgTable("deliverers", {
@@ -269,8 +276,12 @@ export const subscriptions = pgTable("subscriptions", {
   status: text("status").notNull(), // Status da assinatura
   start_date: timestamp("start_date", { withTimezone: true }),
   end_date: timestamp("end_date", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 export const orders = pgTable("orders", {
@@ -282,6 +293,7 @@ export const orders = pgTable("orders", {
     onDelete: "cascade",
   }),
   status: orderStatus("status"),
+  type: orderType("type"),
   total_price: integer("total_price"),
   payment_status: paymentStatus("payment_status"),
   createdAt: timestamp("created_at", { withTimezone: true })

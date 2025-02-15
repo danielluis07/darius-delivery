@@ -96,7 +96,7 @@ const items = [
     label: "Combos",
   },
   {
-    url: "#",
+    url: "/dashboard/customers",
     icon: Users,
     label: "Clientes",
   },
