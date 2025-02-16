@@ -5,6 +5,7 @@ import { db } from "@/db/drizzle";
 import { orders, orderItems } from "@/db/schema";
 import { insertOrderSchema } from "@/db/schemas";
 import { auth } from "@/auth";
+import { revalidatePath } from "next/cache";
 
 export const createOrder = async (
   values: z.infer<typeof insertOrderSchema>
@@ -22,21 +23,36 @@ export const createOrder = async (
       return { success: false, message: "Campos inválidos" };
     }
 
-    const { productId, user_id, price, quantity } = validatedValues.data;
+    const {
+      productId,
+      customer_id,
+      price,
+      quantity,
+      status,
+      type,
+      payment_status,
+    } = validatedValues.data;
 
-    if (!productId || !price || !quantity) {
+    if (
+      !productId ||
+      !price ||
+      !quantity ||
+      !status ||
+      !type ||
+      !payment_status
+    ) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
 
     const [order] = await db
       .insert(orders)
       .values({
-        user_id,
-        customer_id: session.user.id,
+        user_id: session.user.id,
+        customer_id,
         total_price: price * quantity,
-        type: "WEBSITE",
-        status: "PREPARING",
-        payment_status: "PENDING",
+        type,
+        status,
+        payment_status,
       })
       .returning({ id: orders.id });
 
@@ -55,9 +71,11 @@ export const createOrder = async (
       return { success: false, message: "Erro ao criar item do pedido" };
     }
 
+    revalidatePath("/dashboard/orders");
     return {
       success: true,
-      message: "Pedido efetuado com sucesso!",
+      message: "Pedido criado com sucesso!",
+      url: "/dashboard/orders",
     };
   } catch (error) {
     console.error(error);

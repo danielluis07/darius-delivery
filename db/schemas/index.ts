@@ -22,6 +22,17 @@ export const insertApiKeySchema = z.object({
 
 export const insertDeliverersSchema = createInsertSchema(deliverers);
 
+export const insertCustomerByUserSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  phone: z.string(),
+  userId: z.string().optional(),
+  city: z.string(),
+  state: z.string(),
+  neighborhood: z.string(),
+  address: z.string(),
+});
+
 export const insertLocalCustomerSchema = z.object({
   name: z.string(),
   email: z.string().email(),

@@ -18,14 +18,11 @@ type OrdersProps = {
 
 export const OrdersClient = ({ data }: OrdersProps) => {
   return (
-    <Card className="w-full">
-      <h1 className="text-xl font-bold">Pedidos</h1>
-      <OrdersDataTable
-        columns={columns}
-        data={data}
-        onDelete={() => {}}
-        searchKey="status"
-      />
-    </Card>
+    <OrdersDataTable
+      columns={columns}
+      data={data}
+      onDelete={() => {}}
+      searchKey="status"
+    />
   );
 };

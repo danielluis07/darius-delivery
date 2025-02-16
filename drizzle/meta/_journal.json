@@ -43,6 +43,13 @@
       "when": 1739619452888,
       "tag": "0005_slow_green_goblin",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1739643827787,
+      "tag": "0006_lyrical_justice",
+      "breakpoints": true
     }
   ]
 }

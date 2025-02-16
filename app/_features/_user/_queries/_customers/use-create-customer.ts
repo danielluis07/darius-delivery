@@ -6,7 +6,7 @@ import { toast } from "sonner";
 type ResponseType = InferResponseType<typeof client.api.customers.$post>;
 type RequestType = InferRequestType<typeof client.api.customers.$post>["json"];
 
-export const useCreateCustomer = () => {
+export const useCreateCustomer = (onClose: () => void) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
@@ -19,6 +19,7 @@ export const useCreateCustomer = () => {
       queryClient.invalidateQueries({
         queryKey: ["customers"],
       });
+      onClose();
     },
     onError: () => {
       toast.error("Houve um erro ao criar o cliente!");

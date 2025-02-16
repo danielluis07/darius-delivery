@@ -39,7 +39,7 @@ export const orderStatus = pgEnum("order_status", [
   "CANCELLED",
 ]);
 
-export const orderType = pgEnum("order_type", ["LOCAL", "ONLINE"]);
+export const orderType = pgEnum("order_type", ["LOCAL", "WEBSITE", "WHATSAPP"]);
 
 // TABLES
 
@@ -292,10 +292,10 @@ export const orders = pgTable("orders", {
   customer_id: text("customer_id").references(() => customers.userId, {
     onDelete: "cascade",
   }),
-  status: orderStatus("status"),
-  type: orderType("type"),
+  status: orderStatus("status").notNull(),
+  type: orderType("type").notNull(),
   total_price: integer("total_price"),
-  payment_status: paymentStatus("payment_status"),
+  payment_status: paymentStatus("payment_status").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

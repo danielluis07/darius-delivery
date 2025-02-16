@@ -50,7 +50,7 @@ export const columns: ColumnDef<ResponseType>[] = [
   },
   {
     accessorKey: "delivery_fee",
-    header: "Preço",
+    header: "Taxa",
     cell: ({ row }) => formatCurrencyFromCents(row.original.delivery_fee),
   },
   {
