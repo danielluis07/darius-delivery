@@ -1,5 +1,5 @@
+import { auth } from "@/auth";
 import { OrderDetails } from "@/app/_features/_user/_components/_orders/order-details";
-import { getOrder } from "@/app/_features/_user/_queries/_orders/get-order";
 
 const OrderDetailsPage = async ({
   params,
@@ -8,13 +8,13 @@ const OrderDetailsPage = async ({
 }) => {
   const orderId = (await params).orderId;
 
-  const data = await getOrder(orderId);
+  const session = await auth();
 
-  if (!data) {
-    return <div>Esse pedido não existe</div>;
+  if (!session || !session.user.id) {
+    return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  return <OrderDetails data={data} />;
+  return <OrderDetails userId={session.user.id} orderId={orderId} />;
 };
 
 export default OrderDetailsPage;

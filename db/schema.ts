@@ -149,8 +149,6 @@ export const authenticator = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.credentialID] })]
 );
 
-/*  */
-
 export const categories = pgTable("categories", {
   id: text("id")
     .primaryKey()
@@ -178,7 +176,6 @@ export const products = pgTable("products", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
-// Tabela de Combos
 export const combos = pgTable("combos", {
   id: text("id")
     .primaryKey()
@@ -251,7 +248,6 @@ export const deliverers = pgTable("deliverers", {
     .notNull(),
 });
 
-// Tabela de Personalização
 export const customizations = pgTable("customizations", {
   id: text("id")
     .primaryKey()
@@ -291,13 +287,16 @@ export const orders = pgTable("orders", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  delivererId: text("deliverer_id").references(() => deliverers.id, {
+    onDelete: "set null",
+  }),
   customer_id: text("customer_id").references(() => customers.userId, {
     onDelete: "cascade",
   }),
   number: serial("number").notNull().unique(),
   status: orderStatus("status").notNull(),
   type: orderType("type").notNull(),
-  total_price: integer("total_price"),
+  total_price: integer("total_price").notNull(),
   payment_status: paymentStatus("payment_status").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()

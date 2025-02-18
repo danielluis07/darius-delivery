@@ -1,102 +1,394 @@
 "use client";
 
-import { client } from "@/lib/hono";
-import { InferResponseType } from "hono";
-import { formatCurrencyFromCents } from "@/lib/utils";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm, FieldErrors } from "react-hook-form";
+import { cn, formatCurrencyFromCents } from "@/lib/utils";
 import { format } from "date-fns";
+import { Check, CheckCircle, ChevronsUpDown, Clock } from "lucide-react";
+import { updateOrderSchema } from "@/db/schemas";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { RiMotorbikeFill } from "react-icons/ri";
+import { useGetOrder } from "@/app/_features/_user/_queries/_orders/use-get-order";
+import { useGetDeliverers } from "@/app/_features/_user/_queries/_deliverers/use-get-deliverers";
+import Image from "next/image";
+import placeholder from "@/public/placeholder-image.jpg";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { useUpdateOrder } from "@/app/_features/_user/_queries/_orders/use-update-order";
+import { useEffect } from "react";
 
-type ResponseType = InferResponseType<
-  (typeof client.api.orders)[":orderId"]["$get"],
-  200
->["data"];
+type FormData = z.infer<typeof updateOrderSchema>;
 
-export const OrderDetails = ({ data }: { data: ResponseType }) => {
-  const { order, item, product, customer } = data;
+export const OrderDetails = ({
+  userId,
+  orderId,
+}: {
+  userId: string;
+  orderId: string;
+}) => {
+  const { data, isLoading } = useGetOrder(orderId);
+  const { data: deliverersData, isLoading: isDeliverersLoading } =
+    useGetDeliverers(userId);
+  const { mutate, isPending } = useUpdateOrder(orderId);
+  const form = useForm<FormData>({
+    resolver: zodResolver(updateOrderSchema),
+    defaultValues: {
+      status: data?.order.status,
+      delivererId: data?.deliverer?.id,
+      payment_status: data?.order.payment_status,
+      type: data?.order.type,
+    },
+  });
 
-  const totalPrice = order.totalPrice || 0;
-  const productName = product?.name || "N/A";
-  const productDescription = product?.description || "N/A";
-  const date = new Date(order.createdAt);
+  const deliverers = deliverersData || [];
 
-  /* traduzir status para portugues */
-  const statusMap = {
+  const statusColors: Record<string, string> = {
+    ACCEPTED: "bg-blue-500 text-white",
+    PREPARING: "bg-yellow-500 text-white",
+    IN_TRANSIT: "bg-orange-500 text-white",
+    DELIVERED: "bg-green-500 text-white",
+    FINISHED: "bg-gray-500 text-white",
+  };
+
+  const statusIcons: Record<string, React.ReactNode> = {
+    ACCEPTED: <Clock className="w-4 h-4 mr-1" />,
+    PREPARING: <Clock className="w-4 h-4 mr-1" />,
+    IN_TRANSIT: <RiMotorbikeFill className="w-4 h-4 mr-1" />,
+    DELIVERED: <CheckCircle className="w-4 h-4 mr-1" />,
+    FINISHED: <CheckCircle className="w-4 h-4 mr-1" />,
+  };
+
+  const paymentStatusColors: Record<string, string> = {
+    PENDING: "bg-yellow-500 text-white",
+    PAID: "bg-green-500 text-white",
+  };
+
+  const paymentStatusIcons: Record<string, React.ReactNode> = {
+    PENDING: <Clock className="w-4 h-4 mr-1" />,
+    PAID: <CheckCircle className="w-4 h-4 mr-1" />,
+  };
+
+  const paymentStatusTranslations: Record<string, string> = {
+    PENDING: "Aguardando Pagamento",
+    PAID: "Pago",
+  };
+
+  const statusTranslations: Record<string, string> = {
     ACCEPTED: "Aceito",
-    PREPARING: "Preparando",
+    PREPARING: "Em preparo",
     IN_TRANSIT: "Em trânsito",
-    FINISHED: "Finalizado",
     DELIVERED: "Entregue",
-  } as const;
+    FINISHED: "Finalizado",
+  };
+
+  const onInvalid = (errors: FieldErrors<FormData>) => {
+    console.log(errors);
+  };
+
+  const onSubmit = (values: FormData) => {
+    mutate(values);
+  };
+
+  useEffect(() => {
+    if (data) {
+      form.reset({
+        status: data.order.status,
+        delivererId: data.deliverer?.id,
+        payment_status: data.order.payment_status,
+        type: data.order.type,
+      });
+    }
+  }, [data]);
+
+  if (isLoading || isDeliverersLoading) {
+    return <div>Carregando...</div>;
+  }
+
+  if (!data) {
+    return <div>Pedido não encontrado</div>;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Pedido</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <p>
-            <span className="font-medium">Feito em:</span>{" "}
-            {format(date, "dd/MM/yyyy")}
+    <div className="w-full">
+      <Card className="p-6 space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold">Detalhes do Pedido</h3>
+          <Separator className="my-2" />
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">
+              Pedido #{data.order.number}
+            </span>
+            <div className="flex flex-col gap-y-2">
+              <Badge
+                className={cn(
+                  paymentStatusColors[data.order.payment_status],
+                  "px-2"
+                )}>
+                {paymentStatusIcons[data.order.payment_status]}{" "}
+                {paymentStatusTranslations[data.order.payment_status]}
+              </Badge>
+              <Badge className={cn(statusColors[data.order.status], "px-2")}>
+                {statusIcons[data.order.status]}{" "}
+                {statusTranslations[data.order.status]}
+              </Badge>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500">
+            <span className="font-semibold">Data:</span>{" "}
+            {format(new Date(data.order.createdAt), "dd/MM/yyyy")}
           </p>
-          <p>
-            <span className="font-medium">Preço Total:</span> $
-            {formatCurrencyFromCents(totalPrice)}
-          </p>
-          <p>
-            <span className="font-medium">Status:</span>{" "}
-            {order.status ? statusMap[order.status] : "Desconhecido"}
+          <p className="text-sm text-gray-500">
+            <span className="font-semibold">Total:</span>{" "}
+            {formatCurrencyFromCents(data.order.totalPrice)}
           </p>
         </div>
-      </div>
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Mais Detalhes</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <p>
-            <span className="font-medium">Quantidade:</span> {item.quantity}
-          </p>
-          <p>
-            <span className="font-medium">Preço:</span>{" "}
-            {formatCurrencyFromCents(item.price)}
-          </p>
-        </div>
-      </div>
 
-      {/* Product Details */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Detalhes do Produto</h2>
-        <p>
-          <span className="font-medium">Nome do Produto:</span> {productName}
-        </p>
-        <p>
-          <span className="font-medium">Descrição:</span> {productDescription}
-        </p>
-      </div>
+        <div>
+          <h3 className="text-lg font-semibold">Produto</h3>
+          <Separator className="my-2" />
+          <div className="flex items-center gap-4">
+            <div className="relative w-28 h-20 rounded-lg overflow-hidden">
+              <Image
+                src={data.product?.image || placeholder}
+                alt="Product Image"
+                fill
+                sizes="(max-width: 640px) 50px, (max-width: 1024px) 80px, 100px"
+                className="object-cover"
+              />
+            </div>
+            <div>
+              <p className="font-semibold">{data.product?.name}</p>
+              <p className="text-sm text-gray-500">
+                {data.product?.description}
+              </p>
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold">Quantidade:</span>{" "}
+                {data.item.quantity}
+              </p>
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold">Preço:</span>{" "}
+                {formatCurrencyFromCents(data.item.price)}
+              </p>
+            </div>
+          </div>
+        </div>
 
-      {/* Customer Details */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Detalhes do Comprador</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <p>
-            <span className="font-medium">Nome:</span> {customer.name}
+        <div>
+          <h3 className="text-lg font-semibold">Informações do Cliente</h3>
+          <Separator className="my-2" />
+          <p className="text-sm text-gray-500">
+            <span className="font-semibold">Nome:</span> {data.customer.name}
           </p>
-          <p>
-            <span className="font-medium">Email:</span> {customer.email}
+          <p className="text-sm text-gray-500">
+            <span className="font-semibold">Email:</span> {data.customer.email}
           </p>
-          <p>
-            <span className="font-medium">Telefone:</span> {customer.phone}
+          <p className="text-sm text-gray-500">
+            <span className="font-semibold">Telefone:</span>{" "}
+            {data.customer.phone}
           </p>
-          <p>
-            <span className="font-medium">Rua:</span> {customer.address}
-          </p>
-          <p>
-            <span className="font-medium">Cidade:</span> {customer.city}
-          </p>
-          <p>
-            <span className="font-medium">Estado:</span> {customer.state}
-          </p>
-          <p>
-            <span className="font-medium">Bairro:</span> {customer.neighborhood}
+          <p className="text-sm text-gray-500">
+            <span className="font-semibold">Endereço:</span>{" "}
+            {data.customer.address}, {data.customer.neighborhood},{" "}
+            {data.customer.city} - {data.customer.state}
           </p>
         </div>
-      </div>
+      </Card>
+      <Card className="p-6 mt-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <FormField
+                  control={form.control}
+                  name="delivererId"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Associar a um entregador</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-[300px] justify-between",
+                                !field.value && "text-muted-foreground"
+                              )}>
+                              {field.value
+                                ? deliverers.find(
+                                    (deliverer) => deliverer.id === field.value
+                                  )?.name
+                                : "Selecione um entregador"}
+                              <ChevronsUpDown className="opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[300px] p-0">
+                          <Command>
+                            <CommandInput
+                              placeholder="Procurar entregador..."
+                              className="h-9"
+                            />
+                            <CommandList>
+                              <CommandEmpty>
+                                Nenhum cliente encontrado.
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {deliverers.map((deliverer) => (
+                                  <CommandItem
+                                    value={deliverer.name ?? ""}
+                                    key={deliverer.id}
+                                    onSelect={() => {
+                                      form.setValue(
+                                        "delivererId",
+                                        deliverer.id
+                                      );
+                                    }}>
+                                    {deliverer.name}
+                                    <Check
+                                      className={cn(
+                                        "ml-auto",
+                                        deliverer.id === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div>
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo do pedido" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="LOCAL">Local</SelectItem>
+                          <SelectItem value="WEBSITE">Site</SelectItem>
+                          <SelectItem value="WHATSAPP">Whatsapp</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div>
+                <FormField
+                  control={form.control}
+                  name="payment_status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status do Pagamento</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="PENDING">
+                            Aguardando Pagamento
+                          </SelectItem>
+                          <SelectItem value="PAID">Pago</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div>
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="PREPARING">Preparando</SelectItem>
+                          <SelectItem value="DELIVERING">
+                            Em trânsito
+                          </SelectItem>
+                          <SelectItem value="DELIVERED">Entregue</SelectItem>
+                          <SelectItem value="FINISHED">Finalizado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            <LoadingButton
+              label="Salvar"
+              loadingLabel="Salvando"
+              className="w-full mt-5"
+              disabled={isPending}
+              isPending={isPending}
+            />
+          </form>
+        </Form>
+      </Card>
     </div>
   );
 };

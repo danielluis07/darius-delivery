@@ -2,7 +2,14 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import { orders, orderItems, products, customers, users } from "@/db/schema";
+import {
+  orders,
+  orderItems,
+  products,
+  customers,
+  users,
+  deliverers,
+} from "@/db/schema";
 import { asc, eq } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 
@@ -32,6 +39,7 @@ const app = new Hono()
   )
   .get(
     "/:orderId",
+    verifyAuth(),
     zValidator("param", z.object({ orderId: z.string().optional() })),
     async (c) => {
       const { orderId } = c.req.valid("param");
@@ -44,9 +52,12 @@ const app = new Hono()
         .select({
           order: {
             id: orders.id,
+            number: orders.number,
             createdAt: orders.createdAt,
             totalPrice: orders.total_price,
             status: orders.status,
+            payment_status: orders.payment_status,
+            type: orders.type,
           },
           item: {
             id: orderItems.id,
@@ -57,6 +68,7 @@ const app = new Hono()
             id: products.id,
             name: products.name,
             description: products.description,
+            image: products.image,
           },
           customer: {
             id: customers.userId,
@@ -68,16 +80,66 @@ const app = new Hono()
             state: customers.state,
             neighborhood: customers.neighborhood,
           },
+          deliverer: {
+            id: deliverers.id,
+            name: deliverers.name,
+            phone: deliverers.phone,
+          },
         })
         .from(orders)
         .innerJoin(orderItems, eq(orders.id, orderItems.order_id))
         .innerJoin(users, eq(orders.customer_id, users.id))
+        .leftJoin(deliverers, eq(orders.delivererId, deliverers.id))
         .leftJoin(products, eq(orderItems.product_id, products.id))
         .leftJoin(customers, eq(orders.customer_id, customers.userId))
         .where(eq(orders.id, orderId));
 
       if (!data) {
         return c.json({ error: "Order not found" }, 404);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .patch(
+    "/:orderId",
+    verifyAuth(),
+    zValidator("param", z.object({ orderId: z.string().optional() })),
+    zValidator(
+      "json",
+      z.object({
+        delivererId: z.string(),
+        status: z.enum([
+          "ACCEPTED",
+          "PREPARING",
+          "FINISHED",
+          "IN_TRANSIT",
+          "DELIVERED",
+        ]),
+        type: z.enum(["LOCAL", "WEBSITE", "WHATSAPP"]),
+        payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]),
+      })
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { orderId } = c.req.valid("param");
+      const { delivererId, payment_status, status } = c.req.valid("json");
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!orderId || !delivererId || !status || !payment_status) {
+        return c.json({ error: "Missing data or orderId" }, 400);
+      }
+
+      const data = await db
+        .update(orders)
+        .set({ delivererId, status, payment_status, updatedAt: new Date(0) })
+        .where(eq(orders.id, orderId));
+
+      if (!data) {
+        return c.json({ error: "Failed to update order" }, 500);
       }
 
       return c.json({ data });
@@ -103,9 +165,6 @@ const app = new Hono()
       const auth = c.get("authUser");
       const { orderId } = c.req.valid("param");
       const { status } = c.req.valid("json");
-
-      console.log("orderId:", orderId);
-      console.log("status:", status);
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);

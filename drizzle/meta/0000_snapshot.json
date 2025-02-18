@@ -1,5 +1,5 @@
 {
-  "id": "8933e7d3-8339-4447-b37d-aa17db8500e9",
+  "id": "290bf06e-edba-488a-a879-907410e99483",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -412,6 +412,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "restaurantOwnerId": {
+          "name": "restaurantOwnerId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "city": {
           "name": "city",
           "type": "text",
@@ -435,20 +441,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -459,6 +451,19 @@
           "tableTo": "user",
           "columnsFrom": [
             "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "customers_restaurantOwnerId_user_id_fk": {
+          "name": "customers_restaurantOwnerId_user_id_fk",
+          "tableFrom": "customers",
+          "tableTo": "user",
+          "columnsFrom": [
+            "restaurantOwnerId"
           ],
           "columnsTo": [
             "id"
@@ -595,7 +600,7 @@
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "name": {
           "name": "name",
@@ -605,9 +610,9 @@
         },
         "phone": {
           "name": "phone",
-          "type": "varchar(255)",
+          "type": "varchar(20)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "vehicle": {
           "name": "vehicle",
@@ -617,7 +622,7 @@
         },
         "vehicle_plate": {
           "name": "vehicle_plate",
-          "type": "varchar(20)",
+          "type": "varchar(7)",
           "primaryKey": false,
           "notNull": true
         },
@@ -625,7 +630,14 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
           "default": "now()"
         }
       },
@@ -752,12 +764,6 @@
         },
         "longitude": {
           "name": "longitude",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "radius": {
-          "name": "radius",
           "type": "real",
           "primaryKey": false,
           "notNull": false
@@ -904,11 +910,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "request_date": {
-          "name": "request_date",
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         },
         "expiration_date": {
@@ -1012,31 +1018,50 @@
           "primaryKey": false,
           "notNull": false
         },
+        "deliverer_id": {
+          "name": "deliverer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "customer_id": {
           "name": "customer_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
+        "number": {
+          "name": "number",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
         "status": {
           "name": "status",
           "type": "order_status",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "order_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
         },
         "total_price": {
           "name": "total_price",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "payment_status": {
           "name": "payment_status",
           "type": "payment_status",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -1068,6 +1093,19 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
+        "orders_deliverer_id_deliverers_id_fk": {
+          "name": "orders_deliverer_id_deliverers_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "deliverers",
+          "columnsFrom": [
+            "deliverer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
         "orders_customer_id_customers_userId_fk": {
           "name": "orders_customer_id_customers_userId_fk",
           "tableFrom": "orders",
@@ -1083,7 +1121,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "orders_number_unique": {
+          "name": "orders_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "number"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1390,14 +1436,14 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         }
       },
@@ -1635,14 +1681,14 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         }
       },
@@ -1714,10 +1760,20 @@
       "name": "order_status",
       "schema": "public",
       "values": [
+        "ACCEPTED",
         "PREPARING",
+        "FINISHED",
         "IN_TRANSIT",
-        "DELIVERED",
-        "CANCELLED"
+        "DELIVERED"
+      ]
+    },
+    "public.order_type": {
+      "name": "order_type",
+      "schema": "public",
+      "values": [
+        "LOCAL",
+        "WEBSITE",
+        "WHATSAPP"
       ]
     },
     "public.payment_status": {

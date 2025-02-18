@@ -73,6 +73,20 @@ export const insertOrderSchema = baseOrderSchema.extend({
   productId: z.string(),
   quantity: z.number().int().positive(),
   price: z.number().int(),
+  total_price: z.number().int().optional(),
+});
+
+export const updateOrderSchema = z.object({
+  delivererId: z.string(),
+  status: z.enum([
+    "ACCEPTED",
+    "PREPARING",
+    "FINISHED",
+    "IN_TRANSIT",
+    "DELIVERED",
+  ]),
+  type: z.enum(["LOCAL", "WEBSITE", "WHATSAPP"]),
+  payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]),
 });
 
 export const credentialsSignUpSchema = baseUserSchema
@@ -161,59 +175,59 @@ export const templateNames: Array<string> = [
 ];
 
 export const state: Array<
-  | "AC"
-  | "AL"
-  | "AP"
-  | "AM"
-  | "BA"
-  | "CE"
-  | "DF"
-  | "ES"
-  | "GO"
-  | "MA"
-  | "MT"
-  | "MS"
-  | "MG"
-  | "PA"
-  | "PB"
-  | "PR"
-  | "PE"
-  | "PI"
-  | "RJ"
-  | "RN"
-  | "RS"
-  | "RO"
-  | "RR"
-  | "SC"
-  | "SP"
-  | "SE"
-  | "TO"
+  | "Acre"
+  | "Alagoas"
+  | "Amapá"
+  | "Amazonas"
+  | "Bahia"
+  | "Ceará"
+  | "Distrito Federal"
+  | "Espírito Santo"
+  | "Goiás"
+  | "Maranhão"
+  | "Mato Grosso"
+  | "Mato Grosso do Sul"
+  | "Minas Gerais"
+  | "Pará"
+  | "Paraíba"
+  | "Paraná"
+  | "Pernambuco"
+  | "Piauí"
+  | "Rio de Janeiro"
+  | "Rio Grande do Norte"
+  | "Rio Grande do Sul"
+  | "Rondônia"
+  | "Roraima"
+  | "Santa Catarina"
+  | "São Paulo"
+  | "Sergipe"
+  | "Tocantins"
 > = [
-  "AC",
-  "AL",
-  "AP",
-  "AM",
-  "BA",
-  "CE",
-  "DF",
-  "ES",
-  "GO",
-  "MA",
-  "MT",
-  "MS",
-  "MG",
-  "PA",
-  "PB",
-  "PR",
-  "PE",
-  "PI",
-  "RJ",
-  "RN",
-  "RS",
-  "RO",
-  "RR",
-  "SC",
-  "SP",
-  "SE",
-  "TO",
+  "Acre",
+  "Alagoas",
+  "Amapá",
+  "Amazonas",
+  "Bahia",
+  "Ceará",
+  "Distrito Federal",
+  "Espírito Santo",
+  "Goiás",
+  "Maranhão",
+  "Mato Grosso",
+  "Mato Grosso do Sul",
+  "Minas Gerais",
+  "Pará",
+  "Paraíba",
+  "Paraná",
+  "Pernambuco",
+  "Piauí",
+  "Rio de Janeiro",
+  "Rio Grande do Norte",
+  "Rio Grande do Sul",
+  "Rondônia",
+  "Roraima",
+  "Santa Catarina",
+  "São Paulo",
+  "Sergipe",
+  "Tocantins",
 ];
