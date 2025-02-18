@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
   varchar,
+  serial,
   primaryKey,
   real,
 } from "drizzle-orm/pg-core";
@@ -33,10 +34,11 @@ export const paymentStatus = pgEnum("payment_status", [
 ]);
 
 export const orderStatus = pgEnum("order_status", [
+  "ACCEPTED",
   "PREPARING",
+  "FINISHED",
   "IN_TRANSIT",
   "DELIVERED",
-  "CANCELLED",
 ]);
 
 export const orderType = pgEnum("order_type", ["LOCAL", "WEBSITE", "WHATSAPP"]);
@@ -292,6 +294,7 @@ export const orders = pgTable("orders", {
   customer_id: text("customer_id").references(() => customers.userId, {
     onDelete: "cascade",
   }),
+  number: serial("number").notNull().unique(),
   status: orderStatus("status").notNull(),
   type: orderType("type").notNull(),
   total_price: integer("total_price"),

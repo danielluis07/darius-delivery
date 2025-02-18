@@ -86,7 +86,7 @@ const items = [
     label: "Pedidos",
   },
   {
-    url: "#",
+    url: "/dashboard/order-routing",
     icon: Route,
     label: "Roteirização de Pedidos",
   },

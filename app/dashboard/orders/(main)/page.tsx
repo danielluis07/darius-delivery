@@ -2,7 +2,7 @@ import { OrdersClient } from "@/app/_features/_user/_components/_orders/client";
 import { getOrders } from "@/app/_features/_user/_queries/_orders/get-orders";
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Route } from "lucide-react";
 import Link from "next/link";
 
 const OrdersPage = async () => {
@@ -25,7 +25,7 @@ const OrdersPage = async () => {
             </Button>
           </Link>
         </div>
-        <div className="flex items center justify-center mt-10">
+        <div className="flex items center justify-center mt-28">
           Você ainda não possui pedidos
         </div>
       </div>
@@ -36,11 +36,18 @@ const OrdersPage = async () => {
     <div className="w-full">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Pedidos</h1>
-        <Link href="/dashboard/orders/new">
-          <Button>
-            Novo Pedido <Plus />
-          </Button>
-        </Link>
+        <div className="flex items-center gap-x-2">
+          <Link href="/dashboard/orders/new">
+            <Button>
+              Novo Pedido <Plus />
+            </Button>
+          </Link>
+          <Link href="/dashboard/order-routing">
+            <Button>
+              Roteirização <Route />
+            </Button>
+          </Link>
+        </div>
       </div>
       <OrdersClient data={data} />
     </div>

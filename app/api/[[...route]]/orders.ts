@@ -3,7 +3,8 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
 import { orders, orderItems, products, customers, users } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
+import { verifyAuth } from "@hono/auth-js";
 
 const app = new Hono()
   .get(
@@ -20,7 +21,7 @@ const app = new Hono()
         .select()
         .from(orders)
         .where(eq(orders.user_id, userId))
-        .orderBy(desc(orders.createdAt));
+        .orderBy(asc(orders.createdAt));
 
       if (!data || data.length === 0) {
         return c.json({ error: "No orders found" }, 404);
@@ -77,6 +78,50 @@ const app = new Hono()
 
       if (!data) {
         return c.json({ error: "Order not found" }, 404);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .patch(
+    "/status/:orderId",
+    verifyAuth(),
+    zValidator("param", z.object({ orderId: z.string().optional() })),
+    zValidator(
+      "json",
+      z.object({
+        status: z.enum([
+          "ACCEPTED",
+          "PREPARING",
+          "FINISHED",
+          "IN_TRANSIT",
+          "DELIVERED",
+        ]),
+      })
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { orderId } = c.req.valid("param");
+      const { status } = c.req.valid("json");
+
+      console.log("orderId:", orderId);
+      console.log("status:", status);
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!orderId || !status) {
+        return c.json({ error: "Missing order id or status" }, 400);
+      }
+
+      const data = await db
+        .update(orders)
+        .set({ status: status, updatedAt: new Date() })
+        .where(eq(orders.id, orderId));
+
+      if (!data) {
+        return c.json({ error: "Failed to update order" }, 500);
       }
 
       return c.json({ data });

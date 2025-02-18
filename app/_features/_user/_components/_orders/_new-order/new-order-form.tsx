@@ -232,16 +232,8 @@ export const NewOrderForm = ({
                                     value={product.name ?? ""}
                                     key={product.id}
                                     onSelect={() => {
-                                      const selectedProduct = products.find(
-                                        (product) => product.id === product.id
-                                      );
-                                      if (selectedProduct) {
-                                        form.setValue("productId", product.id);
-                                        form.setValue(
-                                          "price",
-                                          selectedProduct.price
-                                        );
-                                      }
+                                      form.setValue("productId", product.id);
+                                      form.setValue("price", product.price);
                                     }}>
                                     {product.name}
                                     <Check
@@ -284,6 +276,7 @@ export const NewOrderForm = ({
                               : 0;
                             field.onChange(numericValue);
                           }}
+                          readOnly
                           required
                         />
                       </FormControl>
@@ -405,7 +398,7 @@ export const NewOrderForm = ({
                             Em trânsito
                           </SelectItem>
                           <SelectItem value="DELIVERED">Entregue</SelectItem>
-                          <SelectItem value="CANCELED">Cancelado</SelectItem>
+                          <SelectItem value="FINISHED">Finalizado</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
