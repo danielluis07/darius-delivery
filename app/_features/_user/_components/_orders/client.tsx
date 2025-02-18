@@ -1,10 +1,7 @@
 "use client";
 
-import { columns } from "@/app/_features/_user/_components/_orders/columns";
-
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
-import { OrdersDataTable } from "@/app/_features/_user/_components/_orders/data-table";
 
 type ResponseType = InferResponseType<
   (typeof client.api.orders.user)[":userId"]["$get"],
@@ -16,12 +13,10 @@ type OrdersProps = {
 };
 
 export const OrdersClient = ({ data }: OrdersProps) => {
+  console.log(data);
   return (
-    <OrdersDataTable
-      columns={columns}
-      data={data}
-      onDelete={() => {}}
-      searchKey="status"
-    />
+    <div>
+      <p>orders</p>
+    </div>
   );
 };

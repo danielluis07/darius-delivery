@@ -20,9 +20,10 @@ export const OrderDetails = ({ data }: { data: ResponseType }) => {
 
   /* traduzir status para portugues */
   const statusMap = {
-    CANCELLED: "Cancelado",
+    ACCEPTED: "Aceito",
     PREPARING: "Preparando",
     IN_TRANSIT: "Em trânsito",
+    FINISHED: "Finalizado",
     DELIVERED: "Entregue",
   } as const;
 
