@@ -58,6 +58,8 @@ const app = new Hono()
             status: orders.status,
             payment_status: orders.payment_status,
             type: orders.type,
+            delivery_deadline: orders.delivery_deadline,
+            pickup_deadline: orders.pickup_deadline,
           },
           item: {
             id: orderItems.id,
@@ -118,24 +120,49 @@ const app = new Hono()
         ]),
         type: z.enum(["LOCAL", "WEBSITE", "WHATSAPP"]),
         payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]),
+        delivery_deadline: z.number().optional(),
+        pickup_deadline: z.number().optional(),
       })
     ),
     async (c) => {
       const auth = c.get("authUser");
       const { orderId } = c.req.valid("param");
-      const { delivererId, payment_status, status } = c.req.valid("json");
+      const {
+        delivererId,
+        payment_status,
+        status,
+        type,
+        delivery_deadline,
+        pickup_deadline,
+      } = c.req.valid("json");
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      if (!orderId || !delivererId || !status || !payment_status) {
+      if (
+        !orderId ||
+        !delivererId ||
+        !status ||
+        !payment_status ||
+        !type ||
+        !delivery_deadline ||
+        !pickup_deadline
+      ) {
         return c.json({ error: "Missing data or orderId" }, 400);
       }
 
       const data = await db
         .update(orders)
-        .set({ delivererId, status, payment_status, updatedAt: new Date(0) })
+        .set({
+          delivererId,
+          status,
+          payment_status,
+          type,
+          delivery_deadline,
+          pickup_deadline,
+          updatedAt: new Date(),
+        })
         .where(eq(orders.id, orderId));
 
       if (!data) {

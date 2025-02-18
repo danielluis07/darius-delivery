@@ -5,8 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1739882701614,
-      "tag": "0000_bored_hellion",
+      "when": 1739907187923,
+      "tag": "0000_peaceful_talkback",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1739909848522,
+      "tag": "0001_late_weapon_omega",
       "breakpoints": true
     }
   ]

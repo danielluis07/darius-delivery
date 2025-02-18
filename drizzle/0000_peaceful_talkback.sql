@@ -151,6 +151,8 @@ CREATE TABLE "orders" (
 	"type" "order_type" NOT NULL,
 	"total_price" integer NOT NULL,
 	"payment_status" "payment_status" NOT NULL,
+	"delivery_deadline" integer NOT NULL,
+	"pickup_deadline" integer NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "orders_number_unique" UNIQUE("number")

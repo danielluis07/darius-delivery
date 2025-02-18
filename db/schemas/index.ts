@@ -87,6 +87,8 @@ export const updateOrderSchema = z.object({
   ]),
   type: z.enum(["LOCAL", "WEBSITE", "WHATSAPP"]),
   payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]),
+  delivery_deadline: z.number().optional(),
+  pickup_deadline: z.number().optional(),
 });
 
 export const credentialsSignUpSchema = baseUserSchema

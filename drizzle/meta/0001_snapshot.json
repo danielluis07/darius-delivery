@@ -1,6 +1,6 @@
 {
-  "id": "65df881f-bf43-4fb7-8200-4cce701e21ed",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "9d524619-1687-4de6-847a-bf1c3f8f32c3",
+  "prevId": "65df881f-bf43-4fb7-8200-4cce701e21ed",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1067,13 +1067,13 @@
           "name": "delivery_deadline",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "pickup_deadline": {
           "name": "pickup_deadline",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",

@@ -298,6 +298,8 @@ export const orders = pgTable("orders", {
   type: orderType("type").notNull(),
   total_price: integer("total_price").notNull(),
   payment_status: paymentStatus("payment_status").notNull(),
+  delivery_deadline: integer("delivery_deadline"), // Tempo máximo para entrega (em minutos)
+  pickup_deadline: integer("pickup_deadline"), // Tempo máximo para retirada (em minutos)
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

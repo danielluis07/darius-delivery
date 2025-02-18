@@ -47,6 +47,7 @@ import {
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useUpdateOrder } from "@/app/_features/_user/_queries/_orders/use-update-order";
 import { useEffect } from "react";
+import { Input } from "@/components/ui/input";
 
 type FormData = z.infer<typeof updateOrderSchema>;
 
@@ -64,14 +65,31 @@ export const OrderDetails = ({
   const form = useForm<FormData>({
     resolver: zodResolver(updateOrderSchema),
     defaultValues: {
-      status: data?.order.status,
-      delivererId: data?.deliverer?.id,
-      payment_status: data?.order.payment_status,
-      type: data?.order.type,
+      status: undefined,
+      delivererId: "",
+      payment_status: undefined,
+      type: undefined,
+      delivery_deadline: 0,
+      pickup_deadline: 0,
     },
   });
 
+  const { reset } = form;
+
   const deliverers = deliverersData || [];
+
+  useEffect(() => {
+    if (data && deliverersData) {
+      reset({
+        status: data.order.status,
+        delivererId: data.deliverer?.id,
+        payment_status: data.order.payment_status,
+        type: data.order.type,
+        delivery_deadline: data.order.delivery_deadline || 0,
+        pickup_deadline: data.order.pickup_deadline || 0,
+      });
+    }
+  }, [data, deliverersData, reset]);
 
   const statusColors: Record<string, string> = {
     ACCEPTED: "bg-blue-500 text-white",
@@ -119,17 +137,6 @@ export const OrderDetails = ({
   const onSubmit = (values: FormData) => {
     mutate(values);
   };
-
-  useEffect(() => {
-    if (data) {
-      form.reset({
-        status: data.order.status,
-        delivererId: data.deliverer?.id,
-        payment_status: data.order.payment_status,
-        type: data.order.type,
-      });
-    }
-  }, [data]);
 
   if (isLoading || isDeliverersLoading) {
     return <div>Carregando...</div>;
@@ -231,6 +238,54 @@ export const OrderDetails = ({
               <div>
                 <FormField
                   control={form.control}
+                  name="delivery_deadline"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Tempo máximo para entrega (em minutos)
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="number"
+                          min="0"
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div>
+                <FormField
+                  control={form.control}
+                  name="pickup_deadline"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Tempo máximo para retirada (em minutos)
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="number"
+                          min="0"
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div>
+                <FormField
+                  control={form.control}
                   name="delivererId"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
@@ -262,7 +317,7 @@ export const OrderDetails = ({
                             />
                             <CommandList>
                               <CommandEmpty>
-                                Nenhum cliente encontrado.
+                                Nenhum entregador encontrado.
                               </CommandEmpty>
                               <CommandGroup>
                                 {deliverers.map((deliverer) => (

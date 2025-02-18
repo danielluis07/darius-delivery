@@ -20,7 +20,6 @@ import {
   User2,
   FolderClosed,
   Paintbrush,
-  Truck,
   NotebookText,
   Route,
   ShoppingBasket,
@@ -48,6 +47,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { RiMotorbikeFill } from "react-icons/ri";
 
 const items = [
   {
@@ -77,7 +77,7 @@ const items = [
   },
   {
     url: "/dashboard/deliverers",
-    icon: Truck,
+    icon: RiMotorbikeFill,
     label: "Entregadores",
   },
   {
