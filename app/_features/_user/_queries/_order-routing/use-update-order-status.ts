@@ -6,9 +6,6 @@ import { toast } from "sonner";
 type ResponseType = InferResponseType<
   (typeof client.api.orders.status)[":orderId"]["$patch"]
 >;
-type RequestType = InferRequestType<
-  (typeof client.api.orders.status)[":orderId"]["$patch"]
->["json"];
 
 type Orders = InferResponseType<
   (typeof client.api.orders.user)[":userId"]["$get"],

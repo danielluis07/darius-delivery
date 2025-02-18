@@ -1,5 +1,4 @@
 import { OrderRoutingClient } from "@/app/_features/_user/_components/_order-routing/client";
-import { getOrders } from "@/app/_features/_user/_queries/_orders/get-orders";
 import { getGoogleApiKey } from "@/app/_features/_user/_queries/get-google-api-key";
 import { auth } from "@/auth";
 
