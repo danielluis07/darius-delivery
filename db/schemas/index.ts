@@ -91,6 +91,10 @@ export const updateOrderSchema = z.object({
   pickup_deadline: z.number().optional(),
 });
 
+export const insertUserSubdomainSchema = z.object({
+  subdomain: z.string(),
+});
+
 export const credentialsSignUpSchema = baseUserSchema
   .extend({
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),

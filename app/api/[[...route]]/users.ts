@@ -55,6 +55,28 @@ const app = new Hono()
 
       return c.json({ data });
     }
+  )
+  .get(
+    "/subdomain/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
+    async (c) => {
+      const { userId } = c.req.valid("param");
+
+      if (!userId) {
+        return c.json({ error: "Missing id" }, 400);
+      }
+
+      const [data] = await db
+        .select({ subdomain: users.subdomain })
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (!data) {
+        return c.json({ error: "User not found" }, 404);
+      }
+
+      return c.json({ data });
+    }
   );
 
 export default app;
