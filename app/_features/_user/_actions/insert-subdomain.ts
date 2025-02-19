@@ -28,6 +28,22 @@ export const insertSubdomain = async (
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
 
+    const res = await fetch("https://api.vercel.com/v4/domains", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.VERCEL_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: subdomain }),
+    });
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: "Falha ao criar o domínio",
+      };
+    }
+
     const data = await db
       .update(users)
       .set({
