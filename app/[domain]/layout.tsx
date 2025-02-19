@@ -12,6 +12,10 @@ export default async function DomainLayout({
 
   const data = await getCustomizationByDomain(domain);
 
+  if (!data) {
+    return <div>Domain not found</div>;
+  }
+
   return (
     <main
       className={cn(
