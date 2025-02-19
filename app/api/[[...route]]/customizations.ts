@@ -29,13 +29,13 @@ const app = new Hono()
     }
   )
   .get(
-    "/user/:subdomain",
-    zValidator("param", z.object({ subdomain: z.string().optional() })),
+    "/user/:domain",
+    zValidator("param", z.object({ domain: z.string().optional() })),
     async (c) => {
-      const { subdomain } = c.req.valid("param");
+      const { domain } = c.req.valid("param");
 
-      if (!subdomain) {
-        return c.json({ error: "Missing subdomain" }, 400);
+      if (!domain) {
+        return c.json({ error: "Missing domain" }, 400);
       }
 
       const [data] = await db
@@ -44,7 +44,7 @@ const app = new Hono()
         })
         .from(users)
         .innerJoin(customizations, eq(users.id, customizations.user_id))
-        .where(eq(users.subdomain, subdomain));
+        .where(eq(users.domain, domain));
 
       if (!data) {
         return c.json({ error: "No templates found" }, 404);

@@ -15,6 +15,13 @@
       "when": 1739909848522,
       "tag": "0001_late_weapon_omega",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1739987515801,
+      "tag": "0002_abandoned_tomorrow_man",
+      "breakpoints": true
     }
   ]
 }

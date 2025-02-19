@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
-export const useGetUserByDomain = (subdomain: string) => {
+export const useGetUserByDomain = (domain: string) => {
   const query = useQuery({
-    enabled: !!subdomain, // the query will only be executed if we have the userId
-    queryKey: ["user-by-domain", { subdomain }],
+    enabled: !!domain, // the query will only be executed if we have the userId
+    queryKey: ["user-by-domain", { domain }],
     queryFn: async () => {
-      const res = await client.api.customizations.user[":subdomain"].$get({
-        param: { subdomain },
+      const res = await client.api.customizations.user[":domain"].$get({
+        param: { domain },
       });
 
       if (!res.ok) {

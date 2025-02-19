@@ -33,14 +33,12 @@ import { useModalStore } from "@/hooks/use-modal-store";
 type FormData = z.infer<typeof insertOrderSchema>;
 
 export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
-  const params = useParams<{ subdomain: string }>();
+  const params = useParams<{ domain: string }>();
   const { onClose } = useModalStore();
   const [isPending, startTransition] = useTransition();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
-  const { data, isLoading: isUserLoading } = useGetUserByDomain(
-    params.subdomain
-  );
+  const { data, isLoading: isUserLoading } = useGetUserByDomain(params.domain);
   const { data: products, isLoading: isProductsLoading } = useGetProducts(
     data?.userId,
     categoryId

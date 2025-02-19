@@ -57,7 +57,7 @@ const app = new Hono()
     }
   )
   .get(
-    "/subdomain/:userId",
+    "/domain/:userId",
     zValidator("param", z.object({ userId: z.string().optional() })),
     async (c) => {
       const { userId } = c.req.valid("param");
@@ -67,7 +67,7 @@ const app = new Hono()
       }
 
       const [data] = await db
-        .select({ subdomain: users.subdomain })
+        .select({ domain: users.domain })
         .from(users)
         .where(eq(users.id, userId));
 

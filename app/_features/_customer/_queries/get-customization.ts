@@ -4,7 +4,7 @@ import { CustomizationWithTemplate } from "@/types";
 import { eq } from "drizzle-orm";
 
 export const getCustomizationByDomain = async (
-  subdomain: string
+  domain: string
 ): Promise<CustomizationWithTemplate | null> => {
   try {
     const [data] = await db
@@ -16,7 +16,7 @@ export const getCustomizationByDomain = async (
       .from(users)
       .innerJoin(customizations, eq(users.id, customizations.user_id))
       .innerJoin(templates, eq(customizations.template_id, templates.id))
-      .where(eq(users.subdomain, subdomain));
+      .where(eq(users.domain, domain));
 
     return data ?? null;
   } catch (error) {

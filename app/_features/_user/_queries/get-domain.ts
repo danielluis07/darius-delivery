@@ -2,13 +2,13 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.users.subdomain)[":userId"]["$get"],
+  (typeof client.api.users.domain)[":userId"]["$get"],
   200
 >["data"];
 
-const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/users/subdomain`;
+const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/users/domain`;
 
-export const getSubdomain = async (
+export const getDomain = async (
   userId: string
 ): Promise<ResponseType | null> => {
   try {
@@ -21,7 +21,7 @@ export const getSubdomain = async (
     const { data } = await res.json();
     return data;
   } catch (error) {
-    console.error("Error fetching subdomain:", error);
+    console.error("Error fetching domain:", error);
     throw error;
   }
 };

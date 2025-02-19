@@ -1,12 +1,8 @@
+import { NextResponse } from "next/server";
 import NextAuth from "next-auth";
 import { getToken } from "next-auth/jwt";
 import authConfig from "@/auth.config";
-import {
-  publicRoutes,
-  apiAuthPrefix,
-  authRoutes,
-  isPublicSubdomain,
-} from "@/routes";
+import { publicRoutes, apiAuthPrefix, authRoutes } from "@/routes";
 
 const { auth } = NextAuth(authConfig);
 
@@ -19,27 +15,29 @@ export default auth(async (req) => {
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-  // 🔹 Detecta o subdomínio
+  // Detecta o domínio ou subdomínio
   const hostname = req.headers.get("host") || "";
-  const subdomain = hostname.split(".")[0];
-
-  console.log("Hostname:", hostname);
-  console.log("Subdomínio:", subdomain);
-
-  // 🔹 Se for um subdomínio de restaurante, permite acesso público
-  if (isPublicSubdomain(hostname)) {
-    return undefined;
-  }
-
-  const role = token?.role as "ADMIN" | "USER" | "CUSTOMER" | undefined;
+  const mainDomain = process.env.NEXT_PUBLIC_APP_URL?.replace(
+    /^https?:\/\//,
+    ""
+  ); // Remove "https://" para comparação correta
+  const isCustomDomain = hostname !== mainDomain;
 
   if (isApiAuthRoute) {
     return undefined;
   }
 
-  // Redirect to /auth/register if role is not set
+  // SE O DOMÍNIO FOR PERSONALIZADO, REDIRECIONA PARA A ROTA DINÂMICA
+  if (isCustomDomain) {
+    const customDomain = hostname.replace(/^www\./, ""); // Remove "www." se existir
+    return NextResponse.rewrite(new URL(`/${customDomain}`, nextUrl));
+  }
+
+  // Gerenciamento de Autenticação para Admin/Dashboard
+  const role = token?.role as "ADMIN" | "USER" | "CUSTOMER" | undefined;
+
   if (isLoggedIn && !role && nextUrl.pathname !== "/auth/register") {
-    return Response.redirect(new URL("/auth/register", nextUrl));
+    return NextResponse.redirect(new URL("/auth/register", nextUrl));
   }
 
   if (isLoggedIn) {
@@ -47,17 +45,17 @@ export default auth(async (req) => {
     const isAdminRoute = nextUrl.pathname.startsWith("/admin");
 
     if (role === "USER" && !isUserRoute && !isPublicRoute) {
-      return Response.redirect(new URL("/dashboard", nextUrl));
+      return NextResponse.redirect(new URL("/dashboard", nextUrl));
     }
 
     if (role === "ADMIN" && !isAdminRoute && !isPublicRoute) {
-      return Response.redirect(new URL("/admin", nextUrl));
+      return NextResponse.redirect(new URL("/admin", nextUrl));
     }
   }
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL("/dashboard", nextUrl));
+      return NextResponse.redirect(new URL("/dashboard", nextUrl));
     }
     return undefined;
   }
@@ -70,13 +68,13 @@ export default auth(async (req) => {
 
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
 
-    return Response.redirect(
+    return NextResponse.redirect(
       new URL(`/auth/sign-in?callbackUrl=${encodedCallbackUrl}`, nextUrl)
     );
   }
 });
 
-// Optionally, don't invoke Middleware on some paths
+// Middleware aplicado a todas as rotas, exceto arquivos estáticos e APIs
 export const config = {
   matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };

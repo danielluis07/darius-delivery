@@ -1,16 +1,16 @@
 import { getCustomizationByDomain } from "@/app/_features/_customer/_queries/get-customization";
 import { cn } from "@/lib/utils";
 
-export default async function SubdomainLayout({
+export default async function DomainLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ subdomain: string }>;
+  params: Promise<{ domain: string }>;
 }) {
-  const subdomain = (await params).subdomain;
+  const domain = (await params).domain;
 
-  const data = await getCustomizationByDomain(subdomain);
+  const data = await getCustomizationByDomain(domain);
 
   return (
     <main

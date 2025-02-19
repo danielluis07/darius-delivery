@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useForm, FieldErrors } from "react-hook-form";
-import { insertUserSubdomainSchema } from "@/db/schemas";
+import { insertUserDomainSchema } from "@/db/schemas";
 import {
   Dialog,
   DialogContent,
@@ -21,25 +21,25 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { insertSubdomain } from "@/app/_features/_user/_actions/insert-subdomain";
+import { insertDomain } from "@/app/_features/_user/_actions/insert-domain";
 import { toast } from "sonner";
-import { useSubdomainModal } from "@/hooks/use-subdomain-modal";
+import { useDomainModal } from "@/hooks/use-domain-modal";
 
-type FormData = z.infer<typeof insertUserSubdomainSchema>;
+type FormData = z.infer<typeof insertUserDomainSchema>;
 
 export const DomainModalProvider = ({
-  userSubdomain,
+  userDomain,
 }: {
-  userSubdomain: string | null | undefined;
+  userDomain: string | null | undefined;
 }) => {
   const [isPending, startTransition] = useTransition();
   const [isMounted, setIsMounted] = useState<boolean>(false);
-  const { isOpen, onOpen, onClose } = useSubdomainModal();
+  const { isOpen, onOpen, onClose } = useDomainModal();
 
   const form = useForm<FormData>({
-    resolver: zodResolver(insertUserSubdomainSchema),
+    resolver: zodResolver(insertUserDomainSchema),
     defaultValues: {
-      subdomain: "",
+      domain: "",
     },
   });
 
@@ -48,10 +48,10 @@ export const DomainModalProvider = ({
   }, []);
 
   useEffect(() => {
-    if (isMounted && !userSubdomain) {
+    if (isMounted && !userDomain) {
       onOpen();
     }
-  }, [isMounted, userSubdomain, onOpen]);
+  }, [isMounted, userDomain, onOpen]);
 
   const onInvalid = (errors: FieldErrors<FormData>) => {
     console.log(errors);
@@ -59,7 +59,7 @@ export const DomainModalProvider = ({
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      insertSubdomain(values)
+      insertDomain(values)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -71,7 +71,7 @@ export const DomainModalProvider = ({
           }
         })
         .catch((error) => {
-          console.error("Error inserting subdomain:", error);
+          console.error("Error inserting domain:", error);
           toast.error("Erro ao salvar o domínio");
         });
     });
@@ -100,7 +100,7 @@ export const DomainModalProvider = ({
           <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
             <FormField
               control={form.control}
-              name="subdomain"
+              name="domain"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>

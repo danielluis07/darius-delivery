@@ -6,16 +6,6 @@
 export const publicRoutes = ["/", "/auth/new-verification", "/api", "/test"];
 
 /**
- * Verifica se uma rota é um subdomínio de restaurante e, portanto, pública
- */
-export function isPublicSubdomain(hostname: string): boolean {
-  const baseDomain = "seusite.com"; // Alterar para o seu domínio real
-  const subdomain = hostname.split(".")[0];
-
-  return subdomain !== "www" && subdomain !== baseDomain;
-}
-
-/**
  * Rotas usadas para autenticação
  * Essas rotas redirecionam usuários logados para /dashboard
  * @type {string[]}

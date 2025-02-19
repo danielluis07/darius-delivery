@@ -1,12 +1,12 @@
 import { create } from "zustand";
 
-interface useSubdomainModalStore {
+interface useDomainModalStore {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
 }
 
-export const useSubdomainModal = create<useSubdomainModalStore>((set) => ({
+export const useDomainModal = create<useDomainModalStore>((set) => ({
   isOpen: false,
   onOpen: () => set({ isOpen: true }),
   onClose: () => set({ isOpen: false }),

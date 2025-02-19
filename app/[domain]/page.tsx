@@ -2,17 +2,17 @@ import { MainClient } from "@/app/_features/_customer/_components/_templates/_te
 import { auth } from "@/auth";
 import { getCustomizationByDomain } from "@/app/_features/_customer/_queries/get-customization";
 
-const SubdomainPage = async ({
+const DomainPage = async ({
   params,
 }: {
-  params: Promise<{ subdomain: string }>;
+  params: Promise<{ domain: string }>;
 }) => {
-  const subdomain = (await params).subdomain;
+  const domain = (await params).domain;
   const session = await auth();
 
-  const data = await getCustomizationByDomain(subdomain);
+  const data = await getCustomizationByDomain(domain);
 
   return <MainClient session={session} data={data} />;
 };
 
-export default SubdomainPage;
+export default DomainPage;

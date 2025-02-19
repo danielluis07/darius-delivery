@@ -91,8 +91,8 @@ export const updateOrderSchema = z.object({
   pickup_deadline: z.number().optional(),
 });
 
-export const insertUserSubdomainSchema = z.object({
-  subdomain: z.string(),
+export const insertUserDomainSchema = z.object({
+  domain: z.string(),
 });
 
 export const credentialsSignUpSchema = baseUserSchema

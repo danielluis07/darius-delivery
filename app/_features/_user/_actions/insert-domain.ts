@@ -4,15 +4,15 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { users } from "@/db/schema";
-import { insertUserSubdomainSchema } from "@/db/schemas";
+import { insertUserDomainSchema } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 
-export const insertSubdomain = async (
-  values: z.infer<typeof insertUserSubdomainSchema>
+export const insertDomain = async (
+  values: z.infer<typeof insertUserDomainSchema>
 ) => {
   try {
     const session = await auth();
-    const validatedValues = insertUserSubdomainSchema.safeParse(values);
+    const validatedValues = insertUserDomainSchema.safeParse(values);
 
     if (!session || !session.user.id) {
       return { success: false, message: "Not authenticated" };
@@ -22,22 +22,37 @@ export const insertSubdomain = async (
       return { success: false, message: "Campos inválidos" };
     }
 
-    const { subdomain } = validatedValues.data;
+    const { domain } = validatedValues.data;
 
-    if (!subdomain) {
+    if (!domain) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
 
-    const res = await fetch("https://api.vercel.com/v4/domains", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.VERCEL_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: subdomain }),
-    });
+    const res = await fetch(
+      `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains?teamId=${process.env.VERCEL_TEAM_ID}`, // Adiciona teamId se existir
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.VERCEL_API_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: domain,
+          gitBranch: null,
+          customEnvironmentId: "",
+          redirect: null,
+        }),
+      }
+    );
 
     if (!res.ok) {
+      const errorDetails = await res.json().catch(() => null);
+      console.error("Error response from Vercel API:", {
+        status: res.status,
+        statusText: res.statusText,
+        errorDetails,
+      });
+
       return {
         success: false,
         message: "Falha ao criar o domínio",
@@ -47,7 +62,7 @@ export const insertSubdomain = async (
     const data = await db
       .update(users)
       .set({
-        subdomain,
+        domain,
       })
       .where(eq(users.id, session.user.id));
 
