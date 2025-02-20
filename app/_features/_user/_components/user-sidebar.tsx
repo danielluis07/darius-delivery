@@ -48,6 +48,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { RiMotorbikeFill } from "react-icons/ri";
+import { ExtendedUser } from "@/next-auth";
 
 const items = [
   {
@@ -127,7 +128,7 @@ const items = [
   },
 ];
 
-export function UserSidebar() {
+export function UserSidebar({ user }: { user: ExtendedUser }) {
   const { open } = useSidebar();
   const router = useRouter();
 
@@ -217,7 +218,7 @@ export function UserSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User2 /> Daniel
+                  <User2 /> {user.name}
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
