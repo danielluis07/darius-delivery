@@ -14,6 +14,13 @@ export default auth(async (req) => {
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
+  // 🔹 Detecta o subdomínio
+  const hostname = req.headers.get("host") || "";
+  const subdomain = hostname.split(".")[0];
+
+  console.log("Hostname:", hostname);
+  console.log("Subdomínio:", subdomain);
+
   const role = token?.role as "ADMIN" | "USER" | "CUSTOMER" | undefined;
 
   if (isApiAuthRoute) {
