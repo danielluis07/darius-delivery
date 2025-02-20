@@ -24,7 +24,7 @@ export default async function UserDashboardLayout({
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <DomainModalProvider userDomain={data?.domain} />
-      <UserSidebar />
+      <UserSidebar user={session.user} />
       <main className="w-full">
         <Navbar user={session?.user} />
         <div className="p-5 w-11/12 mx-auto">{children}</div>
