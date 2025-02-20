@@ -1,82 +1,145 @@
 import NextAuth from "next-auth";
+import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import authConfig from "@/auth.config";
-import {
-  publicRoutes,
-  apiAuthPrefix,
-  authRoutes,
-  isPublicSubdomain,
-} from "@/routes";
+import { publicRoutes, apiAuthPrefix, authRoutes } from "@/routes";
 
 const { auth } = NextAuth(authConfig);
 
+// Helper to normalize domain names
+const normalizeDomain = (domain: string) => {
+  return domain
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "")
+    .toLowerCase();
+};
+
+// Helper to check static files
+const isStaticPath = (pathname: string) => {
+  return (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/static") ||
+    pathname.match(/\.(.*)$/)
+  );
+};
+
 export default auth(async (req) => {
   const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
-  const secret = process.env.AUTH_SECRET!;
-  const token = await getToken({ req, secret, secureCookie: false });
-  const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-
-  // 🔹 Detecta o subdomínio
   const hostname = req.headers.get("host") || "";
-  const subdomain = hostname.split(".")[0];
 
-  console.log("Hostname:", hostname);
-  console.log("Subdomínio:", subdomain);
-
-  // 🔹 Se for um subdomínio de restaurante, permite acesso público
-  if (isPublicSubdomain(hostname)) {
-    return undefined;
+  // Skip middleware for static files
+  if (isStaticPath(nextUrl.pathname)) {
+    return NextResponse.next();
   }
 
-  const role = token?.role as "ADMIN" | "USER" | "CUSTOMER" | undefined;
+  // Environment Detection
+  const isProduction = process.env.NODE_ENV === "production";
+  const isVercelPreview = hostname.endsWith(".vercel.app");
 
-  if (isApiAuthRoute) {
-    return undefined;
+  // Normalize domains
+  const mainDomain = normalizeDomain(
+    isProduction
+      ? process.env.NEXT_PUBLIC_APP_URL || ""
+      : process.env.VERCEL_URL || "localhost:3000"
+  );
+
+  const normalizedHostname = normalizeDomain(hostname);
+
+  console.log({
+    hostname: normalizedHostname,
+    mainDomain,
+    isProduction,
+    isVercelPreview,
+    path: nextUrl.pathname,
+  });
+
+  // Skip for Vercel previews
+  if (isVercelPreview) {
+    console.log("✅ Skipping rewrite: Vercel preview");
+    return NextResponse.next();
   }
 
-  // Redirect to /auth/register if role is not set
-  if (isLoggedIn && !role && nextUrl.pathname !== "/auth/register") {
-    return Response.redirect(new URL("/auth/register", nextUrl));
+  // Handle custom domains
+  if (normalizedHostname !== mainDomain) {
+    const currentPath = nextUrl.pathname;
+
+    // Prevent rewrite loops
+    if (!currentPath.startsWith(`/${normalizedHostname}`)) {
+      console.log(
+        `🔄 Rewriting to custom domain path: /${normalizedHostname}${currentPath}`
+      );
+
+      // Create new URL for rewrite
+      const rewriteUrl = new URL(
+        `/${normalizedHostname}${currentPath}`,
+        req.url
+      );
+
+      // Preserve query parameters
+      rewriteUrl.search = nextUrl.search;
+
+      return NextResponse.rewrite(rewriteUrl);
+    }
   }
 
-  if (isLoggedIn) {
-    const isUserRoute = nextUrl.pathname.startsWith("/dashboard");
-    const isAdminRoute = nextUrl.pathname.startsWith("/admin");
+  // Auth logic only for main domain
+  if (normalizedHostname === mainDomain) {
+    const isLoggedIn = !!req.auth;
+    const secret = process.env.AUTH_SECRET!;
+    const token = await getToken({ req, secret, secureCookie: false });
+    const role = token?.role as "ADMIN" | "USER" | "CUSTOMER" | undefined;
 
-    if (role === "USER" && !isUserRoute && !isPublicRoute) {
-      return Response.redirect(new URL("/dashboard", nextUrl));
+    const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+    const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+    const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+
+    // API routes bypass
+    if (isApiAuthRoute) return undefined;
+
+    // Registration redirect
+    if (isLoggedIn && !role && nextUrl.pathname !== "/auth/register") {
+      return NextResponse.redirect(new URL("/auth/register", nextUrl));
     }
 
-    if (role === "ADMIN" && !isAdminRoute && !isPublicRoute) {
-      return Response.redirect(new URL("/admin", nextUrl));
-    }
-  }
-
-  if (isAuthRoute) {
+    // Role-based routing
     if (isLoggedIn) {
-      return Response.redirect(new URL("/dashboard", nextUrl));
+      const isUserRoute = nextUrl.pathname.startsWith("/dashboard");
+      const isAdminRoute = nextUrl.pathname.startsWith("/admin");
+
+      if (role === "USER" && !isUserRoute && !isPublicRoute) {
+        return NextResponse.redirect(new URL("/dashboard", nextUrl));
+      }
+
+      if (role === "ADMIN" && !isAdminRoute && !isPublicRoute) {
+        return NextResponse.redirect(new URL("/admin", nextUrl));
+      }
     }
-    return undefined;
+
+    // Auth routes handling
+    if (isAuthRoute) {
+      if (isLoggedIn) {
+        return NextResponse.redirect(new URL("/dashboard", nextUrl));
+      }
+      return undefined;
+    }
+
+    // Protected routes
+    if (!isLoggedIn && !isPublicRoute) {
+      const callbackUrl = nextUrl.pathname + nextUrl.search;
+      const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+
+      return NextResponse.redirect(
+        new URL(`/auth/sign-in?callbackUrl=${encodedCallbackUrl}`, nextUrl)
+      );
+    }
   }
 
-  if (!isLoggedIn && !isPublicRoute) {
-    let callbackUrl = nextUrl.pathname;
-    if (nextUrl.search) {
-      callbackUrl += nextUrl.search;
-    }
-
-    const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-
-    return Response.redirect(
-      new URL(`/auth/sign-in?callbackUrl=${encodedCallbackUrl}`, nextUrl)
-    );
-  }
+  return undefined;
 });
 
-// Optionally, don't invoke Middleware on some paths
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    // Skip public files and API routes
+    "/((?!api|trpc|_next|public|static|favicon.ico).*)",
+  ],
 };
