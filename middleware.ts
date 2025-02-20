@@ -6,96 +6,140 @@ import { publicRoutes, apiAuthPrefix, authRoutes } from "@/routes";
 
 const { auth } = NextAuth(authConfig);
 
+// Helper to normalize domain names
+const normalizeDomain = (domain: string) => {
+  return domain
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "")
+    .toLowerCase();
+};
+
+// Helper to check static files
+const isStaticPath = (pathname: string) => {
+  return (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/static") ||
+    pathname.match(/\.(.*)$/)
+  );
+};
+
 export default auth(async (req) => {
   const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
-  const secret = process.env.AUTH_SECRET!;
-  const token = await getToken({ req, secret, secureCookie: false });
-
-  const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-  const role = token?.role as "ADMIN" | "USER" | "CUSTOMER" | undefined;
-
-  // 🔹 Get Hostname (Domain)
   const hostname = req.headers.get("host") || "";
 
-  // 🔹 Dynamically Detect Environment
-  const isProduction = process.env.NODE_ENV === "production";
-  const isVercelPreview = hostname.endsWith(".vercel.app");
-
-  // 🔹 Normalize Main Domain (Remove "https://")
-  const mainDomain = (
-    isProduction
-      ? process.env.NEXT_PUBLIC_APP_URL // Your actual production domain
-      : process.env.VERCEL_URL || "localhost:3000"
-  ) // Preview URL or local dev
-    ?.replace(/^https?:\/\//, "") // Remove "https://" or "http://"
-    .replace(/\/$/, ""); // Remove trailing slash if any
-
-  console.log("🛠 Detected Hostname:", hostname);
-  console.log("🌍 Main Domain (Normalized):", mainDomain);
-  console.log("🚀 Is Vercel Preview?:", isVercelPreview);
-
-  // 🔹 Fix: Explicitly Skip Vercel Preview Rewrites
-  if (isVercelPreview) {
-    console.log("✅ Skipping rewrite: Vercel preview detected.");
+  // Skip middleware for static files
+  if (isStaticPath(nextUrl.pathname)) {
     return NextResponse.next();
   }
 
-  // 🔹 Handle Custom Domains (Only in Production)
-  if (hostname !== mainDomain) {
+  // Environment Detection
+  const isProduction = process.env.NODE_ENV === "production";
+  const isVercelPreview = hostname.endsWith(".vercel.app");
+
+  // Normalize domains
+  const mainDomain = normalizeDomain(
+    isProduction
+      ? process.env.NEXT_PUBLIC_APP_URL || ""
+      : process.env.VERCEL_URL || "localhost:3000"
+  );
+
+  const normalizedHostname = normalizeDomain(hostname);
+
+  console.log({
+    hostname: normalizedHostname,
+    mainDomain,
+    isProduction,
+    isVercelPreview,
+    path: nextUrl.pathname,
+  });
+
+  // Skip for Vercel previews
+  if (isVercelPreview) {
+    console.log("✅ Skipping rewrite: Vercel preview");
+    return NextResponse.next();
+  }
+
+  // Handle custom domains
+  if (normalizedHostname !== mainDomain) {
     const currentPath = nextUrl.pathname;
 
-    // Prevent loop by checking if already rewritten
-    if (!currentPath.startsWith(`/${hostname}`)) {
-      console.log("🔄 Redirecting to custom domain path:", hostname);
-      return NextResponse.rewrite(
-        new URL(`/${hostname}${currentPath}`, req.url)
+    // Prevent rewrite loops
+    if (!currentPath.startsWith(`/${normalizedHostname}`)) {
+      console.log(
+        `🔄 Rewriting to custom domain path: /${normalizedHostname}${currentPath}`
+      );
+
+      // Create new URL for rewrite
+      const rewriteUrl = new URL(
+        `/${normalizedHostname}${currentPath}`,
+        req.url
+      );
+
+      // Preserve query parameters
+      rewriteUrl.search = nextUrl.search;
+
+      return NextResponse.rewrite(rewriteUrl);
+    }
+  }
+
+  // Auth logic only for main domain
+  if (normalizedHostname === mainDomain) {
+    const isLoggedIn = !!req.auth;
+    const secret = process.env.AUTH_SECRET!;
+    const token = await getToken({ req, secret, secureCookie: false });
+    const role = token?.role as "ADMIN" | "USER" | "CUSTOMER" | undefined;
+
+    const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+    const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+    const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+
+    // API routes bypass
+    if (isApiAuthRoute) return undefined;
+
+    // Registration redirect
+    if (isLoggedIn && !role && nextUrl.pathname !== "/auth/register") {
+      return NextResponse.redirect(new URL("/auth/register", nextUrl));
+    }
+
+    // Role-based routing
+    if (isLoggedIn) {
+      const isUserRoute = nextUrl.pathname.startsWith("/dashboard");
+      const isAdminRoute = nextUrl.pathname.startsWith("/admin");
+
+      if (role === "USER" && !isUserRoute && !isPublicRoute) {
+        return NextResponse.redirect(new URL("/dashboard", nextUrl));
+      }
+
+      if (role === "ADMIN" && !isAdminRoute && !isPublicRoute) {
+        return NextResponse.redirect(new URL("/admin", nextUrl));
+      }
+    }
+
+    // Auth routes handling
+    if (isAuthRoute) {
+      if (isLoggedIn) {
+        return NextResponse.redirect(new URL("/dashboard", nextUrl));
+      }
+      return undefined;
+    }
+
+    // Protected routes
+    if (!isLoggedIn && !isPublicRoute) {
+      const callbackUrl = nextUrl.pathname + nextUrl.search;
+      const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+
+      return NextResponse.redirect(
+        new URL(`/auth/sign-in?callbackUrl=${encodedCallbackUrl}`, nextUrl)
       );
     }
   }
 
-  // 🔹 Normal Authentication Logic (Only for Main Domain)
-  if (isApiAuthRoute) return undefined;
-
-  if (isLoggedIn && !role && nextUrl.pathname !== "/auth/register") {
-    return NextResponse.redirect(new URL("/auth/register", nextUrl));
-  }
-
-  if (isLoggedIn) {
-    const isUserRoute = nextUrl.pathname.startsWith("/dashboard");
-    const isAdminRoute = nextUrl.pathname.startsWith("/admin");
-
-    if (role === "USER" && !isUserRoute && !isPublicRoute) {
-      return NextResponse.redirect(new URL("/dashboard", nextUrl));
-    }
-
-    if (role === "ADMIN" && !isAdminRoute && !isPublicRoute) {
-      return NextResponse.redirect(new URL("/admin", nextUrl));
-    }
-  }
-
-  if (isAuthRoute) {
-    if (isLoggedIn) {
-      return NextResponse.redirect(new URL("/dashboard", nextUrl));
-    }
-    return undefined;
-  }
-
-  if (!isLoggedIn && !isPublicRoute) {
-    let callbackUrl = nextUrl.pathname;
-    if (nextUrl.search) {
-      callbackUrl += nextUrl.search;
-    }
-
-    const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-    return NextResponse.redirect(
-      new URL(`/auth/sign-in?callbackUrl=${encodedCallbackUrl}`, nextUrl)
-    );
-  }
+  return undefined;
 });
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    // Skip public files and API routes
+    "/((?!api|trpc|_next|public|static|favicon.ico).*)",
+  ],
 };
