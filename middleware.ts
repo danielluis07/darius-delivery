@@ -97,5 +97,5 @@ export default auth(async (req) => {
 
 // Ensure Middleware does not interfere with static assets or API requests
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/(api|trpc)(.*)"],
 };
