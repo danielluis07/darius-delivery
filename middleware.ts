@@ -53,12 +53,6 @@ export default auth(async (req) => {
     path: nextUrl.pathname,
   });
 
-  // Skip for Vercel previews
-  if (isVercelPreview) {
-    console.log("✅ Skipping rewrite: Vercel preview");
-    return NextResponse.next();
-  }
-
   // Handle custom domains
   if (normalizedHostname !== mainDomain) {
     const currentPath = nextUrl.pathname;
