@@ -33,12 +33,18 @@ export default auth(async (req) => {
     ?.replace(/^https?:\/\//, "") // Remove "https://" or "http://"
     .replace(/\/$/, ""); // Remove trailing slash if any
 
-  console.log("Detected Hostname:", hostname);
-  console.log("Main Domain (Normalized):", mainDomain);
-  console.log("Is Vercel Preview?:", isVercelPreview);
+  console.log("🛠 Detected Hostname:", hostname);
+  console.log("🌍 Main Domain (Normalized):", mainDomain);
+  console.log("🚀 Is Vercel Preview?:", isVercelPreview);
+
+  // 🔹 Fix: Explicitly Skip Vercel Preview Rewrites
+  if (isVercelPreview) {
+    console.log("✅ Skipping rewrite: Vercel preview detected.");
+    return NextResponse.next();
+  }
 
   // 🔹 Handle Custom Domains (Only in Production)
-  if (!isVercelPreview && hostname !== mainDomain) {
+  if (hostname !== mainDomain) {
     const currentPath = nextUrl.pathname;
 
     // Prevent loop by checking if already rewritten
@@ -92,5 +98,5 @@ export default auth(async (req) => {
 
 // 🔹 Apply Middleware to All Paths
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: "/:path*",
 };
