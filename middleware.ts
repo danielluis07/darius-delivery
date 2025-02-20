@@ -17,14 +17,11 @@ export default auth(async (req) => {
 
   // Detecta o domínio ou subdomínio
   const hostname = req.headers.get("host") || "";
-  console.log("Hostname:", hostname);
   const mainDomain = process.env.NEXT_PUBLIC_APP_URL?.replace(
     /^https?:\/\//,
     ""
   ); // Remove "https://" para comparação correta
-  console.log("Main Domain:", mainDomain);
   const isCustomDomain = hostname !== mainDomain;
-  console.log("Is Custom Domain:", isCustomDomain);
 
   if (isApiAuthRoute) {
     return undefined;
