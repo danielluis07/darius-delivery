@@ -96,7 +96,6 @@ export default auth(async (req) => {
   }
 });
 
-// 🔹 Apply Middleware to All Paths
 export const config = {
-  matcher: "/:path*",
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
