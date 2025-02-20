@@ -20,22 +20,26 @@ export default auth(async (req) => {
   // 🔹 Get Hostname (Domain)
   const hostname = req.headers.get("host") || "";
 
-  // 🔹 Dynamically Detect Main Domain (Production, Preview, or Local)
-  const mainDomain =
-    process.env.NODE_ENV === "production"
-      ? "yourapp.com" // Your actual production domain
-      : process.env.VERCEL_URL || "localhost:3000"; // Preview URL or local dev
+  // 🔹 Dynamically Detect Environment
+  const isProduction = process.env.NODE_ENV === "production";
+  const isVercelPreview = hostname.endsWith(".vercel.app");
+
+  // 🔹 Detect Main Domain
+  const mainDomain = isProduction
+    ? process.env.NEXT_PUBLIC_APP_URL // Your actual production domain
+    : process.env.VERCEL_URL || "localhost:3000"; // Preview URL or local dev
 
   console.log("Detected Hostname:", hostname);
   console.log("Main Domain:", mainDomain);
+  console.log("Is Vercel Preview?:", isVercelPreview);
 
-  // 🔹 Handle Custom Domains (Avoid Infinite Loop)
-  if (hostname !== mainDomain) {
+  // 🔹 Handle Custom Domains (Only in Production)
+  if (!isVercelPreview && hostname !== mainDomain) {
     const currentPath = nextUrl.pathname;
 
     // Prevent loop by checking if already rewritten
     if (!currentPath.startsWith(`/${hostname}`)) {
-      console.log("🔄 Redirecting custom domain:", hostname);
+      console.log("🔄 Redirecting to custom domain path:", hostname);
       return NextResponse.rewrite(
         new URL(`/${hostname}${currentPath}`, req.url)
       );
@@ -82,7 +86,7 @@ export default auth(async (req) => {
   }
 });
 
-// Optionally, don't invoke Middleware on some paths
+// 🔹 Apply Middleware to All Paths
 export const config = {
   matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
