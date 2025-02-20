@@ -104,7 +104,7 @@ export const DomainModalProvider = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input {...field} placeholder="Exemplo: meusite" />
+                    <Input {...field} placeholder="Exemplo: meusite.com" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
