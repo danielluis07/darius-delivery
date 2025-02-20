@@ -24,13 +24,17 @@ export default auth(async (req) => {
   const isProduction = process.env.NODE_ENV === "production";
   const isVercelPreview = hostname.endsWith(".vercel.app");
 
-  // 🔹 Detect Main Domain
-  const mainDomain = isProduction
-    ? process.env.NEXT_PUBLIC_APP_URL // Your actual production domain
-    : process.env.VERCEL_URL || "localhost:3000"; // Preview URL or local dev
+  // 🔹 Normalize Main Domain (Remove "https://")
+  const mainDomain = (
+    isProduction
+      ? process.env.NEXT_PUBLIC_APP_URL // Your actual production domain
+      : process.env.VERCEL_URL || "localhost:3000"
+  ) // Preview URL or local dev
+    ?.replace(/^https?:\/\//, "") // Remove "https://" or "http://"
+    .replace(/\/$/, ""); // Remove trailing slash if any
 
   console.log("Detected Hostname:", hostname);
-  console.log("Main Domain:", mainDomain);
+  console.log("Main Domain (Normalized):", mainDomain);
   console.log("Is Vercel Preview?:", isVercelPreview);
 
   // 🔹 Handle Custom Domains (Only in Production)
