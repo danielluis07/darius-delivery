@@ -1,12 +1,8 @@
 import NextAuth from "next-auth";
+import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import authConfig from "@/auth.config";
-import {
-  publicRoutes,
-  apiAuthPrefix,
-  authRoutes,
-  isPublicSubdomain,
-} from "@/routes";
+import { publicRoutes, apiAuthPrefix, authRoutes } from "@/routes";
 
 const { auth } = NextAuth(authConfig);
 
@@ -15,29 +11,39 @@ export default auth(async (req) => {
   const isLoggedIn = !!req.auth;
   const secret = process.env.AUTH_SECRET!;
   const token = await getToken({ req, secret, secureCookie: false });
+
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-
-  // 🔹 Detecta o subdomínio
-  const hostname = req.headers.get("host") || "";
-  const subdomain = hostname.split(".")[0];
-
-  console.log("Hostname:", hostname);
-  console.log("Subdomínio:", subdomain);
-
-  // 🔹 Se for um subdomínio de restaurante, permite acesso público
-  if (isPublicSubdomain(hostname)) {
-    return undefined;
-  }
-
   const role = token?.role as "ADMIN" | "USER" | "CUSTOMER" | undefined;
 
+  // Captura o domínio acessado
+  const hostname = req.headers.get("host") || "";
+  const mainDomain = process.env.NEXT_PUBLIC_APP_URL?.replace(
+    /^https?:\/\//,
+    ""
+  ); // Remove "https://"
+  const isCustomDomain = hostname !== mainDomain;
+  console.log("Domínio acessado:", hostname);
+  console.log("Domínio principal:", mainDomain);
+  console.log("É domínio personalizado?", isCustomDomain);
+
+  if (isCustomDomain) {
+    const currentPath = nextUrl.pathname;
+
+    if (currentPath.startsWith(`/${hostname}`)) {
+      return NextResponse.next();
+    }
+
+    console.log("🔄 Redirecionando domínio personalizado:", hostname);
+    return NextResponse.rewrite(new URL(`/${hostname}`, nextUrl));
+  }
+
+  // Lógica de autenticação normal (somente para o domínio principal)
   if (isApiAuthRoute) {
     return undefined;
   }
 
-  // Redirect to /auth/register if role is not set
   if (isLoggedIn && !role && nextUrl.pathname !== "/auth/register") {
     return Response.redirect(new URL("/auth/register", nextUrl));
   }
@@ -76,7 +82,7 @@ export default auth(async (req) => {
   }
 });
 
-// Optionally, don't invoke Middleware on some paths
+// 🔹 Aplica o middleware para todas as rotas
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: "/:path*",
 };
