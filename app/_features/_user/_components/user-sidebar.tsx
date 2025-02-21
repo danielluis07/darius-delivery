@@ -52,7 +52,7 @@ import { ExtendedUser } from "@/next-auth";
 
 const items = [
   {
-    url: "/dashboard/user",
+    url: "/dashboard",
     icon: House,
     label: "Início",
   },

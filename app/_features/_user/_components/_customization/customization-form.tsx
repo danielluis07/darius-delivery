@@ -1,5 +1,6 @@
 "use client";
 
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { z } from "zod";
 import { useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { useForm, FieldErrors } from "react-hook-form";
 import { insertCustomizationSchema } from "@/db/schemas";
-import { CloudUpload, Trash2 } from "lucide-react";
+import { ClipboardList, CloudUpload, Key, Trash2 } from "lucide-react";
 import { useState } from "react";
 import {
   FileInput,
@@ -21,6 +22,15 @@ import {
   FileUploaderContent,
   FileUploaderItem,
 } from "@/components/ui/file-upload";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 import { LoadingButton } from "@/components/ui/loading-button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -33,6 +43,7 @@ import { cn } from "@/lib/utils";
 import placeholder from "@/public/placeholder-image.jpg";
 import { createCustomization } from "../../_actions/create-customization";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 
 type TemplatesResponseType = InferResponseType<
   typeof client.api.templates.$get,
@@ -84,6 +95,8 @@ export const CustomizationForm = ({
     maxSize: 1024 * 1024 * 5,
     multiple: false,
   };
+
+  console.log(form.watch("button_color"));
 
   const onInvalid = (errors: FieldErrors) => {
     console.log(errors);
@@ -175,198 +188,114 @@ export const CustomizationForm = ({
             </FormItem>
           )}
         />
-        {bannerUrl ? (
-          <div>
-            <FormLabel>Banner</FormLabel>
-            <div className="relative w-full h-52 rounded-md overflow-hidden">
-              <Image
-                src={bannerUrl || placeholder}
-                alt="banner"
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
-                className="object-cover"
-              />
-              <div
-                onClick={() => setBannerUrl(null)}
-                className="absolute top-2 right-2 bg-error text-white rounded-md p-1 cursor-pointer">
-                <Trash2 />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <FormField
-            control={form.control}
-            name="banner"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Banner</FormLabel>
-                <FormControl>
-                  <FileUploader
-                    value={field.value ?? []}
-                    onValueChange={(newFiles: File[] | null) => {
-                      if (newFiles && newFiles.length > 0) {
-                        const selectedFile = newFiles[0];
-                        field.onChange([selectedFile]);
-                        const newPreviewUrl = URL.createObjectURL(selectedFile);
-                        setBannerFiles([selectedFile]);
-                        setBannerPreview(newPreviewUrl);
-                      } else {
-                        field.onChange(null);
-                        setBannerFiles([]);
-                      }
-                    }}
-                    dropzoneOptions={dropZoneConfig}
-                    className="relative bg-background rounded-lg p-5">
-                    <FileInput
-                      id="fileInput"
-                      className="outline-dashed outline-1 outline-slate-500">
-                      <div className="flex items-center justify-center flex-col p-8 w-full ">
-                        <CloudUpload className="text-gray-500 w-10 h-10" />
-                        <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-semibold">
-                            Clique para fazer o upload
-                          </span>
-                          &nbsp; ou arraste e solte um arquivo aqui.
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          SVG, PNG, JPG or GIF
-                        </p>
-                      </div>
-                    </FileInput>
-                    <FileUploaderContent>
-                      {bannerfiles &&
-                        bannerfiles.length > 0 &&
-                        bannerfiles.map((file, i) => (
-                          <FileUploaderItem key={i} index={i}>
-                            <span>{file.name}</span>
-                          </FileUploaderItem>
-                        ))}
-                      {bannerPreview && (
-                        <div className="mt-4">
-                          <p className="text-sm font-semibold mb-2">Preview:</p>
-                          <div className="relative w-full h-80 rounded-lg overflow-hidden">
-                            <Image
-                              src={bannerPreview}
-                              fill
-                              className="object-cover"
-                              alt="preview"
-                            />
-                            <div
-                              onClick={() => {
-                                setBannerPreview(null);
-                                setBannerFiles([]);
-                                form.setValue("banner", null);
-                              }}
-                              className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer">
-                              <Trash2 />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </FileUploaderContent>
-                  </FileUploader>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-        {desktopUrl ? (
-          <div>
-            <FormLabel>Logo Desktop</FormLabel>
-            <div className="relative size-32 rounded-md overflow-hidden">
-              <Image
-                src={desktopUrl || placeholder}
-                alt="logo"
-                fill
-                sizes="128px"
-                className="object-cover"
-              />
-              <div
-                onClick={() => setDesktopUrl(null)}
-                className="absolute top-2 right-2 bg-error text-white rounded-md p-1 cursor-pointer">
-                <Trash2 />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <FormField
-            control={form.control}
-            name="logo_desktop"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Logo Desktop</FormLabel>
-                <FormControl>
-                  <FileUploader
-                    value={field.value ?? []}
-                    onValueChange={(newFiles: File[] | null) => {
-                      if (newFiles && newFiles.length > 0) {
-                        const selectedFile = newFiles[0];
-                        field.onChange([selectedFile]);
-                        const newPreviewUrl = URL.createObjectURL(selectedFile);
-                        setDesktopFiles([selectedFile]);
-                        setDesktopPreview(newPreviewUrl);
-                      } else {
-                        field.onChange(null);
-                        setDesktopFiles([]);
-                      }
-                    }}
-                    dropzoneOptions={dropZoneConfig}
-                    className="relative bg-background rounded-lg p-5">
-                    <FileInput
-                      id="fileInput"
-                      className="outline-dashed outline-1 outline-slate-500">
-                      <div className="flex items-center justify-center flex-col p-8 w-full ">
-                        <CloudUpload className="text-gray-500 w-10 h-10" />
-                        <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-semibold">
-                            Clique para fazer o upload
-                          </span>
-                          &nbsp; ou arraste e solte um arquivo aqui.
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          SVG, PNG, JPG or GIF
-                        </p>
-                      </div>
-                    </FileInput>
-                    <FileUploaderContent>
-                      {desktopfiles &&
-                        desktopfiles.length > 0 &&
-                        desktopfiles.map((file, i) => (
-                          <FileUploaderItem key={i} index={i}>
-                            <span>{file.name}</span>
-                          </FileUploaderItem>
-                        ))}
-                      {desktopPreview && (
-                        <div className="mt-4">
-                          <p className="text-sm font-semibold mb-2">Preview:</p>
-                          <div className="relative w-full h-80 rounded-lg overflow-hidden">
-                            <Image
-                              src={desktopPreview}
-                              fill
-                              className="object-cover"
-                              alt="preview"
-                            />
-                            <div
-                              onClick={() => {
-                                setDesktopPreview(null);
-                                setDesktopFiles([]);
-                                form.setValue("logo_desktop", null);
-                              }}
-                              className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer text-white">
-                              <Trash2 />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </FileUploaderContent>
-                  </FileUploader>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="banner"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Banner</FormLabel>
+              <FormControl>
+                <FileUploader
+                  value={field.value ?? []}
+                  onValueChange={(newFiles: File[] | null) => {
+                    if (newFiles && newFiles.length > 0) {
+                      const selectedFile = newFiles[0];
+                      field.onChange([selectedFile]);
+                      const newPreviewUrl = URL.createObjectURL(selectedFile);
+                      setBannerFiles([selectedFile]);
+                      setBannerPreview(newPreviewUrl);
+                    } else {
+                      field.onChange(null);
+                      setBannerFiles([]);
+                    }
+                  }}
+                  dropzoneOptions={dropZoneConfig}
+                  className="relative bg-background rounded-lg p-5">
+                  <FileInput
+                    id="fileInput"
+                    className="outline-dashed outline-1 outline-slate-500">
+                    <div className="flex items-center justify-center flex-col p-8 w-full ">
+                      <CloudUpload className="text-gray-500 w-10 h-10" />
+                      <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">
+                          Clique para fazer o upload
+                        </span>
+                        &nbsp; ou arraste e solte um arquivo aqui.
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        SVG, PNG, JPG or GIF
+                      </p>
+                    </div>
+                  </FileInput>
+                  <FileUploaderContent>
+                    {bannerfiles &&
+                      bannerfiles.length > 0 &&
+                      bannerfiles.map((file, i) => (
+                        <FileUploaderItem key={i} index={i}>
+                          <span>{file.name}</span>
+                        </FileUploaderItem>
+                      ))}
+                  </FileUploaderContent>
+                </FileUploader>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="logo_desktop"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Logo Desktop</FormLabel>
+              <FormControl>
+                <FileUploader
+                  value={field.value ?? []}
+                  onValueChange={(newFiles: File[] | null) => {
+                    if (newFiles && newFiles.length > 0) {
+                      const selectedFile = newFiles[0];
+                      field.onChange([selectedFile]);
+                      const newPreviewUrl = URL.createObjectURL(selectedFile);
+                      setDesktopFiles([selectedFile]);
+                      setDesktopPreview(newPreviewUrl);
+                    } else {
+                      field.onChange(null);
+                      setDesktopFiles([]);
+                    }
+                  }}
+                  dropzoneOptions={dropZoneConfig}
+                  className="relative bg-background rounded-lg p-5">
+                  <FileInput
+                    id="fileInput"
+                    className="outline-dashed outline-1 outline-slate-500">
+                    <div className="flex items-center justify-center flex-col p-8 w-full ">
+                      <CloudUpload className="text-gray-500 w-10 h-10" />
+                      <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">
+                          Clique para fazer o upload
+                        </span>
+                        &nbsp; ou arraste e solte um arquivo aqui.
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        SVG, PNG, JPG or GIF
+                      </p>
+                    </div>
+                  </FileInput>
+                  <FileUploaderContent>
+                    {desktopfiles &&
+                      desktopfiles.length > 0 &&
+                      desktopfiles.map((file, i) => (
+                        <FileUploaderItem key={i} index={i}>
+                          <span>{file.name}</span>
+                        </FileUploaderItem>
+                      ))}
+                  </FileUploaderContent>
+                </FileUploader>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="logo_mobile"
@@ -414,28 +343,6 @@ export const CustomizationForm = ({
                           <span>{file.name}</span>
                         </FileUploaderItem>
                       ))}
-                    {mobilePreview && (
-                      <div className="mt-4">
-                        <p className="text-sm font-semibold mb-2">Preview:</p>
-                        <div className="relative w-full h-80 rounded-lg overflow-hidden">
-                          <Image
-                            src={mobilePreview}
-                            fill
-                            className="object-cover"
-                            alt="preview"
-                          />
-                          <div
-                            onClick={() => {
-                              setMobilePreview(null);
-                              setMobileFiles([]);
-                              form.setValue("logo_mobile", null);
-                            }}
-                            className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer text-white">
-                            <Trash2 />
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </FileUploaderContent>
                 </FileUploader>
               </FormControl>
@@ -494,15 +401,77 @@ export const CustomizationForm = ({
             </FormItem>
           )}
         />
+        <CustomizationPreview
+          logo={desktopPreview ? desktopPreview : desktopUrl}
+          buttonColor={form.watch("button_color")}
+          backgroundImage={bannerPreview ? bannerPreview : bannerUrl}
+        />
         <LoadingButton
           label="Criar"
           loadingLabel="Criando"
-          className="w-full"
+          className="w-full mt-5"
           disabled={isPending}
           isPending={isPending}
           type="submit"
         />
       </form>
     </Form>
+  );
+};
+
+const CustomizationPreview = ({
+  logo,
+  buttonColor,
+  backgroundImage,
+}: {
+  logo: string | null;
+  buttonColor: string | null | undefined;
+  backgroundImage: string | null;
+}) => {
+  return (
+    <Dialog>
+      <DialogTrigger className="w-full bg-secondary h-9 px-4 py-2 text-primary shadow-sm hover:bg-primary hover:text-white inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
+        Preview
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <VisuallyHidden.Root>
+            <DialogTitle>Receipt Preview</DialogTitle>
+          </VisuallyHidden.Root>
+          <VisuallyHidden.Root>
+            <DialogDescription>View the full receipt details</DialogDescription>
+          </VisuallyHidden.Root>
+        </DialogHeader>
+        <div
+          className="relative h-[600px] w-[450px] overflow-hidden rounded-[40px] border-[12px] border-gray-800 bg-white shadow-2xl p-6 bg-cover"
+          style={{
+            backgroundImage: `url(${backgroundImage})`,
+          }}>
+          <div className="relative size-32 mx-auto mb-4">
+            <Image
+              src={logo || placeholder}
+              alt="logo"
+              fill
+              sizes="(max-width: 768px) 25vw, (max-width: 1200px) 10vw, 200px"
+              className="object-contain"
+            />
+          </div>
+          <div className="flex justify-center gap-4">
+            <Card
+              className="text-black flex flex-col items-center min-w-28 cursor-pointer"
+              style={{ backgroundColor: buttonColor || "transparent" }}>
+              <ClipboardList />
+              Registrar
+            </Card>
+            <Card
+              className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+              style={{ backgroundColor: buttonColor || "transparent" }}>
+              <Key />
+              Login
+            </Card>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
