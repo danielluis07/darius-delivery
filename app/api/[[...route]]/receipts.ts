@@ -12,7 +12,6 @@ import {
 } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
-import { InferSelectModel } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 interface OrderItem {
