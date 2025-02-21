@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
 import { insertOrderSchema } from "@/db/schemas";
 import { Card } from "@/components/ui/card";
@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/input";
 //import { toast } from "sonner";
 //import { createOrder } from "@/app/_features/_customer/_actions/create-order";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { useModalStore } from "@/hooks/use-modal-store";
+//import { useModalStore } from "@/hooks/use-modal-store";
 
 type FormData = z.infer<typeof insertOrderSchema>;
 
@@ -148,8 +148,6 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
                 className="w-full"
                 label="Finalizar Pedido"
                 loadingLabel="Finalizando Pedido..."
-                disabled={isPending}
-                isPending={isPending}
               />
             </form>
           </Form>
