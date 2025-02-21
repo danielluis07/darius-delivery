@@ -46,7 +46,6 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
   const form = useForm<FormData>({
     resolver: zodResolver(insertOrderSchema),
     defaultValues: {
-      productId: "",
       user_id: data?.userId,
       quantity: 1,
       price: 0,
@@ -77,31 +76,7 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
   };
 
   const onSubmit = (values: FormData) => {
-    const productId = selectedProduct?.id;
-    const price = selectedProduct?.price;
-
-    if (!productId || !price) {
-      toast.error("Produto inválido");
-      return;
-    }
-
-    startTransition(() => {
-      createOrder({ ...values, productId, price, user_id: data?.userId })
-        .then((res) => {
-          if (!res.success) {
-            toast.error(res.message);
-          }
-
-          if (res.success) {
-            toast.success(res.message);
-            onClose();
-          }
-        })
-        .catch((error) => {
-          console.error("Error creating category:", error);
-          toast.error("Erro ao criar categoria");
-        });
-    });
+    console.log("values", values);
   };
 
   if (isUserLoading || isProductsLoading) {
