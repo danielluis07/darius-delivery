@@ -25,8 +25,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { createOrder } from "@/app/_features/_customer/_actions/create-order";
+//import { toast } from "sonner";
+//import { createOrder } from "@/app/_features/_customer/_actions/create-order";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useModalStore } from "@/hooks/use-modal-store";
 
@@ -34,8 +34,8 @@ type FormData = z.infer<typeof insertOrderSchema>;
 
 export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
   const params = useParams<{ domain: string }>();
-  const { onClose } = useModalStore();
-  const [isPending, startTransition] = useTransition();
+  //const { onClose } = useModalStore();
+  //const [isPending, startTransition] = useTransition();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data, isLoading: isUserLoading } = useGetUserByDomain(params.domain);
