@@ -112,7 +112,7 @@ const items = [
     label: "Áreas de Entrega",
   },
   {
-    url: "#",
+    url: "/dashboard/receipts",
     icon: Printer,
     label: "Impressão de Comandas",
   },

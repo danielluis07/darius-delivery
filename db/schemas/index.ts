@@ -70,10 +70,19 @@ const baseCreateCustomizationSchema = createInsertSchema(customizations);
 const baseOrderSchema = createInsertSchema(orders);
 
 export const insertOrderSchema = baseOrderSchema.extend({
-  productId: z.string(),
   quantity: z.number().int().positive(),
   price: z.number().int(),
   total_price: z.number().int().optional(),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().nonempty(),
+        quantity: z.number().min(1),
+        price: z.number().min(0),
+        name: z.string().nullable(),
+      })
+    )
+    .nonempty(),
 });
 
 export const updateOrderSchema = z.object({

@@ -2,8 +2,8 @@
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm, FieldErrors } from "react-hook-form";
+import { useForm, FieldErrors, useFieldArray } from "react-hook-form";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { insertOrderSchema } from "@/db/schemas";
 import { client } from "@/lib/hono";
@@ -53,6 +53,27 @@ type Products = InferResponseType<
   200
 >["data"];
 
+type Customer =
+  | {
+      id: string;
+      name: string | null;
+      email: string | null;
+      phone: string | null;
+      address: string | null;
+      neighborhood: string | null;
+      city: string | null;
+      state: string | null;
+      createdAt: string;
+    }
+  | undefined;
+
+type Items = {
+  productId: string;
+  quantity: number;
+  price: number;
+  name: string | null | undefined;
+}[];
+
 type FormData = z.infer<typeof insertOrderSchema>;
 
 export const NewOrderForm = ({
@@ -64,22 +85,36 @@ export const NewOrderForm = ({
 }) => {
   const [isPending, startTransition] = useTransition();
   const { data, isLoading } = useGetCustomers(userId);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer>(undefined);
   const form = useForm<FormData>({
     resolver: zodResolver(insertOrderSchema),
     defaultValues: {
       price: 0,
       quantity: 1,
-      productId: "",
+      items: [
+        {
+          productId: "",
+          quantity: 1,
+          price: 0,
+          name: "",
+        },
+      ],
       customer_id: "",
       status: "PREPARING",
       payment_status: "PENDING",
       type: "LOCAL",
+      payment_type: "CASH",
     },
   });
 
   const router = useRouter();
 
   const customers = data || [];
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "items",
+  });
 
   const onInvalid = (errors: FieldErrors<FormData>) => {
     console.log(errors);
@@ -114,309 +149,432 @@ export const NewOrderForm = ({
   }
 
   return (
-    <Card className="relative max-w-4xl mx-auto">
-      <div className="absolute top-2 right-2">
-        <NewCustomerForm />
-      </div>
-      <Form {...form}>
-        <form
-          className="pt-20"
-          onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
-          <div className="flex items-center gap-5 h-[300px]">
-            <div className="flex flex-col justify-between size-full">
-              <div className="w-[300px]">
-                <FormField
-                  control={form.control}
-                  name="customer_id"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Cliente</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              className={cn(
-                                "w-[300px] justify-between",
-                                !field.value && "text-muted-foreground"
-                              )}>
-                              {field.value
-                                ? customers.find(
-                                    (customer) => customer.id === field.value
-                                  )?.name
-                                : "Selecione um cliente"}
-                              <ChevronsUpDown className="opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0">
-                          <Command>
-                            <CommandInput
-                              placeholder="Procurar cliente..."
-                              className="h-9"
-                            />
-                            <CommandList>
-                              <CommandEmpty>
-                                Nenhum cliente encontrado.
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {customers.map((customer) => (
-                                  <CommandItem
-                                    value={customer.name ?? ""}
-                                    key={customer.id}
-                                    onSelect={() => {
-                                      form.setValue("customer_id", customer.id);
-                                    }}>
-                                    {customer.name}
-                                    <Check
-                                      className={cn(
-                                        "ml-auto",
-                                        customer.id === field.value
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="w-[300px]">
-                <FormField
-                  control={form.control}
-                  name="productId"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Produto</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              className={cn(
-                                "w-[300px] justify-between",
-                                !field.value && "text-muted-foreground"
-                              )}>
-                              {field.value
-                                ? products.find(
-                                    (product) => product.id === field.value
-                                  )?.name
-                                : "Selecione um produto"}
-                              <ChevronsUpDown className="opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0">
-                          <Command>
-                            <CommandInput
-                              placeholder="Procurar produto..."
-                              className="h-9"
-                            />
-                            <CommandList>
-                              <CommandEmpty>
-                                Nenhum produto encontrado.
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {products.map((product) => (
-                                  <CommandItem
-                                    value={product.name ?? ""}
-                                    key={product.id}
-                                    onSelect={() => {
-                                      form.setValue("productId", product.id);
-                                      form.setValue("price", product.price);
-                                    }}>
-                                    {product.name}
-                                    <Check
-                                      className={cn(
-                                        "ml-auto",
-                                        product.id === field.value
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="flex items-center gap-4">
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preço</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          value={formatCurrency(field.value)}
-                          placeholder="R$ 0,00"
-                          onChange={(e) => {
-                            const rawValue = e.target.value.replace(/\D/g, "");
-                            const numericValue = rawValue
-                              ? parseInt(rawValue, 10)
-                              : 0;
-                            field.onChange(numericValue);
-                          }}
-                          readOnly
-                          required
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Quantidade</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          className="text-center"
-                          {...field}
-                          onChange={(e) => {
-                            const value = e.target.value
-                              ? parseInt(e.target.value, 10)
-                              : 0;
-                            const productId = form.getValues("productId");
-                            const selectedProduct = products.find(
-                              (product) => product.id === productId
-                            );
-                            if (selectedProduct) {
-                              const totalPrice = selectedProduct.price * value;
-                              form.setValue("price", totalPrice);
-                            }
-                            field.onChange(isNaN(value) ? 0 : value);
-                          }}
-                          max={999}
-                          min={1}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* div 2 */}
-            <div className="flex flex-col justify-between size-full">
-              <div>
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o tipo do pedido" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="LOCAL">Local</SelectItem>
-                          <SelectItem value="WEBSITE">Site</SelectItem>
-                          <SelectItem value="WHATSAPP">Whatsapp</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div>
-                <FormField
-                  control={form.control}
-                  name="payment_status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status do Pagamento</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o status do pagamento" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="PENDING">
-                            Aguardando Pagamento
-                          </SelectItem>
-                          <SelectItem value="PAID">Pago</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div>
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o status do pedido" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="PREPARING">Preparando</SelectItem>
-                          <SelectItem value="DELIVERING">
-                            Em trânsito
-                          </SelectItem>
-                          <SelectItem value="DELIVERED">Entregue</SelectItem>
-                          <SelectItem value="FINISHED">Finalizado</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
+    <div className="w-full">
+      {/* divs */}
+      <div className="flex gap-8">
+        <Card className="w-full relative">
+          <div className="absolute top-2 right-2">
+            <NewCustomerForm />
           </div>
-          <LoadingButton
-            className="w-full mt-5"
-            label="Criar Pedido"
-            loadingLabel="Criando"
-            disabled={isPending}
-            isPending={isPending}
-          />
-        </form>
-      </Form>
-    </Card>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+              <div className="space-y-5">
+                <div className="w-[300px]">
+                  <FormField
+                    control={form.control}
+                    name="customer_id"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-[300px] justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}>
+                                {field.value
+                                  ? customers.find(
+                                      (customer) => customer.id === field.value
+                                    )?.name
+                                  : "Selecione um cliente"}
+                                <ChevronsUpDown className="opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[300px] p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Procurar cliente..."
+                                className="h-9"
+                              />
+                              <CommandList>
+                                <CommandEmpty>
+                                  Nenhum cliente encontrado.
+                                </CommandEmpty>
+                                <CommandGroup>
+                                  {customers.map((customer) => (
+                                    <CommandItem
+                                      value={customer.name ?? ""}
+                                      key={customer.id}
+                                      onSelect={() => {
+                                        form.setValue(
+                                          "customer_id",
+                                          customer.id
+                                        );
+                                        setSelectedCustomer(customer);
+                                      }}>
+                                      {customer.name}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto",
+                                          customer.id === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Produtos */}
+                <div className="mt-5 space-y-3">
+                  {fields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="flex gap-4 items-center border p-3 rounded">
+                      {/* Produto */}
+                      <FormField
+                        control={form.control}
+                        name={`items.${index}.productId`}
+                        render={({ field }) => (
+                          <FormItem className="w-[300px]">
+                            <Select
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                const selectedProduct = products.find(
+                                  (product) => product.id === value
+                                );
+                                form.setValue(
+                                  `items.${index}.price`,
+                                  selectedProduct ? selectedProduct.price : 0
+                                );
+                              }}
+                              value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione um produto" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {products.map((product) => (
+                                  <SelectItem
+                                    key={product.id}
+                                    value={product.id}>
+                                    {product.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Quantidade */}
+                      <FormField
+                        control={form.control}
+                        name={`items.${index}.quantity`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                className="border p-2 w-16 text-center"
+                                min={1}
+                                max={999}
+                                readOnly={
+                                  !form.watch(`items.${index}.productId`)
+                                }
+                                onChange={(e) => {
+                                  const quantity =
+                                    parseInt(e.target.value, 10) || 1;
+                                  const productId = form.getValues(
+                                    `items.${index}.productId`
+                                  );
+                                  const selectedProduct = products.find(
+                                    (product) => product.id === productId
+                                  );
+                                  const totalPrice = selectedProduct
+                                    ? selectedProduct.price * quantity
+                                    : 0;
+                                  form.setValue(
+                                    `items.${index}.price`,
+                                    totalPrice
+                                  );
+                                  field.onChange(quantity);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Preço */}
+                      <FormField
+                        control={form.control}
+                        name={`items.${index}.price`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="text"
+                                className="border p-2 w-24 text-center"
+                                readOnly
+                                value={formatCurrency(field.value)}
+                                placeholder="R$ 0,00"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Remover Produto */}
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        disabled={fields.length === 1}
+                        onClick={() => remove(index)}>
+                        <Trash2 />
+                      </Button>
+                    </div>
+                  ))}
+                  {/* Botão para Adicionar Produto */}
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      append({ productId: "", quantity: 1, price: 0, name: "" })
+                    }
+                    variant="secondary">
+                    Adicionar Produto
+                  </Button>
+                </div>
+
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o tipo do pedido" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="LOCAL">Local</SelectItem>
+                            <SelectItem value="WEBSITE">Site</SelectItem>
+                            <SelectItem value="WHATSAPP">Whatsapp</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="payment_status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status do Pagamento</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o status do pagamento" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="PENDING">
+                              Aguardando Pagamento
+                            </SelectItem>
+                            <SelectItem value="PAID">Pago</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="payment_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de Pagamento</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o tipo de pagamento" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="CASH">Dinheiro</SelectItem>
+                            <SelectItem value="CREDIT_CARD">Crédito</SelectItem>
+                            <SelectItem value="DEBIT_CARD">Débito</SelectItem>
+                            <SelectItem value="PIX">PIX</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o status do pedido" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="PREPARING">
+                              Preparando
+                            </SelectItem>
+                            <SelectItem value="DELIVERING">
+                              Em trânsito
+                            </SelectItem>
+                            <SelectItem value="DELIVERED">Entregue</SelectItem>
+                            <SelectItem value="FINISHED">Finalizado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <LoadingButton
+                className="w-full mt-5"
+                label="Criar Pedido"
+                loadingLabel="Criando"
+                disabled={isPending}
+                isPending={isPending}
+              />
+            </form>
+          </Form>
+        </Card>
+        <Receipt
+          type={form.watch("type")}
+          paymentType={form.watch("payment_type")}
+          customer={selectedCustomer}
+          items={form.watch("items")}
+        />
+      </div>
+    </div>
+  );
+};
+
+const Receipt = ({
+  type,
+  paymentType,
+  customer,
+  items,
+}: {
+  type: "LOCAL" | "WEBSITE" | "WHATSAPP";
+  paymentType: "CASH" | "CREDIT_CARD" | "DEBIT_CARD" | "PIX";
+  customer: Customer;
+  items: Items;
+}) => {
+  const paymentTypeTranslation: Record<string, string> = {
+    CASH: "Dinheiro",
+    CREDIT_CARD: "Cartão de Crédito",
+    DEBIT_CARD: "Cartão de Débito",
+    PIX: "PIX",
+  };
+
+  const totalPrice = items.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+
+  return (
+    <div className="w-[450px] border p-4 text-xs font-mono">
+      {/* header */}
+      <div>
+        <h1 className="text-center text-xl font-bold">Nome da Loja</h1>
+        <p className="text-center text-sm">(11) 0000-0000</p>
+      </div>
+
+      {/* pedido */}
+      <div className="flex justify-between mt-5">
+        <p className="font-bold text-lg">Pedido</p>
+        <p className="font-bold text-lg">nº</p>
+      </div>
+
+      {/* origem */}
+      <p className="mt-1">Origem: {type}</p>
+      <div className="border-t border-dashed border-black my-2"></div>
+
+      {/* cliente */}
+      <div>
+        <p>Cliente: {customer?.name || "N/A"}</p>
+        <p>Tel: {customer?.phone || "N/A"}</p>
+        <p className="w-full break-words overflow-hidden">
+          Endereço: {customer?.address || "N/A"} -{" "}
+          {customer?.neighborhood || "N/A"} - {customer?.city || "N/A"} -{" "}
+          {customer?.state || "N/A"}
+        </p>
+      </div>
+
+      {/* produtos */}
+      <div className="border-t border-dashed border-black my-2"></div>
+      <p className="font-bold">Produtos</p>
+      <div className="border-t border-dashed border-black my-1"></div>
+      <div className="space-y-2">
+        {items.length > 0 ? (
+          items.map((item) => (
+            <div key={item.productId} className="flex justify-between">
+              <div>
+                <p className="font-bold">{item.name}</p>
+                <p>
+                  {item.quantity}x {formatCurrency(item.price)}
+                </p>
+              </div>
+              <p className="font-bold">
+                {formatCurrency(item.price * item.quantity)}
+              </p>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500">Nenhum produto adicionado</p>
+        )}
+      </div>
+
+      {/* Total */}
+      <div className="border-t border-dashed border-black my-2"></div>
+      <div className="flex justify-between font-bold text-lg">
+        <p>Total</p>
+        <p>{formatCurrency(totalPrice)}</p>
+      </div>
+      <div className="flex justify-between">
+        <p>Forma de Pagamento</p>
+        <p>{paymentTypeTranslation[paymentType]}</p>
+      </div>
+    </div>
   );
 };

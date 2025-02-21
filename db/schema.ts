@@ -41,6 +41,13 @@ export const orderStatus = pgEnum("order_status", [
   "DELIVERED",
 ]);
 
+export const orderPaymentType = pgEnum("order_payment_type", [
+  "CASH",
+  "CREDIT_CARD",
+  "DEBIT_CARD",
+  "PIX",
+]);
+
 export const orderType = pgEnum("order_type", ["LOCAL", "WEBSITE", "WHATSAPP"]);
 
 // TABLES
@@ -298,6 +305,7 @@ export const orders = pgTable("orders", {
   type: orderType("type").notNull(),
   total_price: integer("total_price").notNull(),
   payment_status: paymentStatus("payment_status").notNull(),
+  payment_type: orderPaymentType("payment_type").notNull(),
   delivery_deadline: integer("delivery_deadline"), // Tempo máximo para entrega (em minutos)
   pickup_deadline: integer("pickup_deadline"), // Tempo máximo para retirada (em minutos)
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -320,6 +328,23 @@ export const orderItems = pgTable("order_items", {
   }),
   quantity: integer("quantity").notNull(),
   price: integer("price").notNull(),
+});
+
+export const receipts = pgTable("receipts", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  order_id: text("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }),
+  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  receipt_number: serial("receipt_number").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 export const deliveryAreas = pgTable("delivery_areas", {

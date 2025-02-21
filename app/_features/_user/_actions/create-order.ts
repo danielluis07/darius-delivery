@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { db } from "@/db/drizzle";
-import { orders, orderItems } from "@/db/schema";
+import { orders, orderItems, receipts } from "@/db/schema";
 import { insertOrderSchema } from "@/db/schemas";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -23,36 +23,35 @@ export const createOrder = async (
       return { success: false, message: "Campos inválidos" };
     }
 
-    const {
-      productId,
-      customer_id,
-      price,
-      quantity,
-      status,
-      type,
-      payment_status,
-    } = validatedValues.data;
+    const { customer_id, status, type, payment_status, items, payment_type } =
+      validatedValues.data;
 
     if (
-      !productId ||
-      !price ||
-      !quantity ||
+      !customer_id ||
       !status ||
       !type ||
-      !payment_status
+      !payment_status ||
+      !payment_type ||
+      !items.length
     ) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
+
+    const total_price = items.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
 
     const [order] = await db
       .insert(orders)
       .values({
         user_id: session.user.id,
         customer_id,
-        total_price: price * quantity,
+        total_price,
         type,
         status,
         payment_status,
+        payment_type,
       })
       .returning({ id: orders.id });
 
@@ -60,15 +59,22 @@ export const createOrder = async (
       return { success: false, message: "Erro ao criar pedido" };
     }
 
-    const orderItem = await db.insert(orderItems).values({
+    await db.insert(orderItems).values(
+      items.map((item) => ({
+        order_id: order.id,
+        product_id: item.productId,
+        price: item.price,
+        quantity: item.quantity,
+      }))
+    );
+
+    const receipt = await db.insert(receipts).values({
       order_id: order.id,
-      product_id: productId,
-      price,
-      quantity,
+      user_id: session.user.id,
     });
 
-    if (!orderItem) {
-      return { success: false, message: "Erro ao criar item do pedido" };
+    if (!receipt) {
+      return { success: false, message: "Erro ao criar a comanda" };
     }
 
     revalidatePath("/dashboard/orders");
@@ -79,6 +85,6 @@ export const createOrder = async (
     };
   } catch (error) {
     console.error(error);
-    return { success: false, message: "Erro inserperado ao efetuar o pedido" };
+    return { success: false, message: "Erro inesperado ao efetuar o pedido" };
   }
 };

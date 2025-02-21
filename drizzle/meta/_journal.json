@@ -22,6 +22,27 @@
       "when": 1739987515801,
       "tag": "0002_abandoned_tomorrow_man",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1740098009097,
+      "tag": "0003_talented_lenny_balinger",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1740106060600,
+      "tag": "0004_bitter_namor",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1740107261890,
+      "tag": "0005_demonic_cassandra_nova",
+      "breakpoints": true
     }
   ]
 }
