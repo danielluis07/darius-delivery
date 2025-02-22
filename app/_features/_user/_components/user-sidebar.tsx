@@ -92,7 +92,7 @@ const items = [
     label: "Roteirização de Pedidos",
   },
   {
-    url: "#",
+    url: "/dashboard/combos",
     icon: ShoppingBasket,
     label: "Combos",
   },

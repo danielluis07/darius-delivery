@@ -188,11 +188,9 @@ export const combos = pgTable("combos", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
-  description: text("description"),
+  description: text("description").notNull(),
   price: integer("price").notNull(),
-  user_id: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   image: text("image"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),

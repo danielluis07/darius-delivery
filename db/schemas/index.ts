@@ -9,6 +9,7 @@ import {
   deliveryAreasKm,
   deliveryAreas,
   deliverers,
+  combos,
 } from "@/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 
@@ -68,6 +69,16 @@ const baseCreateProductSchema = createInsertSchema(products);
 const baseCreateCustomizationSchema = createInsertSchema(customizations);
 
 const baseOrderSchema = createInsertSchema(orders);
+
+const baseComboSchema = createInsertSchema(combos);
+
+export const insertComboSchema = baseComboSchema.extend({
+  image:
+    typeof File !== "undefined"
+      ? z.array(z.instanceof(File)).optional()
+      : z.any().optional(),
+  product_ids: z.array(z.string().uuid()),
+});
 
 export const insertOrderSchema = baseOrderSchema.extend({
   quantity: z.number().int().positive(),

@@ -25,6 +25,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDialogStore } from "@/hooks/use-receipt-dialog";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 
 export type Receipt = InferResponseType<
   (typeof client.api.receipts.user)[":userId"]["$get"],
@@ -77,9 +78,7 @@ export const ReceiptsClient = ({ userId }: { userId: string }) => {
           {filteredReceipts.map((receipt) => {
             const totalPrice = receipt.orderTotalPrice || 0;
             return (
-              <div
-                key={receipt.id}
-                className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
+              <Card key={receipt.id}>
                 <div>
                   <h3 className="text-lg font-semibold">
                     Pedido nº{receipt.orderNumber}
@@ -107,7 +106,7 @@ export const ReceiptsClient = ({ userId }: { userId: string }) => {
                   variant="secondary">
                   Preview
                 </Button>
-              </div>
+              </Card>
             );
           })}
         </div>

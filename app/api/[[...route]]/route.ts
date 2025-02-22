@@ -12,6 +12,7 @@ import deliveryAreasKm from "@/app/api/[[...route]]/delivery-areas-km";
 import deliverers from "@/app/api/[[...route]]/deliverers";
 import customers from "@/app/api/[[...route]]/customers";
 import receipts from "@/app/api/[[...route]]/receipts";
+import combos from "@/app/api/[[...route]]/combos";
 
 export const runtime = "nodejs";
 
@@ -37,7 +38,8 @@ const routes = app
   .route("/deliveryareaskm", deliveryAreasKm)
   .route("/deliverers", deliverers)
   .route("/customers", customers)
-  .route("/receipts", receipts);
+  .route("/receipts", receipts)
+  .route("/combos", combos);
 
 export const GET = handle(app);
 export const POST = handle(app);
