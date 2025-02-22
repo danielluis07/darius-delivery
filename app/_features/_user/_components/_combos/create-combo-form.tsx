@@ -73,13 +73,15 @@ export const CreateComboForm = ({ products }: { products: Products }) => {
     multiple: false,
   };
 
+  const formProductIds = form.watch("product_ids");
+
   useEffect(() => {
     const selectedNames = products
       .filter((product) => form.watch("product_ids")?.includes(product.id))
       .map((product) => product.name);
 
     setSelectedProductNames(selectedNames);
-  }, [form.watch("product_ids"), products, form]);
+  }, [formProductIds, products]);
 
   const onInvalid = (errors: FieldErrors) => {
     console.log(errors);

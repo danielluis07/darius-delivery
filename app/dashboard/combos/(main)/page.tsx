@@ -20,7 +20,7 @@ const CategoriesPage = async () => {
       <Card className="h-[500px] w-full">
         <div className="flex justify-between items-center w-full">
           <h1 className="text-xl font-bold">Combos</h1>
-          <Link href="/dashboard/categories/new">
+          <Link href="/dashboard/combos/new">
             <Button>
               Adicionar Combo
               <Plus />

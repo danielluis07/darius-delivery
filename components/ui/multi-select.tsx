@@ -280,6 +280,8 @@ const MultiSelectorInput = forwardRef<
     ref: inputRef,
   } = useMultiSelect();
 
+  console.log(ref);
+
   return (
     <CommandPrimitive.Input
       {...props}
