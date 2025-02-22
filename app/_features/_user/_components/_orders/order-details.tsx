@@ -182,32 +182,40 @@ export const OrderDetails = ({
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold">Produto</h3>
+          <h3 className="text-lg font-semibold">Produtos</h3>
           <Separator className="my-2" />
-          <div className="flex items-center gap-4">
-            <div className="relative w-28 h-20 rounded-lg overflow-hidden">
-              <Image
-                src={data.product?.image || placeholder}
-                alt="Product Image"
-                fill
-                sizes="(max-width: 640px) 50px, (max-width: 1024px) 80px, 100px"
-                className="object-cover"
-              />
-            </div>
-            <div>
-              <p className="font-semibold">{data.product?.name}</p>
-              <p className="text-sm text-gray-500">
-                {data.product?.description}
-              </p>
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold">Quantidade:</span>{" "}
-                {data.item.quantity}
-              </p>
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold">Preço:</span>{" "}
-                {formatCurrencyFromCents(data.item.price)}
-              </p>
-            </div>
+          <div className="space-y-4">
+            {data.products.length > 0 ? (
+              data.products.map((product, index) => (
+                <div key={index} className="flex items-center gap-4">
+                  <div className="relative w-28 h-20 rounded-lg overflow-hidden">
+                    <Image
+                      src={product.image || placeholder}
+                      alt={product.name || "Product Image"}
+                      fill
+                      sizes="(max-width: 640px) 50px, (max-width: 1024px) 80px, 100px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold">{product.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {product.description || "Sem descrição"}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      <span className="font-semibold">Quantidade:</span>{" "}
+                      {product.quantity || 1}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      <span className="font-semibold">Preço:</span>{" "}
+                      {formatCurrencyFromCents(product.price)}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">Nenhum produto encontrado.</p>
+            )}
           </div>
         </div>
 

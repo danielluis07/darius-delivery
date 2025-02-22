@@ -10,8 +10,17 @@ import {
   users,
   deliverers,
 } from "@/db/schema";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
+
+type Products = {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  description: string;
+  image: string;
+};
 
 const app = new Hono()
   .get(
@@ -61,17 +70,6 @@ const app = new Hono()
             delivery_deadline: orders.delivery_deadline,
             pickup_deadline: orders.pickup_deadline,
           },
-          item: {
-            id: orderItems.id,
-            quantity: orderItems.quantity,
-            price: orderItems.price,
-          },
-          product: {
-            id: products.id,
-            name: products.name,
-            description: products.description,
-            image: products.image,
-          },
           customer: {
             id: customers.userId,
             name: users.name,
@@ -87,6 +85,20 @@ const app = new Hono()
             name: deliverers.name,
             phone: deliverers.phone,
           },
+          products: sql<Products[]>`
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', ${products.id},
+                'name', ${products.name},
+                'price', ${products.price},
+                'quantity', ${orderItems.quantity},
+                'description', ${products.description},
+                'image', ${products.image}
+              )
+            ) FILTER (WHERE ${products.id} IS NOT NULL), '[]'
+          )
+        `.as("products"),
         })
         .from(orders)
         .innerJoin(orderItems, eq(orders.id, orderItems.order_id))
@@ -94,7 +106,17 @@ const app = new Hono()
         .leftJoin(deliverers, eq(orders.delivererId, deliverers.id))
         .leftJoin(products, eq(orderItems.product_id, products.id))
         .leftJoin(customers, eq(orders.customer_id, customers.userId))
-        .where(eq(orders.id, orderId));
+        .where(eq(orders.id, orderId))
+        .groupBy(
+          orders.id,
+          users.id,
+          deliverers.id,
+          customers.userId,
+          customers.address,
+          customers.city,
+          customers.state,
+          customers.neighborhood
+        );
 
       if (!data) {
         return c.json({ error: "Order not found" }, 404);
