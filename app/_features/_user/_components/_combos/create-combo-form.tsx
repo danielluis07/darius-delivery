@@ -79,7 +79,7 @@ export const CreateComboForm = ({ products }: { products: Products }) => {
       .map((product) => product.name);
 
     setSelectedProductNames(selectedNames);
-  }, [form.watch("product_ids"), products]);
+  }, [form.watch("product_ids"), products, form]);
 
   const onInvalid = (errors: FieldErrors) => {
     console.log(errors);
