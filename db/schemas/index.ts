@@ -96,6 +96,19 @@ export const insertOrderSchema = baseOrderSchema.extend({
     .nonempty(),
 });
 
+export const insertCustomerOrderSchema = baseOrderSchema.extend({
+  quantity: z.number().int().positive(),
+  price: z.number().int(),
+  product_id: z.string().nonempty(),
+  total_price: z.number().int().optional(),
+  payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]).optional(),
+  payment_type: z.enum(["CASH", "CREDIT_CARD", "DEBIT_CARD", "PIX"]).optional(),
+  type: z.enum(["LOCAL", "WEBSITE", "WHATSAPP"]).optional(),
+  status: z
+    .enum(["ACCEPTED", "PREPARING", "FINISHED", "IN_TRANSIT", "DELIVERED"])
+    .optional(),
+});
+
 export const updateOrderSchema = z.object({
   delivererId: z.string(),
   status: z.enum([

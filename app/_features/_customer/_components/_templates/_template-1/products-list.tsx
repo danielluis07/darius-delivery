@@ -2,9 +2,9 @@
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
-import { insertOrderSchema } from "@/db/schemas";
+import { insertCustomerOrderSchema } from "@/db/schemas";
 import { Card } from "@/components/ui/card";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -25,17 +25,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-//import { toast } from "sonner";
-//import { createOrder } from "@/app/_features/_customer/_actions/create-order";
+import { toast } from "sonner";
+import { createOrder } from "@/app/_features/_customer/_actions/create-order";
 import { LoadingButton } from "@/components/ui/loading-button";
-//import { useModalStore } from "@/hooks/use-modal-store";
+import { useModalStore } from "@/hooks/use-modal-store";
 
-type FormData = z.infer<typeof insertOrderSchema>;
+type FormData = z.infer<typeof insertCustomerOrderSchema>;
 
 export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
   const params = useParams<{ domain: string }>();
-  //const { onClose } = useModalStore();
-  //const [isPending, startTransition] = useTransition();
+  const { onClose } = useModalStore();
+  const [isPending, startTransition] = useTransition();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data, isLoading: isUserLoading } = useGetUserByDomain(params.domain);
@@ -44,13 +44,34 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
     categoryId
   );
   const form = useForm<FormData>({
-    resolver: zodResolver(insertOrderSchema),
+    resolver: zodResolver(insertCustomerOrderSchema),
     defaultValues: {
-      user_id: data?.userId,
+      user_id: "",
       quantity: 1,
       price: 0,
+      product_id: "",
     },
   });
+
+  const { reset } = form;
+
+  useEffect(() => {
+    if (data) {
+      reset({
+        user_id: data.userId,
+        quantity: 1,
+        price: 0,
+        product_id: "",
+      });
+    }
+  }, [data, reset]);
+
+  useEffect(() => {
+    if (selectedProduct) {
+      form.setValue("product_id", selectedProduct.id);
+      form.setValue("price", selectedProduct.price);
+    }
+  }, [selectedProduct]);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -69,14 +90,28 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
     setShowOrderDetails(true);
   };
 
-  console.log("selectedProduct price:", selectedProduct?.price);
-
   const onInvalid = (errors: FieldErrors) => {
     console.log(errors);
   };
 
   const onSubmit = (values: FormData) => {
-    console.log("values", values);
+    startTransition(() => {
+      createOrder(values)
+        .then((res) => {
+          if (!res.success) {
+            toast.error(res.message);
+          }
+
+          if (res.success) {
+            toast.success(res.message);
+            onClose();
+          }
+        })
+        .catch((error) => {
+          console.error("Error creating order:", error);
+          toast.error("Erro ao enviar o pedido");
+        });
+    });
   };
 
   if (isUserLoading || isProductsLoading) {
@@ -148,6 +183,8 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
                 className="w-full"
                 label="Finalizar Pedido"
                 loadingLabel="Finalizando Pedido..."
+                isPending={isPending}
+                disabled={isPending}
               />
             </form>
           </Form>
