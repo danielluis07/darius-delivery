@@ -28,7 +28,11 @@ import { useModalStore } from "@/hooks/use-modal-store";
 
 type FormData = z.infer<typeof insertCustomerSchema>;
 
-export const SignUpForm = () => {
+export const SignUpForm = ({
+  restaurantOwnerId,
+}: {
+  restaurantOwnerId: string | undefined;
+}) => {
   const [isPending, startTransition] = useTransition();
   const { onClose } = useModalStore();
   const form = useForm<FormData>({
@@ -38,6 +42,7 @@ export const SignUpForm = () => {
       email: "",
       password: "",
       repeat_password: "",
+      restaurantOwnerId: restaurantOwnerId || "",
       phone: "",
       address: "",
       city: "",
@@ -47,6 +52,8 @@ export const SignUpForm = () => {
     },
   });
   const router = useRouter();
+
+  console.log("restaurantOwnerId:", form.watch("restaurantOwnerId"));
 
   const onInvalid = (errors: FieldErrors) => {
     console.log(errors);

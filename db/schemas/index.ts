@@ -125,7 +125,12 @@ export const updateOrderSchema = z.object({
 });
 
 export const insertUserDomainSchema = z.object({
-  domain: z.string(),
+  domain: z
+    .string()
+    .regex(
+      /^[a-z0-9-]+\.[a-z]{2,}(\.[a-z]{2,})?$/,
+      "Formato inválido. O domínio deve ser nesse formato: meudominio.com ou meudominio.com.br"
+    ),
 });
 
 export const credentialsSignUpSchema = baseUserSchema
@@ -195,6 +200,7 @@ export const insertCustomerSchema = z
     city: z.string(),
     state: z.string(),
     neighborhood: z.string(),
+    restaurantOwnerId: z.string().optional(),
     address: z.string(),
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
     repeat_password: z

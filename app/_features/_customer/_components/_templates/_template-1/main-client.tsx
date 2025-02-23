@@ -62,7 +62,11 @@ export const MainClient = ({
                       Crie sua Conta
                     </h2>
                   )}
-                  <ModalContent modalType={modalType} categoryId={categoryId} />
+                  <ModalContent
+                    modalType={modalType}
+                    categoryId={categoryId}
+                    restaurantOwnerId={data?.userId}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -117,13 +121,15 @@ export const MainClient = ({
 const ModalContent = ({
   modalType,
   categoryId,
+  restaurantOwnerId,
 }: {
   modalType: string;
   categoryId: string | null;
+  restaurantOwnerId: string | undefined;
 }) => {
   switch (modalType) {
     case "signUp":
-      return <SignUpForm />;
+      return <SignUpForm restaurantOwnerId={restaurantOwnerId} />;
     case "signIn":
       return <SignInForm />;
     case "products":
