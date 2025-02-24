@@ -49,7 +49,7 @@ export default function CustomDomainPage() {
       {/* Passo 3 */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">
-          3 - (Opcional) Configure um Subdomínio "www"
+          {"3 - (Opcional) Configure um Subdomínio  'www'"}
         </h2>
         <p className="text-gray-700 mb-2">
           Se quiser que o domínio **www.seusite.com** funcione, adicione também

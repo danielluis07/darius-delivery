@@ -8,14 +8,12 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { useForm, FieldErrors } from "react-hook-form";
 import { insertUserDomainSchema } from "@/db/schemas";
 import { toast } from "sonner";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { PasswordInput } from "@/components/ui/password-input";
 import { updateDomain } from "@/app/_features/_user/_actions/update-domain";
 import { Input } from "@/components/ui/input";
 

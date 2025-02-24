@@ -71,7 +71,7 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
       form.setValue("product_id", selectedProduct.id);
       form.setValue("price", selectedProduct.price);
     }
-  }, [selectedProduct]);
+  }, [selectedProduct, form]);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
