@@ -89,8 +89,6 @@ export const CustomizationForm = ({
   const [desktopfiles, setDesktopFiles] = useState<File[] | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [desktopPreview, setDesktopPreview] = useState<string | null>(null);
-  const [bannerUrl, setBannerUrl] = useState(customization?.banner || null);
-  const [desktopUrl, setDesktopUrl] = useState(customization?.logo || null);
   const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomizationSchema),
@@ -466,9 +464,9 @@ export const CustomizationForm = ({
           />
         )}
         <CustomizationPreview
-          logo={desktopPreview ? desktopPreview : desktopUrl}
+          logo={desktopPreview}
           buttonColor={form.watch("button_color")}
-          backgroundImage={bannerPreview ? bannerPreview : bannerUrl}
+          backgroundImage={bannerPreview}
         />
         <LoadingButton
           label="Criar"
