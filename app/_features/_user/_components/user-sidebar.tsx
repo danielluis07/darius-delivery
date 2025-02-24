@@ -67,9 +67,9 @@ const items = [
     label: "Produtos",
   },
   {
-    url: "#",
+    url: "/dashboard/domain-configuration",
     icon: Globe,
-    label: "Domínio",
+    label: "Configuração de Domínio",
   },
   {
     url: "/dashboard/customization",

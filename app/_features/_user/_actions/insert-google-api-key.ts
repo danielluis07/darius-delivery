@@ -43,7 +43,7 @@ export const insertGoogleApiKey = async (
       };
     }
 
-    revalidatePath("/dashboard/delivery-areas");
+    revalidatePath("/dashboard/settings");
     return { success: true, message: "Chave API salva com sucesso!" };
   } catch (error) {
     console.error(error);

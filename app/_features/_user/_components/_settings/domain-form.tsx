@@ -12,24 +12,25 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useForm, FieldErrors } from "react-hook-form";
-import { insertApiKeySchema } from "@/db/schemas";
-import { insertGoogleApiKey } from "@/app/_features/_user/_actions/insert-google-api-key";
+import { insertUserDomainSchema } from "@/db/schemas";
 import { toast } from "sonner";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { PasswordInput } from "@/components/ui/password-input";
+import { updateDomain } from "@/app/_features/_user/_actions/update-domain";
+import { Input } from "@/components/ui/input";
 
-type FormData = z.infer<typeof insertApiKeySchema>;
+type FormData = z.infer<typeof insertUserDomainSchema>;
 
-export const GoogleApiKeyForm = ({
-  userApiKey,
+export const DomainForm = ({
+  domain,
 }: {
-  userApiKey: string | null | undefined;
+  domain: string | null | undefined;
 }) => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
-    resolver: zodResolver(insertApiKeySchema),
+    resolver: zodResolver(insertUserDomainSchema),
     defaultValues: {
-      apiKey: userApiKey || "",
+      domain: domain || "",
     },
   });
 
@@ -39,7 +40,7 @@ export const GoogleApiKeyForm = ({
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      insertGoogleApiKey(values)
+      updateDomain(values, domain)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -50,8 +51,8 @@ export const GoogleApiKeyForm = ({
           }
         })
         .catch((error) => {
-          console.error("Error while saving google api key:", error);
-          toast.error("Erro ao salvar a chave do Google Maps");
+          console.error("Error while updating domain:", error);
+          toast.error("Erro ao atualizar o domínio");
         });
     });
   };
@@ -59,20 +60,17 @@ export const GoogleApiKeyForm = ({
   return (
     <Form {...form}>
       <form
-        className="bg-white p-6 rounded-lg shadow-md"
+        className="p-6 rounded-lg shadow-md"
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
-        <h1 className="font-semibold">Chave do Google Maps</h1>
+        <h1 className="font-semibold">Domínio</h1>
         <div className="flex items-center gap-5 mt-5">
           <FormField
             control={form.control}
-            name="apiKey"
+            name="domain"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <PasswordInput
-                    placeholder="Insira a chave aqui..."
-                    {...field}
-                  />
+                  <Input placeholder="Insira o domínio aqui..." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -80,8 +78,8 @@ export const GoogleApiKeyForm = ({
           />
 
           <LoadingButton
-            label={userApiKey ? "Atualizar" : "Salvar"}
-            loadingLabel="Salvando..."
+            label="Atualizar"
+            loadingLabel="Atualizando..."
             className="min-w-[200px]"
             disabled={isPending}
             isPending={isPending}

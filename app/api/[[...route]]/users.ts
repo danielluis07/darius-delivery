@@ -72,7 +72,7 @@ const app = new Hono()
         .where(eq(users.id, userId));
 
       if (!data) {
-        return c.json({ error: "User not found" }, 404);
+        return c.json({ error: "Domain not found" }, 404);
       }
 
       return c.json({ data });

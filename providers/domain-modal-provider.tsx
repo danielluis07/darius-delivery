@@ -24,6 +24,7 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { insertDomain } from "@/app/_features/_user/_actions/insert-domain";
 import { toast } from "sonner";
 import { useDomainModal } from "@/hooks/use-domain-modal";
+import { useRouter } from "next/navigation";
 
 type FormData = z.infer<typeof insertUserDomainSchema>;
 
@@ -42,6 +43,8 @@ export const DomainModalProvider = ({
       domain: "",
     },
   });
+
+  const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
@@ -68,6 +71,7 @@ export const DomainModalProvider = ({
           if (res.success) {
             toast.success(res.message);
             onClose();
+            router.push("/dashboard/domain-configuration");
           }
         })
         .catch((error) => {
