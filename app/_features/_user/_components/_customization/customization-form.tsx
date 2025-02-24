@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { useForm, FieldErrors } from "react-hook-form";
 import { insertCustomizationSchema } from "@/db/schemas";
-import { ClipboardList, CloudUpload, Key, Trash2 } from "lucide-react";
+import { ClipboardList, CloudUpload, Key } from "lucide-react";
 import { FaPix, FaCreditCard, FaMoneyBill1Wave } from "react-icons/fa6";
 import { BsCreditCard2FrontFill } from "react-icons/bs";
 import { useState } from "react";
