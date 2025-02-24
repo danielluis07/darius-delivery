@@ -262,8 +262,9 @@ export const customizations = pgTable("customizations", {
     .notNull()
     .references(() => templates.id, { onDelete: "cascade" }),
   store_name: text("store_name").notNull(),
-  logo_desktop: text("logo_desktop"),
-  logo_mobile: text("logo_mobile"),
+  payment_methods: text("payment_methods").array().default([]),
+  need_change: boolean("need_change").default(false).notNull(),
+  logo: text("logo"),
   banner: text("banner"),
   button_color: varchar("button_color", { length: 7 }), // Hexadecimal (ex: #FFFFFF)
   header_color: varchar("header_color", { length: 7 }),

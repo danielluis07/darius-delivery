@@ -181,11 +181,7 @@ export const insertCustomizationSchema = baseCreateCustomizationSchema.extend({
     typeof File !== "undefined"
       ? z.array(z.instanceof(File)).optional()
       : z.any().optional(),
-  logo_desktop:
-    typeof File !== "undefined"
-      ? z.array(z.instanceof(File)).optional()
-      : z.any().optional(),
-  logo_mobile:
+  logo:
     typeof File !== "undefined"
       ? z.array(z.instanceof(File)).optional()
       : z.any().optional(),

@@ -8,6 +8,7 @@ import { insertCustomizationSchema } from "@/db/schemas";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
+import { eq } from "drizzle-orm";
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
@@ -75,14 +76,16 @@ export const createCustomization = async (
     }
 
     const {
+      id,
       store_name,
       template_id,
       banner,
       button_color,
       footer_color,
       header_color,
-      logo_desktop,
-      logo_mobile,
+      logo,
+      payment_methods,
+      need_change,
     } = validatedValues.data;
 
     if (
@@ -92,8 +95,8 @@ export const createCustomization = async (
       !button_color ||
       !footer_color ||
       !header_color ||
-      !logo_desktop ||
-      !logo_mobile
+      !logo ||
+      !payment_methods
     ) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
@@ -101,49 +104,74 @@ export const createCustomization = async (
     /* Image Upload */
 
     const bannerFile = banner[0];
-    const logoDesktopFile = logo_desktop[0];
-    const logoMobileFile = logo_mobile[0];
+    const logoDesktopFile = logo[0];
 
-    if (!bannerFile || !logoDesktopFile || !logoMobileFile) {
+    if (!bannerFile || !logoDesktopFile) {
       return {
         success: false,
-        message: "ALgum dos arquivos de imagem não foi encontrado",
+        message: "Algum dos arquivos de imagem não foi encontrado",
       };
     }
 
-    const [bannerUrl, logoDesktopUrl, logoMobileUrl] = await Promise.all([
+    const [bannerUrl, logoDesktopUrl] = await Promise.all([
       uploadImageToS3(bannerFile),
       uploadImageToS3(logoDesktopFile),
-      uploadImageToS3(logoMobileFile),
     ]);
 
-    if (!bannerUrl || !logoDesktopUrl || !logoMobileUrl) {
+    if (!bannerUrl || !logoDesktopUrl) {
       return {
         success: false,
         message: "Erro ao fazer upload das imagens",
       };
     }
 
-    const customization = await db.insert(customizations).values({
-      store_name,
-      template_id,
-      banner: bannerUrl,
-      button_color,
-      footer_color,
-      header_color,
-      logo_desktop: logoDesktopUrl,
-      logo_mobile: logoMobileUrl,
-      user_id: session.user.id,
-    });
+    if (id) {
+      const updatedCustomization = await db
+        .update(customizations)
+        .set({
+          store_name,
+          template_id,
+          banner: bannerUrl,
+          button_color,
+          footer_color,
+          header_color,
+          logo: logoDesktopUrl,
+          payment_methods,
+          need_change,
+        })
+        .where(eq(customizations.id, id));
 
-    if (!customization) {
-      return {
-        success: false,
-        message: "Falha criar a customização",
-      };
+      if (!updatedCustomization) {
+        return {
+          success: false,
+          message: "Falha ao atualizar a customização",
+        };
+      }
+
+      return { success: true, message: "Customização atualizada com sucesso" };
+    } else {
+      const customization = await db.insert(customizations).values({
+        store_name,
+        template_id,
+        banner: bannerUrl,
+        button_color,
+        footer_color,
+        header_color,
+        logo: logoDesktopUrl,
+        payment_methods,
+        need_change,
+        user_id: session.user.id,
+      });
+
+      if (!customization) {
+        return {
+          success: false,
+          message: "Falha criar a customização",
+        };
+      }
+
+      return { success: true, message: "Customização criada com sucesso" };
     }
-
-    return { success: true, message: "Customização criada com sucesso" };
   } catch (error) {
     console.error(error);
     return {

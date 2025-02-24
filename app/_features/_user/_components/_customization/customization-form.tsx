@@ -15,6 +15,8 @@ import {
 import { useForm, FieldErrors } from "react-hook-form";
 import { insertCustomizationSchema } from "@/db/schemas";
 import { ClipboardList, CloudUpload, Key, Trash2 } from "lucide-react";
+import { FaPix, FaCreditCard, FaMoneyBill1Wave } from "react-icons/fa6";
+import { BsCreditCard2FrontFill } from "react-icons/bs";
 import { useState } from "react";
 import {
   FileInput,
@@ -41,9 +43,11 @@ import Image from "next/image";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import placeholder from "@/public/placeholder-image.jpg";
-import { createCustomization } from "../../_actions/create-customization";
+import { createCustomization } from "@/app/_features/_user/_actions/create-customization";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 
 type TemplatesResponseType = InferResponseType<
   typeof client.api.templates.$get,
@@ -57,6 +61,22 @@ type CustomizationResponseType = InferResponseType<
 
 type FormData = z.infer<typeof insertCustomizationSchema>;
 
+const paymentOptions = [
+  {
+    value: "PIX",
+    icon: <FaMoneyBill1Wave className="mt-2 text-green-600" />,
+  },
+  {
+    value: "Cartão de Crédito",
+    icon: <FaCreditCard className="mt-2 text-blue-700" />,
+  },
+  { value: "Dinheiro", icon: <FaPix className="mt-2 text-[#00BDAE]" /> },
+  {
+    value: "Cartão",
+    icon: <BsCreditCard2FrontFill className="mt-2 text-blue-700" />,
+  },
+];
+
 export const CustomizationForm = ({
   templates,
   customization,
@@ -67,26 +87,24 @@ export const CustomizationForm = ({
   const [isPending, startTransition] = useTransition();
   const [bannerfiles, setBannerFiles] = useState<File[] | null>(null);
   const [desktopfiles, setDesktopFiles] = useState<File[] | null>(null);
-  const [mobilefiles, setMobileFiles] = useState<File[] | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [desktopPreview, setDesktopPreview] = useState<string | null>(null);
-  const [mobilePreview, setMobilePreview] = useState<string | null>(null);
   const [bannerUrl, setBannerUrl] = useState(customization?.banner || null);
-  const [desktopUrl, setDesktopUrl] = useState(
-    customization?.logo_desktop || null
-  );
+  const [desktopUrl, setDesktopUrl] = useState(customization?.logo || null);
   const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomizationSchema),
     defaultValues: {
+      id: customization?.id ?? "",
       store_name: customization?.store_name ?? "",
       button_color: customization?.button_color ?? "",
       footer_color: customization?.footer_color ?? "",
       header_color: customization?.header_color ?? "",
       banner: [],
-      logo_desktop: [],
-      logo_mobile: [],
+      logo: [],
+      need_change: customization?.need_change ?? false,
       template_id: customization?.template_id ?? "",
+      payment_methods: customization?.payment_methods ?? [],
     },
   });
 
@@ -96,13 +114,12 @@ export const CustomizationForm = ({
     multiple: false,
   };
 
-  console.log(form.watch("button_color"));
-
   const onInvalid = (errors: FieldErrors) => {
     console.log(errors);
   };
 
   const onSubmit = (values: FormData) => {
+    console.log(values);
     startTransition(() => {
       createCustomization(values)
         .then((res) => {
@@ -188,204 +205,12 @@ export const CustomizationForm = ({
             </FormItem>
           )}
         />
-        {bannerUrl ? (
-          <div>
-            <FormLabel>Banner</FormLabel>
-            <div className="relative w-full h-52 rounded-md overflow-hidden">
-              <Image
-                src={bannerUrl || placeholder}
-                alt="banner"
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
-                className="object-cover"
-              />
-              <div
-                onClick={() => setBannerUrl(null)}
-                className="absolute top-2 right-2 bg-error text-white rounded-md p-1 cursor-pointer">
-                <Trash2 />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <FormField
-            control={form.control}
-            name="banner"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Banner</FormLabel>
-                <FormControl>
-                  <FileUploader
-                    value={field.value ?? []}
-                    onValueChange={(newFiles: File[] | null) => {
-                      if (newFiles && newFiles.length > 0) {
-                        const selectedFile = newFiles[0];
-                        field.onChange([selectedFile]);
-                        const newPreviewUrl = URL.createObjectURL(selectedFile);
-                        setBannerFiles([selectedFile]);
-                        setBannerPreview(newPreviewUrl);
-                      } else {
-                        field.onChange(null);
-                        setBannerFiles([]);
-                      }
-                    }}
-                    dropzoneOptions={dropZoneConfig}
-                    className="relative bg-background rounded-lg p-5">
-                    <FileInput
-                      id="fileInput"
-                      className="outline-dashed outline-1 outline-slate-500">
-                      <div className="flex items-center justify-center flex-col p-8 w-full ">
-                        <CloudUpload className="text-gray-500 w-10 h-10" />
-                        <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-semibold">
-                            Clique para fazer o upload
-                          </span>
-                          &nbsp; ou arraste e solte um arquivo aqui.
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          SVG, PNG, JPG or GIF
-                        </p>
-                      </div>
-                    </FileInput>
-                    <FileUploaderContent>
-                      {bannerfiles &&
-                        bannerfiles.length > 0 &&
-                        bannerfiles.map((file, i) => (
-                          <FileUploaderItem key={i} index={i}>
-                            <span>{file.name}</span>
-                          </FileUploaderItem>
-                        ))}
-                      {bannerPreview && (
-                        <div className="mt-4">
-                          <p className="text-sm font-semibold mb-2">Preview:</p>
-                          <div className="relative w-full h-80 rounded-lg overflow-hidden">
-                            <Image
-                              src={bannerPreview}
-                              fill
-                              className="object-cover"
-                              alt="preview"
-                            />
-                            <div
-                              onClick={() => {
-                                setBannerPreview(null);
-                                setBannerFiles([]);
-                                form.setValue("banner", null);
-                              }}
-                              className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer">
-                              <Trash2 />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </FileUploaderContent>
-                  </FileUploader>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-        {desktopUrl ? (
-          <div>
-            <FormLabel>Logo Desktop</FormLabel>
-            <div className="relative size-32 rounded-md overflow-hidden">
-              <Image
-                src={desktopUrl || placeholder}
-                alt="logo"
-                fill
-                sizes="128px"
-                className="object-cover"
-              />
-              <div
-                onClick={() => setDesktopUrl(null)}
-                className="absolute top-2 right-2 bg-error text-white rounded-md p-1 cursor-pointer">
-                <Trash2 />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <FormField
-            control={form.control}
-            name="logo_desktop"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Logo Desktop</FormLabel>
-                <FormControl>
-                  <FileUploader
-                    value={field.value ?? []}
-                    onValueChange={(newFiles: File[] | null) => {
-                      if (newFiles && newFiles.length > 0) {
-                        const selectedFile = newFiles[0];
-                        field.onChange([selectedFile]);
-                        const newPreviewUrl = URL.createObjectURL(selectedFile);
-                        setDesktopFiles([selectedFile]);
-                        setDesktopPreview(newPreviewUrl);
-                      } else {
-                        field.onChange(null);
-                        setDesktopFiles([]);
-                      }
-                    }}
-                    dropzoneOptions={dropZoneConfig}
-                    className="relative bg-background rounded-lg p-5">
-                    <FileInput
-                      id="fileInput"
-                      className="outline-dashed outline-1 outline-slate-500">
-                      <div className="flex items-center justify-center flex-col p-8 w-full ">
-                        <CloudUpload className="text-gray-500 w-10 h-10" />
-                        <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-semibold">
-                            Clique para fazer o upload
-                          </span>
-                          &nbsp; ou arraste e solte um arquivo aqui.
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          SVG, PNG, JPG or GIF
-                        </p>
-                      </div>
-                    </FileInput>
-                    <FileUploaderContent>
-                      {desktopfiles &&
-                        desktopfiles.length > 0 &&
-                        desktopfiles.map((file, i) => (
-                          <FileUploaderItem key={i} index={i}>
-                            <span>{file.name}</span>
-                          </FileUploaderItem>
-                        ))}
-                      {desktopPreview && (
-                        <div className="mt-4">
-                          <p className="text-sm font-semibold mb-2">Preview:</p>
-                          <div className="relative w-full h-80 rounded-lg overflow-hidden">
-                            <Image
-                              src={desktopPreview}
-                              fill
-                              className="object-cover"
-                              alt="preview"
-                            />
-                            <div
-                              onClick={() => {
-                                setDesktopPreview(null);
-                                setDesktopFiles([]);
-                                form.setValue("logo_desktop", null);
-                              }}
-                              className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer text-white">
-                              <Trash2 />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </FileUploaderContent>
-                  </FileUploader>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
         <FormField
           control={form.control}
-          name="logo_mobile"
+          name="banner"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Logo Mobile</FormLabel>
+              <FormLabel>Banner</FormLabel>
               <FormControl>
                 <FileUploader
                   value={field.value ?? []}
@@ -394,11 +219,11 @@ export const CustomizationForm = ({
                       const selectedFile = newFiles[0];
                       field.onChange([selectedFile]);
                       const newPreviewUrl = URL.createObjectURL(selectedFile);
-                      setMobileFiles([selectedFile]);
-                      setMobilePreview(newPreviewUrl);
+                      setBannerFiles([selectedFile]);
+                      setBannerPreview(newPreviewUrl);
                     } else {
                       field.onChange(null);
-                      setMobileFiles([]);
+                      setBannerFiles([]);
                     }
                   }}
                   dropzoneOptions={dropZoneConfig}
@@ -420,35 +245,13 @@ export const CustomizationForm = ({
                     </div>
                   </FileInput>
                   <FileUploaderContent>
-                    {mobilefiles &&
-                      mobilefiles.length > 0 &&
-                      mobilefiles.map((file, i) => (
+                    {bannerfiles &&
+                      bannerfiles.length > 0 &&
+                      bannerfiles.map((file, i) => (
                         <FileUploaderItem key={i} index={i}>
                           <span>{file.name}</span>
                         </FileUploaderItem>
                       ))}
-                    {mobilePreview && (
-                      <div className="mt-4">
-                        <p className="text-sm font-semibold mb-2">Preview:</p>
-                        <div className="relative w-full h-80 rounded-lg overflow-hidden">
-                          <Image
-                            src={mobilePreview}
-                            fill
-                            className="object-cover"
-                            alt="preview"
-                          />
-                          <div
-                            onClick={() => {
-                              setMobilePreview(null);
-                              setMobileFiles([]);
-                              form.setValue("logo_mobile", null);
-                            }}
-                            className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer text-white">
-                            <Trash2 />
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </FileUploaderContent>
                 </FileUploader>
               </FormControl>
@@ -458,55 +261,210 @@ export const CustomizationForm = ({
         />
         <FormField
           control={form.control}
-          name="header_color"
+          name="logo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cor do Header</FormLabel>
+              <FormLabel>Logo</FormLabel>
               <FormControl>
-                <ColorPicker
-                  className="w-28"
-                  onChange={field.onChange}
-                  value={field.value}
-                />
+                <FileUploader
+                  value={field.value ?? []}
+                  onValueChange={(newFiles: File[] | null) => {
+                    if (newFiles && newFiles.length > 0) {
+                      const selectedFile = newFiles[0];
+                      field.onChange([selectedFile]);
+                      const newPreviewUrl = URL.createObjectURL(selectedFile);
+                      setDesktopFiles([selectedFile]);
+                      setDesktopPreview(newPreviewUrl);
+                    } else {
+                      field.onChange(null);
+                      setDesktopFiles([]);
+                    }
+                  }}
+                  dropzoneOptions={dropZoneConfig}
+                  className="relative bg-background rounded-lg p-5">
+                  <FileInput
+                    id="fileInput"
+                    className="outline-dashed outline-1 outline-slate-500">
+                    <div className="flex items-center justify-center flex-col p-8 w-full ">
+                      <CloudUpload className="text-gray-500 w-10 h-10" />
+                      <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">
+                          Clique para fazer o upload
+                        </span>
+                        &nbsp; ou arraste e solte um arquivo aqui.
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        SVG, PNG, JPG or GIF
+                      </p>
+                    </div>
+                  </FileInput>
+                  <FileUploaderContent>
+                    {desktopfiles &&
+                      desktopfiles.length > 0 &&
+                      desktopfiles.map((file, i) => (
+                        <FileUploaderItem key={i} index={i}>
+                          <span>{file.name}</span>
+                        </FileUploaderItem>
+                      ))}
+                  </FileUploaderContent>
+                </FileUploader>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        <div className="flex items-center gap-10">
+          <FormField
+            control={form.control}
+            name="header_color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cor do Header</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="w-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="button_color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cor do botão</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="w-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="footer_color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cor do Footer</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="w-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
-          name="button_color"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cor do botão</FormLabel>
-              <FormControl>
-                <ColorPicker
-                  className="w-28"
-                  onChange={field.onChange}
-                  value={field.value}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          name="payment_methods"
+          render={() => (
+            <div className="flex flex-col gap-6">
+              {/* Darius Pay */}
+              <div className="border p-4 rounded-lg shadow-sm">
+                <h3 className="text-lg font-semibold mb-3">Darius Pay</h3>
+                <div className="flex flex-col">
+                  {paymentOptions.slice(0, 2).map((item, i) => (
+                    <FormItem
+                      key={i}
+                      className="flex items-center gap-x-3 py-2">
+                      {item.icon}
+                      <FormControl>
+                        <Checkbox
+                          className="size-5"
+                          checked={form
+                            .watch("payment_methods")
+                            ?.includes(item.value)}
+                          onCheckedChange={(checked) => {
+                            const currentValues =
+                              form.getValues("payment_methods") || [];
+                            form.setValue(
+                              "payment_methods",
+                              checked
+                                ? [...currentValues, item.value]
+                                : currentValues.filter(
+                                    (value) => value !== item.value
+                                  )
+                            );
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel className="capitalize">{item.value}</FormLabel>
+                    </FormItem>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pagamento na Entrega */}
+              <div className="border p-4 rounded-lg shadow-sm">
+                <h3 className="text-lg font-semibold mb-3">
+                  Pagamento na Entrega
+                </h3>
+                <div className="flex flex-col">
+                  {paymentOptions.slice(2, 4).map((item, i) => (
+                    <FormItem
+                      key={i}
+                      className="flex items-center gap-x-3 py-2">
+                      {item.icon}
+                      <FormControl>
+                        <Checkbox
+                          className="size-5"
+                          checked={form
+                            .watch("payment_methods")
+                            ?.includes(item.value)}
+                          onCheckedChange={(checked) => {
+                            const currentValues =
+                              form.getValues("payment_methods") || [];
+                            form.setValue(
+                              "payment_methods",
+                              checked
+                                ? [...currentValues, item.value]
+                                : currentValues.filter(
+                                    (value) => value !== item.value
+                                  )
+                            );
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel className="capitalize">{item.value}</FormLabel>
+                    </FormItem>
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
         />
-        <FormField
-          control={form.control}
-          name="footer_color"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cor do Footer</FormLabel>
-              <FormControl>
-                <ColorPicker
-                  className="w-28"
-                  onChange={field.onChange}
-                  value={field.value}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+        {form.watch("payment_methods")?.includes("Dinheiro") && (
+          <FormField
+            control={form.control}
+            name="need_change"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                <div className="space-y-0.5">
+                  <FormLabel>Precisa de Troco?</FormLabel>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        )}
         <CustomizationPreview
           logo={desktopPreview ? desktopPreview : desktopUrl}
           buttonColor={form.watch("button_color")}

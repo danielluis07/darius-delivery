@@ -73,7 +73,7 @@ export const MainClient = ({
 
             <div className="relative size-32 mx-auto mb-4">
               <Image
-                src={data?.customization.logo_desktop || placeholder}
+                src={data?.customization.logo || placeholder}
                 alt="logo"
                 fill
                 sizes="(max-width: 768px) 25vw, (max-width: 1200px) 10vw, 200px"
