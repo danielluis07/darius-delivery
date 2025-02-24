@@ -166,6 +166,11 @@ const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
     DEBIT_CARD: "Cartão de Débito",
     PIX: "PIX",
   };
+
+  const paymentStatusTranslations: Record<string, string> = {
+    PENDING: "Aguardando",
+    PAID: "Pago",
+  };
   return (
     <Document>
       <Page size="A6" style={styles.page}>
@@ -218,6 +223,13 @@ const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
           <Text>Forma de Pagamento</Text>
           <Text>
             {paymentTypeTranslation[receipt.orderPaymentType ?? ""] ||
+              "Não informado"}
+          </Text>
+        </View>
+        <View style={styles.flexRow}>
+          <Text>Status do Pagamento</Text>
+          <Text>
+            {paymentStatusTranslations[receipt.orderPaymentStatus ?? ""] ||
               "Não informado"}
           </Text>
         </View>

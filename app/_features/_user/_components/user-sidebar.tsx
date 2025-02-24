@@ -28,7 +28,6 @@ import {
   MapPin,
   Printer,
   ChartPie,
-  CreditCard,
   Globe,
   Sandwich,
   Settings,
@@ -120,11 +119,6 @@ const items = [
     url: "#",
     icon: ChartPie,
     label: "Pixels",
-  },
-  {
-    url: "#",
-    icon: CreditCard,
-    label: "Formas de Pagamento",
   },
 ];
 

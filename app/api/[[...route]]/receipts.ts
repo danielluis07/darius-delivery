@@ -55,6 +55,7 @@ const app = new Hono().get(
         customerAddress: customers.address,
         orderTotalPrice: orders.total_price,
         orderPaymentType: orders.payment_type,
+        orderPaymentStatus: orders.payment_status,
         orderStatus: orders.status,
         orderItems: sql<OrderItem[]>`json_agg(json_build_object(
           'id', ${orderItems.id}, 
@@ -78,6 +79,7 @@ const app = new Hono().get(
         customersUser.phone,
         orders.total_price,
         orders.payment_type,
+        orders.payment_status,
         orders.status,
         orders.number,
         customers.id,

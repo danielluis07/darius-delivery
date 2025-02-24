@@ -483,6 +483,7 @@ export const NewOrderForm = ({
           paymentType={form.watch("payment_type")}
           customer={selectedCustomer}
           items={form.watch("items")}
+          paymentStatus={form.watch("payment_status")}
         />
       </div>
     </div>
@@ -494,17 +495,24 @@ const Receipt = ({
   paymentType,
   customer,
   items,
+  paymentStatus,
 }: {
-  type: "LOCAL" | "WEBSITE" | "WHATSAPP";
-  paymentType: "CASH" | "CREDIT_CARD" | "DEBIT_CARD" | "PIX";
+  type: string;
+  paymentType: string;
   customer: Customer;
   items: Items;
+  paymentStatus: string;
 }) => {
   const paymentTypeTranslation: Record<string, string> = {
     CASH: "Dinheiro",
     CREDIT_CARD: "Cartão de Crédito",
     DEBIT_CARD: "Cartão de Débito",
     PIX: "PIX",
+  };
+
+  const paymentStatusTranslations: Record<string, string> = {
+    PENDING: "Aguardando",
+    PAID: "Pago",
   };
 
   const totalPrice = items.reduce(
@@ -574,6 +582,10 @@ const Receipt = ({
       <div className="flex justify-between">
         <p>Forma de Pagamento</p>
         <p>{paymentTypeTranslation[paymentType]}</p>
+      </div>
+      <div className="flex justify-between">
+        <p>Status do Pagamento</p>
+        <p>{paymentStatusTranslations[paymentStatus]}</p>
       </div>
     </div>
   );
