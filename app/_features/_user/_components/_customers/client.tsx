@@ -3,7 +3,7 @@
 import { columns } from "@/app/_features/_user/_components/_customers/columns";
 import { CustomersDataTable } from "@/app/_features/_user/_components/_customers/data-table";
 import { useDeleteCustomers } from "@/app/_features/_user/_queries/_customers/use-delete-customers";
-import { useGetCustomers } from "../../_queries/_customers/use-get-customers";
+import { useGetCustomers } from "@/app/_features/_user/_queries/_customers/use-get-customers";
 
 export const CustomersClient = ({ userId }: { userId: string }) => {
   const { data, isLoading } = useGetCustomers(userId);
