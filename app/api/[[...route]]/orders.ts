@@ -74,7 +74,7 @@ const app = new Hono()
             id: customers.userId,
             name: users.name,
             email: users.email,
-            address: customers.address,
+            street: customers.street,
             phone: users.phone,
             city: customers.city,
             state: customers.state,
@@ -112,7 +112,7 @@ const app = new Hono()
           users.id,
           deliverers.id,
           customers.userId,
-          customers.address,
+          customers.street,
           customers.city,
           customers.state,
           customers.neighborhood

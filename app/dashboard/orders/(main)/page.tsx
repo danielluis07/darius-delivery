@@ -2,6 +2,7 @@ import { OrdersClient } from "@/app/_features/_user/_components/_orders/client";
 import { getOrders } from "@/app/_features/_user/_queries/_orders/get-orders";
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Plus, Route } from "lucide-react";
 import Link from "next/link";
 
@@ -16,7 +17,7 @@ const OrdersPage = async () => {
 
   if (!data) {
     return (
-      <div className="w-full">
+      <Card className="h-[500px] w-full">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">Pedidos</h1>
           <Link href="/dashboard/orders/new">
@@ -25,10 +26,12 @@ const OrdersPage = async () => {
             </Button>
           </Link>
         </div>
-        <div className="flex items center justify-center mt-28">
-          Você ainda não possui pedidos
+        <div className="flex items-center justify-center w-full h-full">
+          <span className="text-muted-foreground">
+            Nenhum pedido encontrado
+          </span>
         </div>
-      </div>
+      </Card>
     );
   }
 

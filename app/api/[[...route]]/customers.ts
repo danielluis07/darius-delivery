@@ -30,7 +30,9 @@ const app = new Hono()
           name: users.name,
           email: users.email,
           phone: users.phone,
-          address: customers.address,
+          street: customers.street,
+          street_number: customers.street_number,
+          complement: customers.complement,
           neighborhood: customers.neighborhood,
           city: customers.city,
           state: customers.state,
@@ -53,8 +55,17 @@ const app = new Hono()
     zValidator("json", insertLocalCustomerSchema),
     async (c) => {
       const auth = c.get("authUser");
-      const { name, email, phone, address, neighborhood, city, state } =
-        c.req.valid("json");
+      const {
+        name,
+        email,
+        phone,
+        street,
+        street_number,
+        complement,
+        neighborhood,
+        city,
+        state,
+      } = c.req.valid("json");
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
@@ -64,7 +75,8 @@ const app = new Hono()
         !name ||
         !email ||
         !phone ||
-        !address ||
+        !street ||
+        !street_number ||
         !neighborhood ||
         !city ||
         !state
@@ -89,7 +101,9 @@ const app = new Hono()
       const customer = await db.insert(customers).values({
         userId: user.id,
         restaurantOwnerId: auth.token.sub,
-        address,
+        street,
+        street_number,
+        complement,
         neighborhood,
         city,
         state,

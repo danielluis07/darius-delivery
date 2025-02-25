@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { LoadingButton } from "@/components/ui/loading-button";
 import Image from "next/image";
-import { formatPhoneNumber } from "@/lib/utils";
+import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
 
 type FormData = z.infer<typeof credentialsSignUpSchema>;
 
@@ -49,7 +49,10 @@ export const SignUpForm = () => {
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      credentialsSignUp(values)
+      credentialsSignUp({
+        ...values,
+        phone: removeFormatting(values.phone || ""),
+      })
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);

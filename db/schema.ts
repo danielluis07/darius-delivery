@@ -233,7 +233,9 @@ export const customers = pgTable("customers", {
   city: text("city").notNull(),
   state: text("state").notNull(),
   neighborhood: text("neighborhood").notNull(),
-  address: text("street").notNull(),
+  street: text("street").notNull(),
+  street_number: text("street_number").notNull(),
+  complement: text("complement"),
 });
 
 export const deliverers = pgTable("deliverers", {

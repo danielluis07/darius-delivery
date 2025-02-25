@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useModalStore } from "@/hooks/use-modal-store";
+import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
 
 type FormData = z.infer<typeof insertCustomerSchema>;
 
@@ -44,47 +45,23 @@ export const SignUpForm = ({
       repeat_password: "",
       restaurantOwnerId: restaurantOwnerId || "",
       phone: "",
-      address: "",
+      street: "",
+      street_number: "",
+      complement: "",
       city: "",
       state: "",
       neighborhood: "",
-      userId: "",
     },
   });
   const router = useRouter();
-
-  console.log("restaurantOwnerId:", form.watch("restaurantOwnerId"));
 
   const onInvalid = (errors: FieldErrors) => {
     console.log(errors);
   };
 
-  const formatPhoneNumber = (value: string) => {
-    // Remove all non-digit characters
-    const digits = value.replace(/\D/g, "");
-
-    // Initialize an empty string for the formatted number
-    let formattedNumber = "";
-
-    // Apply conditional formatting based on the number of digits
-    if (digits.length > 2) {
-      formattedNumber += `(${digits.slice(0, 2)}) `;
-    } else {
-      formattedNumber += digits;
-    }
-
-    if (digits.length > 7) {
-      formattedNumber += digits.slice(2, 7) + "-" + digits.slice(7, 11);
-    } else if (digits.length > 2) {
-      formattedNumber += digits.slice(2, 7);
-    }
-
-    return formattedNumber;
-  };
-
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      credentialsSignUp(values)
+      credentialsSignUp({ ...values, phone: removeFormatting(values.phone) })
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -169,55 +146,63 @@ export const SignUpForm = ({
             </FormItem>
           )}
         />
+        <div className="grid grid-cols-2 gap-3">
+          <FormField
+            control={form.control}
+            name="street"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input {...field} placeholder="Endereço" required />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="street_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input {...field} placeholder="Número" required />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="neighborhood"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input {...field} placeholder="Bairro" required />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="complement"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input {...field} placeholder="Complemento (opcional)" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
           name="city"
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input
-                  {...field}
-                  value={field.value}
-                  disabled={isPending}
-                  placeholder="Cidade"
-                  required
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  {...field}
-                  value={field.value}
-                  disabled={isPending}
-                  placeholder="Rua e Número"
-                  required
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="neighborhood"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  {...field}
-                  value={field.value}
-                  disabled={isPending}
-                  placeholder="Bairro"
-                  required
-                />
+                <Input {...field} placeholder="Cidade" required />
               </FormControl>
               <FormMessage />
             </FormItem>

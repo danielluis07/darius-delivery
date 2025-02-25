@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, formatPhoneNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -59,7 +59,9 @@ type Customer =
       name: string | null;
       email: string | null;
       phone: string | null;
-      address: string | null;
+      street: string | null;
+      street_number: string | null;
+      complement: string | null;
       neighborhood: string | null;
       city: string | null;
       state: string | null;
@@ -541,9 +543,10 @@ const Receipt = ({
       {/* cliente */}
       <div>
         <p>Cliente: {customer?.name || "N/A"}</p>
-        <p>Tel: {customer?.phone || "N/A"}</p>
+        <p>Tel: {formatPhoneNumber(customer?.phone || "") || "N/A"}</p>
         <p className="w-full break-words overflow-hidden">
-          Endereço: {customer?.address || "N/A"} -{" "}
+          Rua: {customer?.street || "N/A"} - nº {customer?.street_number} -{" "}
+          {customer?.complement && `Complemento: ${customer?.complement} - `}{" "}
           {customer?.neighborhood || "N/A"} - {customer?.city || "N/A"} -{" "}
           {customer?.state || "N/A"}
         </p>

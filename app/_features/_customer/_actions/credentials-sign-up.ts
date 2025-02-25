@@ -25,15 +25,26 @@ export const credentialsSignUp = async (
       return { success: false, message: "Campos inválidos" };
     }
 
-    const { name, email, phone, password, address, city, neighborhood, state } =
-      validatedValues.data;
+    const {
+      name,
+      email,
+      phone,
+      password,
+      street,
+      street_number,
+      complement,
+      city,
+      neighborhood,
+      state,
+    } = validatedValues.data;
 
     if (
       !name ||
       !email ||
       !phone ||
       !password ||
-      !address ||
+      !street ||
+      !street_number ||
       !city ||
       !neighborhood ||
       !state
@@ -73,7 +84,9 @@ export const credentialsSignUp = async (
 
     const newCustomer = await db.insert(customers).values({
       userId: newUser.id,
-      address,
+      street,
+      street_number,
+      complement: complement || null,
       city,
       neighborhood,
       state,

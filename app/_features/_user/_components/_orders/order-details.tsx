@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useForm, FieldErrors } from "react-hook-form";
-import { cn, formatCurrencyFromCents } from "@/lib/utils";
+import { cn, formatCurrencyFromCents, formatPhoneNumber } from "@/lib/utils";
 import { format } from "date-fns";
 import { Check, CheckCircle, ChevronsUpDown, Clock } from "lucide-react";
 import { updateOrderSchema } from "@/db/schemas";
@@ -230,11 +230,11 @@ export const OrderDetails = ({
           </p>
           <p className="text-sm text-gray-500">
             <span className="font-semibold">Telefone:</span>{" "}
-            {data.customer.phone}
+            {formatPhoneNumber(data.customer.phone || "")}
           </p>
           <p className="text-sm text-gray-500">
             <span className="font-semibold">Endereço:</span>{" "}
-            {data.customer.address}, {data.customer.neighborhood},{" "}
+            {data.customer.street}, {data.customer.neighborhood},{" "}
             {data.customer.city} - {data.customer.state}
           </p>
         </div>

@@ -31,7 +31,9 @@ export const insertCustomerByUserSchema = z.object({
   city: z.string(),
   state: z.string(),
   neighborhood: z.string(),
-  address: z.string(),
+  street: z.string(),
+  street_number: z.string(),
+  complement: z.string().optional(),
 });
 
 export const insertLocalCustomerSchema = z.object({
@@ -41,7 +43,9 @@ export const insertLocalCustomerSchema = z.object({
   city: z.string(),
   state: z.string(),
   neighborhood: z.string(),
-  address: z.string(),
+  street: z.string(),
+  street_number: z.string(),
+  complement: z.string().optional(),
 });
 
 export const insertDeliveryAreasSchema = createInsertSchema(deliveryAreas);
@@ -197,7 +201,9 @@ export const insertCustomerSchema = z
     state: z.string(),
     neighborhood: z.string(),
     restaurantOwnerId: z.string().optional(),
-    address: z.string(),
+    street: z.string(),
+    street_number: z.string(),
+    complement: z.string().optional(),
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
     repeat_password: z
       .string()

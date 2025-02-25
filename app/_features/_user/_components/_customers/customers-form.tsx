@@ -14,7 +14,7 @@ import { useForm, FieldErrors } from "react-hook-form";
 import { insertDeliverersSchema } from "@/db/schemas";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useCreateDeliverer } from "@/app/_features/_user/_queries/_deliverers/use-create-deliverer";
-import { formatPhoneNumber } from "@/lib/utils";
+import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
 
 type FormData = z.infer<typeof insertDeliverersSchema>;
 
@@ -35,7 +35,7 @@ export const DeliverersForm = ({ isLoading }: { isLoading: boolean }) => {
   };
 
   const onSubmit = (values: FormData) => {
-    mutate(values);
+    mutate({ ...values, phone: removeFormatting(values.phone) });
   };
 
   return (

@@ -43,3 +43,7 @@ export const formatPhoneNumber = (value: string) => {
 
   return formattedNumber;
 };
+
+export const removeFormatting = (phone: string) => {
+  return phone.replace(/\D/g, ""); // Remove tudo que não for número
+};

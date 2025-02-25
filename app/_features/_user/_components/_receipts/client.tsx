@@ -191,7 +191,7 @@ const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
         <Text>Cliente: {receipt.customerName}</Text>
         <Text>Tel: {receipt.customerPhone}</Text>
         <Text>
-          Endereço: {receipt.customerAddress} - {receipt.customerNeighborhood} -{" "}
+          Endereço: {receipt.customerStreet} - {receipt.customerNeighborhood} -{" "}
           {receipt.customerCity} - {receipt.customerState}
         </Text>
 
