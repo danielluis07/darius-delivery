@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Ellipsis, Pencil } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-export const CustomersCellAction = ({ id }: { id: string }) => {
-  console.log(id);
+export const CustomersCellAction = ({ userId }: { userId: string }) => {
+  const router = useRouter();
 
   return (
     <DropdownMenu>
@@ -24,7 +25,7 @@ export const CustomersCellAction = ({ id }: { id: string }) => {
         <DropdownMenuItem
           disabled={false}
           className="cursor-pointer"
-          onClick={() => {}}>
+          onClick={() => router.push(`/dashboard/customers/${userId}`)}>
           <Pencil className="mr-2 size-5" />
           Editar
         </DropdownMenuItem>

@@ -6,6 +6,7 @@ import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import { CustomersCellAction } from "@/app/_features/_user/_components/_customers/cell-action";
 import { format } from "date-fns";
+import { formatPhoneNumber } from "@/lib/utils";
 
 export type ResponseType = InferResponseType<
   (typeof client.api.customers.user)[":userId"]["$get"],
@@ -46,6 +47,9 @@ export const columns: ColumnDef<ResponseType>[] = [
   {
     accessorKey: "phone",
     header: "Telefone",
+    cell: ({ row }) => {
+      return <span>{formatPhoneNumber(row.original.phone || "")}</span>;
+    },
   },
   {
     accessorKey: "createdAt",
@@ -57,6 +61,6 @@ export const columns: ColumnDef<ResponseType>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <CustomersCellAction id={row.original.id} />,
+    cell: ({ row }) => <CustomersCellAction userId={row.original.id} />,
   },
 ];

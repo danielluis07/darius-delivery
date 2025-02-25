@@ -9,6 +9,41 @@ import { verifyAuth } from "@hono/auth-js";
 
 const app = new Hono()
   .get(
+    "/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
+    async (c) => {
+      const { userId } = c.req.valid("param");
+
+      if (!userId) {
+        return c.json({ error: "Missing user id" }, 400);
+      }
+
+      const [data] = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          phone: users.phone,
+          street: customers.street,
+          street_number: customers.street_number,
+          complement: customers.complement,
+          neighborhood: customers.neighborhood,
+          city: customers.city,
+          state: customers.state,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .leftJoin(customers, eq(customers.userId, users.id))
+        .where(eq(customers.userId, userId));
+
+      if (!data) {
+        return c.json({ error: "Customer not found" }, 404);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .get(
     "/user/:userId",
     verifyAuth(),
     zValidator("param", z.object({ userId: z.string().optional() })),
@@ -140,6 +175,68 @@ const app = new Hono()
       }
 
       return c.json({ data });
+    }
+  )
+  .patch(
+    "/:userId",
+    verifyAuth(),
+    zValidator("param", z.object({ userId: z.string().optional() })),
+    zValidator("json", insertLocalCustomerSchema),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { userId } = c.req.valid("param");
+      const {
+        name,
+        email,
+        phone,
+        street,
+        street_number,
+        complement,
+        neighborhood,
+        city,
+        state,
+      } = c.req.valid("json");
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!userId) {
+        return c.json({ error: "Missing user id" }, 400);
+      }
+
+      const [user] = await db
+        .update(users)
+        .set({
+          email,
+          phone,
+          name,
+        })
+        .where(eq(users.id, userId))
+        .returning({ id: users.id });
+
+      if (!user) {
+        return c.json({ error: "Failed to update user" }, 500);
+      }
+
+      const customer = await db
+        .update(customers)
+        .set({
+          street,
+          street_number,
+          complement,
+          neighborhood,
+          city,
+          state,
+        })
+        .where(eq(customers.userId, userId))
+        .returning({ id: customers.id });
+
+      if (!customer) {
+        return c.json({ error: "Failed to update customer" }, 500);
+      }
+
+      return c.json({ user, customer });
     }
   )
   .delete(
