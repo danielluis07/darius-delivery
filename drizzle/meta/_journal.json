@@ -85,6 +85,34 @@
       "when": 1740573326346,
       "tag": "0011_smart_gwen_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1740588025065,
+      "tag": "0012_purple_yellowjacket",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1740588166541,
+      "tag": "0013_melodic_doomsday",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1740588541469,
+      "tag": "0014_early_emma_frost",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1740588603209,
+      "tag": "0015_tough_dexter_bennett",
+      "breakpoints": true
     }
   ]
 }

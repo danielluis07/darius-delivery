@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/collapsible";
 import { RiMotorbikeFill } from "react-icons/ri";
 import { ExtendedUser } from "@/next-auth";
+import Link from "next/link";
 
 const items = [
   {
@@ -101,7 +102,7 @@ const items = [
     label: "Clientes",
   },
   {
-    url: "#",
+    url: "/dashboard/finances",
     icon: CircleDollarSign,
     label: "Financeiro",
   },
@@ -131,23 +132,27 @@ export function UserSidebar({ user }: { user: ExtendedUser }) {
       <SidebarHeader>
         {open ? (
           <div className="relative w-5/6 h-16 mx-auto">
-            <Image
-              src="/darius.png"
-              fill
-              alt="logo"
-              priority
-              sizes="(max-width: 768px) 90vw, (max-width: 1200px) 75vw, 256px"
-            />
+            <Link href="/dashboard">
+              <Image
+                src="/darius.png"
+                fill
+                alt="logo"
+                priority
+                sizes="(max-width: 768px) 90vw, (max-width: 1200px) 75vw, 256px"
+              />
+            </Link>
           </div>
         ) : (
-          <div className="relative w-5/6 h-8 mx-auto">
-            <Image
-              src="/darius-mini.png"
-              fill
-              alt="logo"
-              priority
-              sizes="48px"
-            />
+          <div className="relative w-5/6 h-7 mx-auto">
+            <Link href="/dashboard">
+              <Image
+                src="/darius-mini.png"
+                fill
+                alt="logo"
+                priority
+                sizes="48px"
+              />
+            </Link>
           </div>
         )}
       </SidebarHeader>

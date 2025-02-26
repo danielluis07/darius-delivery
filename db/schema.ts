@@ -51,6 +51,18 @@ export const orderPaymentType = pgEnum("order_payment_type", [
 
 export const orderType = pgEnum("order_type", ["LOCAL", "WEBSITE", "WHATSAPP"]);
 
+export const transactionType = pgEnum("transaction_type", [
+  "PAYMENT",
+  "REFUND",
+  "FEE",
+]);
+
+export const transactionStatus = pgEnum("transaction_status", [
+  "PENDING",
+  "COMPLETED",
+  "FAILED",
+]);
+
 // TABLES
 
 export const users = pgTable("user", {
@@ -330,6 +342,25 @@ export const orderItems = pgTable("order_items", {
   }),
   quantity: integer("quantity").notNull(),
   price: integer("price").notNull(),
+});
+
+export const transactions = pgTable("transactions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  order_id: text("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }),
+  type: transactionType("type").notNull(),
+  amount: integer("amount").notNull(),
+  status: transactionStatus("status").notNull(),
+  //transaction_reference: text("transaction_reference").unique(), // Payment gateway ID
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 export const receipts = pgTable("receipts", {
