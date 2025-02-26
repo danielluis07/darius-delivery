@@ -10,7 +10,7 @@ import {
   users,
   deliverers,
 } from "@/db/schema";
-import { asc, eq, sql } from "drizzle-orm";
+import { asc, eq, inArray, sql, isNull, and } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 
 type Products = {
@@ -36,7 +36,7 @@ const app = new Hono()
       const data = await db
         .select()
         .from(orders)
-        .where(eq(orders.user_id, userId))
+        .where(and(eq(orders.user_id, userId), isNull(orders.delivererId)))
         .orderBy(asc(orders.createdAt));
 
       if (!data || data.length === 0) {
@@ -120,6 +120,40 @@ const app = new Hono()
 
       if (!data) {
         return c.json({ error: "Order not found" }, 404);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .post(
+    "/assignorders",
+    verifyAuth(),
+    zValidator(
+      "json",
+      z.object({
+        ordersIds: z.array(z.string()),
+        delivererId: z.string(),
+      })
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { ordersIds, delivererId } = c.req.valid("json");
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!orders || !delivererId) {
+        return c.json({ error: "Missing orders or deliverer id" }, 400);
+      }
+
+      const data = await db
+        .update(orders)
+        .set({ delivererId: delivererId, updatedAt: new Date() })
+        .where(inArray(orders.id, ordersIds));
+
+      if (!data) {
+        return c.json({ error: "Failed to assign orders" }, 500);
       }
 
       return c.json({ data });

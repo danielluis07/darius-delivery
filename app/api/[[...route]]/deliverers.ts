@@ -2,9 +2,9 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import { deliverers } from "@/db/schema";
+import { deliverers, orders } from "@/db/schema";
 import { insertDeliverersSchema } from "@/db/schemas";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 
 const app = new Hono()
@@ -24,10 +24,22 @@ const app = new Hono()
         return c.json({ error: "Missing user id" }, 400);
       }
 
+      // Fetch deliverers with their assigned order count
       const data = await db
-        .select()
+        .select({
+          id: deliverers.id,
+          name: deliverers.name,
+          phone: deliverers.phone,
+          vehicle: deliverers.vehicle,
+          vehicle_plate: deliverers.vehicle_plate,
+          createdAt: deliverers.createdAt,
+          updatedAt: deliverers.updatedAt,
+          order_count: sql<number>`COUNT(${orders.id})`.as("order_count"),
+        })
         .from(deliverers)
-        .where(eq(deliverers.user_id, userId));
+        .leftJoin(orders, eq(deliverers.id, orders.delivererId))
+        .where(eq(deliverers.user_id, userId))
+        .groupBy(deliverers.id);
 
       if (!data || data.length === 0) {
         return c.json({ error: "No deliverers found" }, 404);

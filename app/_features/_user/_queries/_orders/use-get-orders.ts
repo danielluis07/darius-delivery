@@ -4,7 +4,7 @@ import { client } from "@/lib/hono";
 export const useGetOrders = (userId: string) => {
   const query = useQuery({
     enabled: !!userId,
-    queryKey: ["orders"],
+    queryKey: ["orders", userId],
     queryFn: async () => {
       const res = await client.api.orders.user[":userId"].$get({
         param: { userId },

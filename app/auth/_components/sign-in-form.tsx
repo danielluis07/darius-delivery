@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   Card,
   CardContent,
@@ -33,6 +33,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 type FormData = z.infer<typeof credentialsSignInSchema>;
 
 export const SignInForm = () => {
+  const [isMounted, setIsMounted] = useState<boolean>(false);
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
     resolver: zodResolver(credentialsSignInSchema),
@@ -72,6 +73,15 @@ export const SignInForm = () => {
         });
     });
   };
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <Card className="w-[350px]">
       <CardHeader>

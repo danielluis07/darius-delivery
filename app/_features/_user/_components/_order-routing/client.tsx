@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -12,6 +12,9 @@ import { useUpdateOrderStatus } from "@/app/_features/_user/_queries/_order-rout
 import { Separator } from "@/components/ui/separator";
 import { useGetDeliverers } from "@/app/_features/_user/_queries/_deliverers/use-get-deliverers";
 import { RiMotorbikeFill } from "react-icons/ri";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { useAssignDeliverers } from "@/app/_features/_user/_queries/_orders/use-assign-deliverers";
 
 const mapContainerStyle = {
   width: "100%",
@@ -34,16 +37,40 @@ export const OrderRoutingClient = ({
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apiKey,
   });
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const [selectedDeliverer, setSelectedDeliverer] = useState<string | null>(
+    null
+  );
+
   const { data: ordersData, isLoading: ordersLoading } = useGetOrders(userId);
   const { data: deliverersData, isLoading: deliverersLoading } =
     useGetDeliverers(userId);
   const { mutate } = useUpdateOrderStatus();
-  const [latitude, setLatitude] = React.useState<number>(center.lat);
-  const [longitude, setLongitude] = React.useState<number>(center.lng);
+  const { mutate: assignDeliverers } = useAssignDeliverers(userId);
+  const [latitude, setLatitude] = useState<number>(center.lat);
+  const [longitude, setLongitude] = useState<number>(center.lng);
+
+  const toggleOrderSelection = (orderId: string) => {
+    setSelectedOrders((prev) =>
+      prev.includes(orderId)
+        ? prev.filter((id) => id !== orderId)
+        : [...prev, orderId]
+    );
+  };
+
+  const selectDeliverer = (delivererId: string) => {
+    if (selectedOrders.length === 0) return;
+    setSelectedDeliverer((prev) => (prev === delivererId ? null : delivererId));
+  };
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Tem certeza?",
     "Você está prestes a mudar o status do pedido para finalizado"
+  );
+
+  const [AssignmentDialog, assignmentConfirm] = useConfirm(
+    "Tem certeza?",
+    "Você está prestes a atribuir os pedidos ao entregador"
   );
 
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -76,9 +103,6 @@ export const OrderRoutingClient = ({
     }
   }, []);
 
-  console.log("latitude", latitude);
-  console.log("longitude", longitude);
-
   if (loadError)
     return (
       <div className="text-red-500">
@@ -88,6 +112,7 @@ export const OrderRoutingClient = ({
   if (!isLoaded) return <Skeleton className="h-[300px]" />;
   return (
     <>
+      <AssignmentDialog />
       <ConfirmDialog />
       <div className="relative">
         <GoogleMap
@@ -196,7 +221,11 @@ export const OrderRoutingClient = ({
                             <Check />
                           </div>
                         ) : (
-                          <div className="w-6 text-center">-</div>
+                          <Checkbox
+                            onCheckedChange={() =>
+                              toggleOrderSelection(order.id)
+                            }
+                          />
                         )}
                       </div>
                     </div>
@@ -229,13 +258,22 @@ export const OrderRoutingClient = ({
                   {deliverers.map((deliverer) => (
                     <div
                       key={deliverer.id}
-                      className="border-b border-gray-200 pb-2 mb-2">
+                      onClick={() => selectDeliverer(deliverer.id)}
+                      className={cn(
+                        selectedDeliverer === deliverer.id &&
+                          selectedOrders.length > 0
+                          ? "border-gray-400"
+                          : "border-gray-200",
+                        "border pb-2 mb-2 cursor-pointer px-2 py-3 rounded-sm"
+                      )}>
                       <div className="flex items-center justify-between">
                         <div>
                           <RiMotorbikeFill className="text-gray-500" />
                         </div>
                         <div>{deliverer.name}</div>
-                        <div className="text-xs text-gray-400">0</div>
+                        <div className="flex items-center justify-center text-xs text-white bg-error size-6 rounded-full">
+                          {deliverer.order_count}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -243,6 +281,25 @@ export const OrderRoutingClient = ({
               </div>
             )}
           </div>
+        )}
+
+        {selectedOrders.length > 0 && selectedDeliverer && (
+          <Button
+            onClick={async () => {
+              const ok = await assignmentConfirm();
+
+              if (ok) {
+                assignDeliverers({
+                  delivererId: selectedDeliverer,
+                  ordersIds: selectedOrders,
+                });
+                selectDeliverer("");
+                setSelectedOrders([]);
+              }
+            }}
+            className="absolute bottom-2 right-2">
+            Entregar Pedido
+          </Button>
         )}
       </div>
     </>
