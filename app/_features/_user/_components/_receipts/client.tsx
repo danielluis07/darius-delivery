@@ -104,7 +104,7 @@ export const ReceiptsClient = ({ userId }: { userId: string }) => {
                   onClick={() => openDialog(receipt)}
                   className="mt-4"
                   variant="secondary">
-                  Preview
+                  Imprimir
                 </Button>
               </Card>
             );
