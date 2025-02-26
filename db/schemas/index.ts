@@ -121,6 +121,7 @@ export const updateOrderSchema = z.object({
     "FINISHED",
     "IN_TRANSIT",
     "DELIVERED",
+    "CANCELLED",
   ]),
   type: z.enum(["LOCAL", "WEBSITE", "WHATSAPP"]),
   payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]),
