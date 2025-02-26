@@ -10,6 +10,7 @@ import {
   deliveryAreas,
   deliverers,
   combos,
+  pixels,
 } from "@/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 
@@ -67,6 +68,8 @@ export const insertDeliveryAreaKmSchema = baseDeliveryAreaKmSchema.extend({
     })
   ),
 });
+
+export const insertPixelsSchema = createInsertSchema(pixels);
 
 const baseCreateProductSchema = createInsertSchema(products);
 

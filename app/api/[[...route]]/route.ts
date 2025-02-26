@@ -13,6 +13,7 @@ import deliverers from "@/app/api/[[...route]]/deliverers";
 import customers from "@/app/api/[[...route]]/customers";
 import receipts from "@/app/api/[[...route]]/receipts";
 import combos from "@/app/api/[[...route]]/combos";
+import pixels from "@/app/api/[[...route]]/pixels";
 
 export const runtime = "nodejs";
 
@@ -39,7 +40,8 @@ const routes = app
   .route("/deliverers", deliverers)
   .route("/customers", customers)
   .route("/receipts", receipts)
-  .route("/combos", combos);
+  .route("/combos", combos)
+  .route("/pixels", pixels);
 
 export const GET = handle(app);
 export const POST = handle(app);

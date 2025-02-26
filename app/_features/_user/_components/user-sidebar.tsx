@@ -117,7 +117,7 @@ const items = [
     label: "Impressão de Comandas",
   },
   {
-    url: "#",
+    url: "/dashboard/pixels",
     icon: ChartPie,
     label: "Pixels",
   },
