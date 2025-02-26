@@ -31,7 +31,7 @@ export const useAssignDeliverers = (userId: string) => {
     },
 
     onMutate: async (json) => {
-      queryClient.cancelQueries({ queryKey: ["orders", userId] });
+      queryClient.cancelQueries({ queryKey: ["routing-orders", userId] });
 
       const previousOrders = queryClient.getQueryData<Orders>([
         "orders",
@@ -39,7 +39,7 @@ export const useAssignDeliverers = (userId: string) => {
       ]);
 
       queryClient.setQueryData(
-        ["orders", userId],
+        ["routing-orders", userId],
         (oldOrders: Orders | undefined) => {
           if (!oldOrders) return [];
 
@@ -73,7 +73,7 @@ export const useAssignDeliverers = (userId: string) => {
 
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["deliverers", userId] });
-      queryClient.invalidateQueries({ queryKey: ["orders", userId] });
+      queryClient.invalidateQueries({ queryKey: ["routing-orders", userId] });
     },
   });
 

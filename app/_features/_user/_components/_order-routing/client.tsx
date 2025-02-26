@@ -5,7 +5,6 @@ import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useGetOrders } from "@/app/_features/_user/_queries/_orders/use-get-orders";
 import { Check } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useUpdateOrderStatus } from "@/app/_features/_user/_queries/_order-routing/use-update-order-status";
@@ -15,6 +14,7 @@ import { RiMotorbikeFill } from "react-icons/ri";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useAssignDeliverers } from "@/app/_features/_user/_queries/_orders/use-assign-deliverers";
+import { useGetRoutingOrders } from "@/app/_features/_user/_queries/_order-routing/use-get-routing-orders";
 
 const mapContainerStyle = {
   width: "100%",
@@ -42,7 +42,8 @@ export const OrderRoutingClient = ({
     null
   );
 
-  const { data: ordersData, isLoading: ordersLoading } = useGetOrders(userId);
+  const { data: ordersData, isLoading: ordersLoading } =
+    useGetRoutingOrders(userId);
   const { data: deliverersData, isLoading: deliverersLoading } =
     useGetDeliverers(userId);
   const { mutate } = useUpdateOrderStatus();

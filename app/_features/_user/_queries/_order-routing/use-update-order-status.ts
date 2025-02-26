@@ -12,7 +12,7 @@ type Orders = InferResponseType<
   200
 >["data"];
 
-export const useUpdateOrderStatus = () => {
+export const useUpdateOrderStatus = (userId?: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<
@@ -25,7 +25,8 @@ export const useUpdateOrderStatus = () => {
         | "PREPARING"
         | "FINISHED"
         | "IN_TRANSIT"
-        | "DELIVERED";
+        | "DELIVERED"
+        | "CANCELLED";
     }
   >({
     mutationFn: async ({ orderId, status }) => {
@@ -43,7 +44,7 @@ export const useUpdateOrderStatus = () => {
           order.id === orderId ? { ...order, status } : order
         );
       });
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["orders", userId] });
     },
     onError: () => {
       toast.error("Houve um erro ao atualizar o pedido!");
