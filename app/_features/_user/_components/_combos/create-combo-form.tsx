@@ -289,6 +289,7 @@ export const CreateComboForm = ({ products }: { products: Products }) => {
           />
         </div>
         <div className="flex flex-col gap-5 text-gray-500">
+          <p className="text-lg">{form.watch("name")}</p>
           <p>{form.watch("description")}</p>
           {selectedProductNames.length > 0 && (
             <p>{selectedProductNames.join(" + ")}</p>

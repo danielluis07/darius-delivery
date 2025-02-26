@@ -196,15 +196,7 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      if (
-        !orderId ||
-        !delivererId ||
-        !status ||
-        !payment_status ||
-        !type ||
-        !delivery_deadline ||
-        !pickup_deadline
-      ) {
+      if (!orderId || !delivererId || !status || !payment_status || !type) {
         return c.json({ error: "Missing data or orderId" }, 400);
       }
 

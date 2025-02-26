@@ -169,8 +169,12 @@ export const OrderRoutingClient = ({
         ) : (
           <div className="absolute top-3 left-2 bg-gray-100 p-2 shadow-lg rounded-md w-[300px] h-[350px] overflow-y-auto z-10">
             {orders.length === 0 ? (
-              <div className="flex items-center justify-center text-gray-500 h-[250px]">
-                Nenhum pedido encontrado
+              <div className="w-full">
+                <h3 className="ml-1 font-semibold">Pedidos</h3>
+                <Separator />
+                <div className="flex items-center justify-center text-gray-500 h-[250px]">
+                  Nenhum pedido encontrado
+                </div>
               </div>
             ) : (
               <div className="w-full">

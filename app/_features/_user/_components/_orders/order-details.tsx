@@ -79,7 +79,7 @@ export const OrderDetails = ({
   const deliverers = deliverersData || [];
 
   useEffect(() => {
-    if (data && deliverersData) {
+    if (data) {
       reset({
         status: data.order.status,
         delivererId: data.deliverer?.id,
@@ -89,7 +89,7 @@ export const OrderDetails = ({
         pickup_deadline: data.order.pickup_deadline || 0,
       });
     }
-  }, [data, deliverersData, reset]);
+  }, [data, reset]);
 
   const statusColors: Record<string, string> = {
     ACCEPTED: "bg-blue-500 text-white",
@@ -371,7 +371,7 @@ export const OrderDetails = ({
                         defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione o tipo do pedido" />
+                            <SelectValue />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -429,7 +429,7 @@ export const OrderDetails = ({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="PREPARING">Preparando</SelectItem>
-                          <SelectItem value="DELIVERING">
+                          <SelectItem value="IN_TRANSIT">
                             Em trânsito
                           </SelectItem>
                           <SelectItem value="DELIVERED">Entregue</SelectItem>
