@@ -50,6 +50,9 @@ export const OrderRoutingClient = ({
   const [latitude, setLatitude] = useState<number>(center.lat);
   const [longitude, setLongitude] = useState<number>(center.lng);
 
+  console.log(latitude);
+  console.log(longitude);
+
   const toggleOrderSelection = (orderId: string) => {
     setSelectedOrders((prev) =>
       prev.includes(orderId)
