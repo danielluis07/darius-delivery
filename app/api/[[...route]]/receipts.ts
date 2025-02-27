@@ -14,12 +14,12 @@ import { eq, sql } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 import { alias } from "drizzle-orm/pg-core";
 
-interface OrderItem {
+type OrderItem = {
   id: number;
   productName: string;
   quantity: number;
   price: number;
-}
+};
 
 const app = new Hono().get(
   "/user/:userId",
@@ -65,16 +65,16 @@ const app = new Hono().get(
       ))`.as("orderItems"),
       })
       .from(receipts)
-      .leftJoin(users, eq(receipts.user_id, users.id)) // This is likely the restaurant owner
+      .leftJoin(users, eq(receipts.user_id, users.id))
       .leftJoin(orders, eq(receipts.order_id, orders.id))
       .leftJoin(customers, eq(orders.customer_id, customers.userId))
-      .leftJoin(customersUser, eq(customers.userId, customersUser.id)) // Join actual customer user info
+      .leftJoin(customersUser, eq(customers.userId, customersUser.id))
       .leftJoin(orderItems, eq(orders.id, orderItems.order_id))
       .leftJoin(products, eq(orderItems.product_id, products.id))
       .where(eq(users.id, userId))
       .groupBy(
         receipts.id,
-        customersUser.name, // Make sure to group by the correct user alias
+        customersUser.name,
         customersUser.email,
         customersUser.phone,
         orders.total_price,

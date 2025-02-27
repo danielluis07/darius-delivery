@@ -1,5 +1,6 @@
 "use client";
 
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,6 +13,7 @@ import {
   Ellipsis,
   Plus,
   Route,
+  Printer,
 } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -28,6 +30,29 @@ import { useUpdateOrderStatus } from "@/app/_features/_user/_queries/_order-rout
 import { useGetOrders } from "../../_queries/_orders/use-get-orders";
 import Link from "next/link";
 import { useState } from "react";
+import { useDialogStore } from "@/hooks/use-receipt-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  PDFViewer,
+} from "@react-pdf/renderer";
+import { InferResponseType } from "hono";
+import { client } from "@/lib/hono";
+
+export type Receipt = InferResponseType<
+  (typeof client.api.receipts.user)[":userId"]["$get"],
+  200
+>["data"];
 
 const orderStatus: Array<
   | "ACCEPTED"
@@ -46,16 +71,23 @@ const orderStatus: Array<
 ];
 
 export const OrdersClient = ({ userId }: { userId: string }) => {
-  const [open, setOpen] = useState<boolean>(false);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { data, isLoading } = useGetOrders(userId);
   const { mutate, isPending } = useUpdateOrderStatus(userId);
+  const { isOpen, receipt, openDialog, closeDialog } = useDialogStore();
   const router = useRouter();
 
   const ordersData = data || [];
 
-  const orders = ordersData.filter((order) => order.status !== "FINISHED");
+  const orders = ordersData.filter(
+    (item) =>
+      item.order.status !== "FINISHED" && item.order.status !== "IN_TRANSIT"
+  );
+  const ordersInTransit = ordersData.filter(
+    (item) => item.order.status === "IN_TRANSIT"
+  );
   const finishedOrders = ordersData.filter(
-    (order) => order.status === "FINISHED"
+    (item) => item.order.status === "FINISHED"
   );
 
   const [ConfirmStatusDialog, confirmStatus] = useConfirm(
@@ -130,21 +162,24 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
             </Link>
           </div>
         </div>
-        <div className="grid md:grid-cols-2 gap-6 mt-10">
+        <div className="grid md:grid-cols-3 gap-4 mt-10">
           {/* Preparing Orders */}
           <Card className="p-4">
             <h3 className="text-lg font-semibold mb-3">Em Preparo</h3>
             <ScrollArea className="h-64">
               {orders.length > 0 ? (
-                orders.map((order) => (
-                  <div key={order.id} className="p-3 border rounded-lg mb-3">
+                orders.map((item) => (
+                  <div
+                    key={item.order.id}
+                    className="p-3 border rounded-lg mb-3">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">
-                        Pedido #{order.number}
+                        Pedido #{item.order.number}
                       </span>
-                      <Badge className={cn(statusColors[order.status], "px-2")}>
-                        {statusIcons[order.status]}{" "}
-                        {statusTranslations[order.status]}
+                      <Badge
+                        className={cn(statusColors[item.order.status], "px-2")}>
+                        {statusIcons[item.order.status]}{" "}
+                        {statusTranslations[item.order.status]}
                       </Badge>
                     </div>
                     <Separator className="my-2" />
@@ -152,22 +187,33 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                       <div>
                         <p className="text-sm text-gray-800">
                           <span className="font-semibold">Total:</span>{" "}
-                          {formatCurrencyFromCents(order.total_price)}
+                          {formatCurrencyFromCents(item.order.total_price)}
                         </p>
                         <p className="text-xs text-gray-500">
                           <span className="font-semibold">Tipo:</span>{" "}
-                          {order.type}
+                          {item.order.type}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
                         <div
                           className="cursor-pointer text-gray-500 hover:bg-accent hover:text-accent-foreground rounded-sm p-1"
                           onClick={() =>
-                            router.push(`/dashboard/orders/${order.id}`)
+                            router.push(`/dashboard/orders/${item.order.id}`)
                           }>
                           <ClipboardPen />
                         </div>
-                        <DropdownMenu open={open} onOpenChange={setOpen}>
+                        <div
+                          className="cursor-pointer text-gray-500 hover:bg-accent hover:text-accent-foreground rounded-sm p-1"
+                          onClick={() =>
+                            openDialog(item.receipt as Receipt[number])
+                          }>
+                          <Printer />
+                        </div>
+                        <DropdownMenu
+                          open={openDropdownId === item.order.id}
+                          onOpenChange={(isOpen) => {
+                            setOpenDropdownId(isOpen ? item.order.id : null);
+                          }}>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
                               <span className="sr-only">Abrir menu</span>
@@ -179,19 +225,22 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                               Mudar Status
                             </div>
                             <Separator />
-                            {orderStatus.map((item, i) => (
+                            {orderStatus.map((status, i) => (
                               <DropdownMenuItem
                                 key={i}
                                 disabled={isPending}
                                 className="cursor-pointer text-xs"
                                 onClick={async () => {
-                                  setOpen(false); // Close dropdown before opening dialog
+                                  setOpenDropdownId(null); // Close dropdown
                                   const ok = await confirmStatus();
                                   if (ok) {
-                                    mutate({ orderId: order.id, status: item });
+                                    mutate({
+                                      orderId: item.order.id,
+                                      status: status,
+                                    });
                                   }
                                 }}>
-                                {statusTranslations[item]}
+                                {statusTranslations[status]}
                               </DropdownMenuItem>
                             ))}
                           </DropdownMenuContent>
@@ -208,16 +257,103 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
             </ScrollArea>
           </Card>
 
+          {/* In Transit Orders */}
+          <Card className="p-4">
+            <h3 className="text-lg font-semibold mb-3">Em Trânsito</h3>
+            <ScrollArea className="h-64">
+              {ordersInTransit.length > 0 ? (
+                ordersInTransit.map((item) => (
+                  <div
+                    key={item.order.id}
+                    className="p-3 border rounded-lg mb-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">
+                        Pedido #{item.order.number}
+                      </span>
+                      <Badge className={cn(statusColors["IN_TRANSIT"], "px-2")}>
+                        {statusIcons["IN_TRANSIT"]} Em Trânsito
+                      </Badge>
+                    </div>
+                    <Separator className="my-2" />
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-sm text-gray-800">
+                          <span className="font-semibold">Total:</span>{" "}
+                          {formatCurrencyFromCents(item.order.total_price)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          <span className="font-semibold">Tipo:</span>{" "}
+                          {item.order.type}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <div
+                          className="cursor-pointer text-gray-500 hover:bg-accent hover:text-accent-foreground rounded-sm p-1"
+                          onClick={() =>
+                            router.push(`/dashboard/orders/${item.order.id}`)
+                          }>
+                          <ClipboardPen />
+                        </div>
+                        <DropdownMenu
+                          open={openDropdownId === item.order.id}
+                          onOpenChange={(isOpen) => {
+                            setOpenDropdownId(isOpen ? item.order.id : null);
+                          }}>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Abrir menu</span>
+                              <Ellipsis className="size-5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <div className="flex justify-center text-sm font-semibold p-2">
+                              Mudar Status
+                            </div>
+                            <Separator />
+                            {orderStatus.map((status, i) => (
+                              <DropdownMenuItem
+                                key={i}
+                                disabled={isPending}
+                                className="cursor-pointer text-xs"
+                                onClick={async () => {
+                                  setOpenDropdownId(null); // Close dropdown
+                                  const ok = await confirmStatus();
+                                  if (ok) {
+                                    mutate({
+                                      orderId: item.order.id,
+                                      status: status,
+                                    });
+                                  }
+                                }}>
+                                {statusTranslations[status]}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">
+                  Nenhum pedido finalizado.
+                </p>
+              )}
+            </ScrollArea>
+          </Card>
+
           {/* Finished Orders */}
           <Card className="p-4">
             <h3 className="text-lg font-semibold mb-3">Finalizados</h3>
             <ScrollArea className="h-64">
               {finishedOrders.length > 0 ? (
-                finishedOrders.map((order) => (
-                  <div key={order.id} className="p-3 border rounded-lg mb-3">
+                finishedOrders.map((item) => (
+                  <div
+                    key={item.order.id}
+                    className="p-3 border rounded-lg mb-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">
-                        Pedido #{order.number}
+                        Pedido #{item.order.number}
                       </span>
                       <Badge className={cn(statusColors["FINISHED"], "px-2")}>
                         {statusIcons["FINISHED"]} Finalizado
@@ -228,17 +364,17 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                       <div>
                         <p className="text-sm text-gray-800">
                           <span className="font-semibold">Total:</span>{" "}
-                          {formatCurrencyFromCents(order.total_price)}
+                          {formatCurrencyFromCents(item.order.total_price)}
                         </p>
                         <p className="text-xs text-gray-500">
                           <span className="font-semibold">Tipo:</span>{" "}
-                          {order.type}
+                          {item.order.type}
                         </p>
                       </div>
                       <div
                         className="cursor-pointer text-gray-500"
                         onClick={() =>
-                          router.push(`/dashboard/orders/${order.id}`)
+                          router.push(`/dashboard/orders/${item.order.id}`)
                         }>
                         <ClipboardPen />
                       </div>
@@ -254,6 +390,126 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
           </Card>
         </div>
       </div>
+      {/* Dialog for Previewing the Receipt */}
+      <Dialog open={isOpen} onOpenChange={closeDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <VisuallyHidden.Root>
+              <DialogTitle>Receipt Preview</DialogTitle>
+            </VisuallyHidden.Root>
+            <VisuallyHidden.Root>
+              <DialogDescription>
+                View the full receipt details
+              </DialogDescription>
+            </VisuallyHidden.Root>
+          </DialogHeader>
+          {receipt && (
+            <PDFViewer style={{ width: "100%", height: "500px" }}>
+              <ReceiptPDF receipt={receipt} />
+            </PDFViewer>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
+  );
+};
+
+const styles = StyleSheet.create({
+  page: { padding: 20, fontSize: 10, fontFamily: "Courier" },
+  section: { marginBottom: 10 },
+  header: { textAlign: "center", fontSize: 16, fontWeight: "bold" },
+  subheader: { textAlign: "center", fontSize: 10 },
+  dashedLine: { borderBottom: "1px dashed black", marginVertical: 5 },
+  boldText: { fontWeight: "bold" },
+  flexRow: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  productRow: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 2,
+  },
+});
+
+const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
+  const totalPrice = receipt.orderTotalPrice || 0;
+  const paymentTypeTranslation: Record<string, string> = {
+    CASH: "Dinheiro",
+    CREDIT_CARD: "Cartão de Crédito",
+    DEBIT_CARD: "Cartão de Débito",
+    PIX: "PIX",
+  };
+
+  const paymentStatusTranslations: Record<string, string> = {
+    PENDING: "Aguardando",
+    PAID: "Pago",
+  };
+  return (
+    <Document>
+      <Page size="A6" style={styles.page}>
+        <View style={styles.section}>
+          <Text style={styles.header}>Nome da Loja</Text>
+          <Text style={styles.subheader}>(11) 0000-0000</Text>
+        </View>
+
+        <View style={styles.flexRow}>
+          <Text style={[styles.boldText, { fontSize: 12 }]}>Pedido</Text>
+          <Text style={[styles.boldText, { fontSize: 12 }]}>
+            nº {receipt.number}
+          </Text>
+        </View>
+        <Text>Origem: Online</Text>
+        <View style={styles.dashedLine}></View>
+
+        <Text>Cliente: {receipt.customerName}</Text>
+        <Text>Tel: {receipt.customerPhone}</Text>
+        <Text>
+          Endereço: {receipt.customerStreet} - {receipt.customerNeighborhood} -{" "}
+          {receipt.customerCity} - {receipt.customerState}
+        </Text>
+
+        <View style={styles.dashedLine}></View>
+        <Text style={styles.boldText}>Produtos</Text>
+        <View style={styles.dashedLine}></View>
+        {receipt.orderItems.map((item, index) => (
+          <View key={index} style={styles.productRow}>
+            <View>
+              <Text style={styles.boldText}>{item.productName}</Text>
+              <Text>
+                {item.quantity}x {formatCurrencyFromCents(item.price)}
+              </Text>
+            </View>
+            <Text style={styles.boldText}>
+              {formatCurrencyFromCents(item.quantity * item.price)}
+            </Text>
+          </View>
+        ))}
+
+        <View style={styles.dashedLine}></View>
+        <View style={styles.flexRow}>
+          <Text style={[styles.boldText, { fontSize: 12 }]}>Total</Text>
+          <Text style={[styles.boldText, { fontSize: 12 }]}>
+            {formatCurrencyFromCents(totalPrice)}
+          </Text>
+        </View>
+        <View style={styles.flexRow}>
+          <Text>Forma de Pagamento</Text>
+          <Text>
+            {paymentTypeTranslation[receipt.orderPaymentType ?? ""] ||
+              "Não informado"}
+          </Text>
+        </View>
+        <View style={styles.flexRow}>
+          <Text>Status do Pagamento</Text>
+          <Text>
+            {paymentStatusTranslations[receipt.orderPaymentStatus ?? ""] ||
+              "Não informado"}
+          </Text>
+        </View>
+      </Page>
+    </Document>
   );
 };

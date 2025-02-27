@@ -9,9 +9,11 @@ import {
   customers,
   users,
   deliverers,
+  receipts,
 } from "@/db/schema";
 import { asc, eq, inArray, sql, isNull, and } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
+import { alias } from "drizzle-orm/pg-core";
 
 type Products = {
   id: number;
@@ -20,6 +22,13 @@ type Products = {
   quantity: number;
   description: string;
   image: string;
+};
+
+type OrderItem = {
+  id: number;
+  productName: string;
+  quantity: number;
+  price: number;
 };
 
 const app = new Hono()
@@ -33,10 +42,58 @@ const app = new Hono()
         return c.json({ error: "Missing user id" }, 400);
       }
 
+      const customersUser = alias(users, "customersUser");
+
       const data = await db
-        .select()
+        .select({
+          order: orders,
+          receipt: {
+            id: receipts.id,
+            number: receipts.receipt_number,
+            orderNumber: orders.number,
+            createdAt: receipts.createdAt,
+            customerName: customersUser.name, // Get the actual customer name
+            customerEmail: customersUser.email,
+            customerPhone: customersUser.phone,
+            customerId: customers.id,
+            customerCity: customers.city,
+            customerState: customers.state,
+            customerNeighborhood: customers.neighborhood,
+            customerStreet: customers.street,
+            orderTotalPrice: orders.total_price,
+            orderPaymentType: orders.payment_type,
+            orderPaymentStatus: orders.payment_status,
+            orderStatus: orders.status,
+            orderItems: sql<OrderItem[]>`json_agg(json_build_object(
+                      'id', ${orderItems.id}, 
+                      'productName', ${products.name}, 
+                      'quantity', ${orderItems.quantity}, 
+                      'price', ${orderItems.price}
+                  ))`.as("orderItems"),
+          },
+        })
         .from(orders)
+        .leftJoin(receipts, eq(receipts.order_id, orders.id))
+        .leftJoin(users, eq(orders.user_id, users.id)) // Ensure correct restaurant owner
+        .leftJoin(customers, eq(orders.customer_id, customers.userId))
+        .leftJoin(customersUser, eq(customers.userId, customersUser.id)) // Alias for customer users
+        .leftJoin(orderItems, eq(orders.id, orderItems.order_id))
+        .leftJoin(products, eq(orderItems.product_id, products.id))
         .where(eq(orders.user_id, userId))
+        .groupBy(
+          orders.id,
+          receipts.id,
+          receipts.receipt_number,
+          receipts.createdAt,
+          customers.id,
+          customersUser.name,
+          customersUser.email,
+          customersUser.phone,
+          customers.city,
+          customers.state,
+          customers.neighborhood,
+          customers.street
+        )
         .orderBy(asc(orders.createdAt));
 
       if (!data || data.length === 0) {
