@@ -48,6 +48,7 @@ import {
 } from "@react-pdf/renderer";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
+import { useGetOrdersReceipts } from "../../_queries/_orders/use-get-orders-receipts";
 
 export type Receipt = InferResponseType<
   (typeof client.api.receipts.user)[":userId"]["$get"],
@@ -72,7 +73,7 @@ const orderStatus: Array<
 
 export const OrdersClient = ({ userId }: { userId: string }) => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const { data, isLoading } = useGetOrders(userId);
+  const { data, isLoading } = useGetOrdersReceipts(userId);
   const { mutate, isPending } = useUpdateOrderStatus(userId);
   const { isOpen, receipt, openDialog, closeDialog } = useDialogStore();
   const router = useRouter();

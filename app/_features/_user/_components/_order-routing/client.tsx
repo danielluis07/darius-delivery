@@ -46,7 +46,7 @@ export const OrderRoutingClient = ({
     useGetRoutingOrders(userId);
   const { data: deliverersData, isLoading: deliverersLoading } =
     useGetDeliverers(userId);
-  const { mutate } = useUpdateOrderStatus();
+  const { mutate } = useUpdateOrderStatus(userId);
   const { mutate: assignDeliverers } = useAssignDeliverers(userId);
   const [latitude, setLatitude] = useState<number>(center.lat);
   const [longitude, setLongitude] = useState<number>(center.lng);

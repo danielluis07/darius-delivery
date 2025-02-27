@@ -42,6 +42,29 @@ const app = new Hono()
         return c.json({ error: "Missing user id" }, 400);
       }
 
+      const data = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.user_id, userId))
+        .orderBy(asc(orders.createdAt));
+
+      if (!data || data.length === 0) {
+        return c.json({ error: "No orders found" }, 404);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .get(
+    "/ordersreceipts/user/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
+    async (c) => {
+      const { userId } = c.req.valid("param");
+
+      if (!userId) {
+        return c.json({ error: "Missing user id" }, 400);
+      }
+
       const customersUser = alias(users, "customersUser");
 
       const data = await db

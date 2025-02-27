@@ -38,12 +38,15 @@ export const useUpdateOrderStatus = (userId?: string) => {
     },
     onSuccess: (_, { orderId, status }) => {
       toast.success("Pedido atualizado!");
-      queryClient.setQueryData(["orders"], (oldData: Orders) => {
-        if (!oldData) return oldData;
-        return oldData.map((order) =>
-          order.id === orderId ? { ...order, status } : order
-        );
-      });
+      queryClient.setQueryData(
+        ["routing-orders", userId],
+        (oldData: Orders) => {
+          if (!oldData) return oldData;
+          return oldData.map((order) =>
+            order.id === orderId ? { ...order, status } : order
+          );
+        }
+      );
       queryClient.invalidateQueries({ queryKey: ["orders", userId] });
     },
     onError: () => {
