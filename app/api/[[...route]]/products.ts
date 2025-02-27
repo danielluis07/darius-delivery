@@ -3,7 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
 import { products } from "@/db/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 
 const app = new Hono()
   .get(
@@ -53,6 +53,28 @@ const app = new Hono()
 
       if (!data || data.length === 0) {
         return c.json({ error: "No products found" }, 404);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .get(
+    "/count/:userId",
+    zValidator("param", z.object({ userId: z.string() })),
+    async (c) => {
+      const { userId } = c.req.valid("param");
+
+      if (!userId) {
+        return c.json({ error: "Missing user ID" }, 400);
+      }
+
+      const [data] = await db
+        .select({ count: count() })
+        .from(products)
+        .where(eq(products.userId, userId));
+
+      if (!data) {
+        return c.json({ error: "No orders found" }, 404);
       }
 
       return c.json({ data });

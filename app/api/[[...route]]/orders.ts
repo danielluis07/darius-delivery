@@ -11,7 +11,17 @@ import {
   deliverers,
   receipts,
 } from "@/db/schema";
-import { asc, eq, inArray, sql, isNull, and } from "drizzle-orm";
+import {
+  asc,
+  eq,
+  inArray,
+  sql,
+  isNull,
+  and,
+  gte,
+  lte,
+  count,
+} from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 import { alias } from "drizzle-orm/pg-core";
 import { insertOrderSchema } from "@/db/schemas";
@@ -230,28 +240,68 @@ const app = new Hono()
     }
   )
   .get(
-    "/repurchaseindex",
-    zValidator("param", z.object({ userId: z.string().optional() })), // Agora userId é obrigatório
+    "/ordersperday/:userId",
+    zValidator("param", z.object({ userId: z.string() })), // Validate userId
+    zValidator(
+      "query",
+      z.object({
+        from: z.string().refine((val) => !isNaN(Date.parse(val)), {
+          message: "Invalid date format",
+        }),
+        to: z.string().refine((val) => !isNaN(Date.parse(val)), {
+          message: "Invalid date format",
+        }),
+      })
+    ),
+    async (c) => {
+      const { userId } = c.req.valid("param");
+      const { from, to } = c.req.valid("query");
+
+      if (!userId) {
+        return c.json({ error: "Missing user ID" }, 400);
+      }
+
+      if (!from || !to) {
+        return c.json({ error: "Missing date range" }, 400);
+      }
+
+      const data = await db
+        .select({
+          date: sql`DATE(${orders.createdAt})`.as("date"),
+          count: sql<number>`COUNT(*)`.as("order_count"),
+        })
+        .from(orders)
+        .where(
+          and(
+            eq(orders.user_id, userId),
+            gte(orders.createdAt, new Date(from)), // Convert string to Date
+            lte(orders.createdAt, new Date(to)) // Convert string to Date
+          )
+        )
+        .groupBy(sql`DATE(${orders.createdAt})`)
+        .orderBy(sql`DATE(${orders.createdAt})`);
+
+      return c.json({ data });
+    }
+  )
+  .get(
+    "/count/:userId",
+    zValidator("param", z.object({ userId: z.string() })),
     async (c) => {
       const { userId } = c.req.valid("param");
 
-      const data = await db.execute(
-        sql`
-        SELECT 
-          TO_CHAR(o.created_at, 'YYYY-MM') AS month, 
-          COUNT(DISTINCT o.customer_id) AS total_customers, 
-          COUNT(o.customer_id) FILTER (WHERE o.customer_id IN (
-              SELECT customer_id FROM orders 
-              WHERE user_id = ${userId}
-              GROUP BY customer_id 
-              HAVING COUNT(*) > 1
-          )) AS repurchase_customers
-        FROM orders o
-        WHERE o.user_id = ${userId}
-        GROUP BY month
-        ORDER BY month;
-      `
-      );
+      if (!userId) {
+        return c.json({ error: "Missing user ID" }, 400);
+      }
+
+      const [data] = await db
+        .select({ count: count() })
+        .from(orders)
+        .where(eq(orders.user_id, userId));
+
+      if (!data) {
+        return c.json({ error: "No orders found" }, 404);
+      }
 
       return c.json({ data });
     }
