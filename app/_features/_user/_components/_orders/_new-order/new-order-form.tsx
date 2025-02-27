@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
 import { cn, formatCurrency, formatPhoneNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -44,9 +44,8 @@ import { useGetCustomers } from "@/app/_features/_user/_queries/_customers/use-g
 import { NewOrderSkeleton } from "@/components/skeletons/new-order";
 import { NewCustomerForm } from "./new-customer-form";
 import { Card } from "@/components/ui/card";
-import { createOrder } from "@/app/_features/_user/_actions/create-order";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useCreateOrder } from "@/app/_features/_user/_queries/_orders/use-create-order";
 
 type Products = InferResponseType<
   (typeof client.api.products)[":userId"]["$get"],
@@ -85,8 +84,8 @@ export const NewOrderForm = ({
   products: Products;
   userId: string;
 }) => {
-  const [isPending, startTransition] = useTransition();
   const { data, isLoading } = useGetCustomers(userId);
+  const { mutate, isPending } = useCreateOrder(userId);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer>(undefined);
   const form = useForm<FormData>({
     resolver: zodResolver(insertOrderSchema),
@@ -113,6 +112,8 @@ export const NewOrderForm = ({
 
   const customers = data || [];
 
+  const selectedProductIds = form.watch("items").map((item) => item.productId);
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "items",
@@ -123,22 +124,10 @@ export const NewOrderForm = ({
   };
 
   const onSubmit = async (values: FormData) => {
-    startTransition(() => {
-      createOrder(values)
-        .then((res) => {
-          if (!res.success) {
-            toast.error(res.message);
-          }
-
-          if (res.success) {
-            toast.success(res.message);
-            router.push(`${res.url}`);
-          }
-        })
-        .catch((error) => {
-          console.error("Error creating order:", error);
-          toast.error("Erro ao criar o pedido");
-        });
+    mutate(values, {
+      onSuccess: () => {
+        router.push("/dashboard/orders");
+      },
     });
   };
 
@@ -260,15 +249,23 @@ export const NewOrderForm = ({
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {products.map((product) => (
-                                  <SelectItem
-                                    key={product.id}
-                                    value={product.id}>
-                                    {product.name}
-                                  </SelectItem>
-                                ))}
+                                {products
+                                  .filter(
+                                    (product) =>
+                                      !selectedProductIds.includes(
+                                        product.id
+                                      ) || product.id === field.value
+                                  )
+                                  .map((product) => (
+                                    <SelectItem
+                                      key={product.id}
+                                      value={product.id}>
+                                      {product.name}
+                                    </SelectItem>
+                                  ))}
                               </SelectContent>
                             </Select>
+
                             <FormMessage />
                           </FormItem>
                         )}
@@ -299,13 +296,16 @@ export const NewOrderForm = ({
                                   const selectedProduct = products.find(
                                     (product) => product.id === productId
                                   );
-                                  const totalPrice = selectedProduct
-                                    ? selectedProduct.price * quantity
+
+                                  // Store only the unit price, not total price
+                                  const unitPrice = selectedProduct
+                                    ? selectedProduct.price
                                     : 0;
                                   form.setValue(
                                     `items.${index}.price`,
-                                    totalPrice
+                                    unitPrice
                                   );
+
                                   field.onChange(quantity);
                                 }}
                               />
@@ -350,6 +350,7 @@ export const NewOrderForm = ({
                     onClick={() =>
                       append({ productId: "", quantity: 1, price: 0, name: "" })
                     }
+                    disabled={selectedProductIds.length >= products.length}
                     variant="secondary">
                     Adicionar Produto
                   </Button>
@@ -558,8 +559,8 @@ const Receipt = ({
       <div className="border-t border-dashed border-black my-1"></div>
       <div className="space-y-2">
         {items.length > 0 ? (
-          items.map((item) => (
-            <div key={item.productId} className="flex justify-between">
+          items.map((item, i) => (
+            <div key={i} className="flex justify-between">
               <div>
                 <p className="font-bold">{item.name}</p>
                 <p>

@@ -166,7 +166,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
           {/* Preparing Orders */}
           <Card className="p-4">
             <h3 className="text-lg font-semibold mb-3">Em Preparo</h3>
-            <ScrollArea className="h-64">
+            <ScrollArea className="h-96">
               {orders.length > 0 ? (
                 orders.map((item) => (
                   <div
@@ -260,7 +260,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
           {/* In Transit Orders */}
           <Card className="p-4">
             <h3 className="text-lg font-semibold mb-3">Em Trânsito</h3>
-            <ScrollArea className="h-64">
+            <ScrollArea className="h-96">
               {ordersInTransit.length > 0 ? (
                 ordersInTransit.map((item) => (
                   <div
@@ -345,7 +345,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
           {/* Finished Orders */}
           <Card className="p-4">
             <h3 className="text-lg font-semibold mb-3">Finalizados</h3>
-            <ScrollArea className="h-64">
+            <ScrollArea className="h-96">
               {finishedOrders.length > 0 ? (
                 finishedOrders.map((item) => (
                   <div
