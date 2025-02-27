@@ -27,7 +27,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useUpdateOrderStatus } from "@/app/_features/_user/_queries/_order-routing/use-update-order-status";
-import { useGetOrders } from "../../_queries/_orders/use-get-orders";
 import Link from "next/link";
 import { useState } from "react";
 import { useDialogStore } from "@/hooks/use-receipt-dialog";
