@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, LockKeyhole, LockKeyholeOpen, Pencil } from "lucide-react";
+import { Ellipsis, LockKeyhole, LockKeyholeOpen } from "lucide-react";
 import { useUpdateUserStatus } from "../../_queries/use-update-user-status";
 
 export const UsersCellAction = ({
