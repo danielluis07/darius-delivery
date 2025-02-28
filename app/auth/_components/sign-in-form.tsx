@@ -49,7 +49,6 @@ export const SignInForm = () => {
     searchParams.get("error") === "OAuthAccountNotLinked"
       ? "Esse email já está em uso com outro provedor!"
       : ""; */
-  const router = useRouter();
 
   const onInvalid = (errors: FieldErrors) => {
     console.log(errors);
