@@ -57,20 +57,11 @@ export const SignInForm = () => {
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      credentialsSignIn(values, callbackUrl)
-        .then((res) => {
-          if (!res.success) {
-            toast.error(res.message);
-          }
-
-          if (res.success) {
-            router.push(`${res.url}`);
-          }
-        })
-        .catch((error) => {
-          console.error("Error during user sign-up:", error);
-          toast.error("Um erro inesperado aconteceu. Tente novamente.");
-        });
+      credentialsSignIn(values, callbackUrl).then((res) => {
+        if (!res.success) {
+          toast.error(res.message);
+        }
+      });
     });
   };
 

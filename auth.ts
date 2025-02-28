@@ -32,6 +32,19 @@ export const {
   },
   callbacks: {
     async signIn({ user, account }) {
+      if (!user || !user.id) {
+        return false;
+      }
+
+      const [existingUser] = await db
+        .select({ isActive: users.isActive })
+        .from(users)
+        .where(eq(users.id, user.id));
+
+      if (existingUser.isActive === false) {
+        return "/auth/error?error=BlockedUser";
+      }
+
       return true;
     },
     async session({ token, session }) {

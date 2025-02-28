@@ -49,19 +49,13 @@ export const credentialsSignIn = async (
       return { success: false, message: "Senha incorreta!" };
     }
 
+    const url = existingUser.role === "ADMIN" ? "/admin" : "/dashboard";
+
     await signIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirectTo: url,
     });
-
-    let url;
-
-    if (existingUser.role === "ADMIN") {
-      url = "/admin";
-    } else {
-      url = "/dashboard";
-    }
 
     return {
       success: true,
