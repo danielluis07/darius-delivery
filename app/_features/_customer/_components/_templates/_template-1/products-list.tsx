@@ -27,12 +27,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { createOrder } from "@/app/_features/_customer/_actions/create-order";
-import { LoadingButton } from "@/components/ui/loading-button";
 import { useModalStore } from "@/hooks/use-modal-store";
+import { Loader2 } from "lucide-react";
 
 type FormData = z.infer<typeof insertCustomerOrderSchema>;
 
-export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
+export const ProductsList = ({
+  categoryId,
+  buttonColor,
+  fontColor,
+}: {
+  categoryId: string | null;
+  buttonColor: string;
+  fontColor: string;
+}) => {
   const params = useParams<{ domain: string }>();
   const { onClose } = useModalStore();
   const [isPending, startTransition] = useTransition();
@@ -178,14 +186,18 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
                   )}
                 />
               </div>
-              <LoadingButton
-                type="submit"
+              <Button
                 className="w-full"
-                label="Finalizar Pedido"
-                loadingLabel="Finalizando Pedido..."
-                isPending={isPending}
-                disabled={isPending}
-              />
+                style={{ backgroundColor: buttonColor, color: fontColor }}>
+                {isPending ? (
+                  <div className="flex items-center justify-center gap-2 w-full">
+                    <Loader2 className="animate-spin" />
+                    Finalizar Pedido
+                  </div>
+                ) : (
+                  <span>Finalizando Pedido</span>
+                )}
+              </Button>
             </form>
           </Form>
         </motion.div>
@@ -217,7 +229,10 @@ export const ProductsList = ({ categoryId }: { categoryId: string | null }) => {
             />
           </div>
 
-          <Button className="w-full my-3" onClick={handleBuyClick}>
+          <Button
+            style={{ backgroundColor: buttonColor, color: fontColor }}
+            className="w-full my-3"
+            onClick={handleBuyClick}>
             Comprar Produto
           </Button>
         </motion.div>

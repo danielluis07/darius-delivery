@@ -15,13 +15,20 @@ import {
 import { credentialsSignInSchema } from "@/db/schemas";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { LoadingButton } from "@/components/ui/loading-button";
 import { credentialsSignIn } from "@/app/_features/_customer/_actions/credentials-sign-in";
 import { useModalStore } from "@/hooks/use-modal-store";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type FormData = z.infer<typeof credentialsSignInSchema>;
 
-export const SignInForm = () => {
+export const SignInForm = ({
+  fontColor,
+  buttonColor,
+}: {
+  fontColor: string;
+  buttonColor: string;
+}) => {
   const [isPending, startTransition] = useTransition();
   const { onClose } = useModalStore();
   const form = useForm<FormData>({
@@ -99,14 +106,18 @@ export const SignInForm = () => {
             </FormItem>
           )}
         />
-        <LoadingButton
-          className="w-full mt-5"
-          label="Entrar"
-          loadingLabel="Entrando"
-          disabled={isPending}
-          isPending={isPending}
-          type="submit"
-        />
+        <Button
+          className="w-full"
+          style={{ backgroundColor: buttonColor, color: fontColor }}>
+          {isPending ? (
+            <div className="flex items-center justify-center gap-2 w-full mt-5">
+              <Loader2 className="animate-spin" />
+              Entrando
+            </div>
+          ) : (
+            <span>Entrar</span>
+          )}
+        </Button>
       </form>
     </Form>
   );

@@ -16,7 +16,6 @@ import { insertCustomerSchema, state } from "@/db/schemas";
 import { credentialsSignUp } from "@/app/_features/_customer/_actions/credentials-sign-up";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { LoadingButton } from "@/components/ui/loading-button";
 import {
   Select,
   SelectContent,
@@ -26,12 +25,18 @@ import {
 } from "@/components/ui/select";
 import { useModalStore } from "@/hooks/use-modal-store";
 import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 type FormData = z.infer<typeof insertCustomerSchema>;
 
 export const SignUpForm = ({
+  fontColor,
+  buttonColor,
   restaurantOwnerId,
 }: {
+  fontColor: string;
+  buttonColor: string;
   restaurantOwnerId: string | undefined;
 }) => {
   const [isPending, startTransition] = useTransition();
@@ -270,14 +275,18 @@ export const SignUpForm = ({
             </FormItem>
           )}
         />
-        <LoadingButton
-          className="w-full mt-5"
-          label="Entrar"
-          loadingLabel="Entrando"
-          disabled={isPending}
-          isPending={isPending}
-          type="submit"
-        />
+        <Button
+          className="w-full"
+          style={{ backgroundColor: buttonColor, color: fontColor }}>
+          {isPending ? (
+            <div className="flex items-center justify-center gap-2 w-full mt-5">
+              <Loader2 className="animate-spin" />
+              Entrando
+            </div>
+          ) : (
+            <span>Entrar</span>
+          )}
+        </Button>
       </form>
     </Form>
   );

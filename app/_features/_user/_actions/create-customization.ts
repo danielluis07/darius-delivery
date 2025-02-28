@@ -78,6 +78,7 @@ export const createCustomization = async (
     const {
       id,
       store_name,
+      store_phone,
       template_id,
       banner,
       button_color,
@@ -132,6 +133,7 @@ export const createCustomization = async (
         .update(customizations)
         .set({
           store_name,
+          store_phone: store_phone || null,
           template_id,
           banner: bannerUrl,
           button_color,
@@ -155,6 +157,7 @@ export const createCustomization = async (
     } else {
       const customization = await db.insert(customizations).values({
         store_name,
+        store_phone: store_phone || null,
         template_id,
         banner: bannerUrl,
         button_color,

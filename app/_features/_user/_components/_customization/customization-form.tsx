@@ -41,7 +41,7 @@ import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import Image from "next/image";
 import { RadioGroup } from "@/components/ui/radio-group";
-import { cn } from "@/lib/utils";
+import { cn, formatPhoneNumber } from "@/lib/utils";
 import placeholder from "@/public/placeholder-image.jpg";
 import { createCustomization } from "@/app/_features/_user/_actions/create-customization";
 import { Input } from "@/components/ui/input";
@@ -98,6 +98,7 @@ export const CustomizationForm = ({
     defaultValues: {
       id: customization?.id ?? "",
       store_name: customization?.store_name ?? "",
+      store_phone: customization?.store_phone ?? "",
       button_color: customization?.button_color ?? "",
       footer_color: customization?.footer_color ?? "",
       header_color: customization?.header_color ?? "",
@@ -145,19 +146,44 @@ export const CustomizationForm = ({
       <form
         className="space-y-4"
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
-        <FormField
-          control={form.control}
-          name="store_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome da Loja</FormLabel>
-              <FormControl>
-                <Input {...field} required />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex items-center gap-4">
+          <FormField
+            control={form.control}
+            name="store_name"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Nome da Loja</FormLabel>
+                <FormControl>
+                  <Input {...field} required />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="store_phone"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Telefone da Loja (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(event) => {
+                      const formattedPhoneNumber = formatPhoneNumber(
+                        event.target.value
+                      );
+                      field.onChange(formattedPhoneNumber);
+                    }}
+                    value={field.value ?? ""}
+                    required
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
           name="template_id"

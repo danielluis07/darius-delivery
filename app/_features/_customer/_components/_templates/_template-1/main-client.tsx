@@ -65,6 +65,8 @@ export const MainClient = ({
                   <ModalContent
                     modalType={modalType}
                     categoryId={categoryId}
+                    fontColor={data?.customization.font_color || "black"}
+                    buttonColor={data?.customization.button_color || "white"}
                     restaurantOwnerId={data?.userId}
                   />
                 </motion.div>
@@ -97,12 +99,22 @@ export const MainClient = ({
               ) : (
                 <div className="flex justify-center gap-4">
                   <Card
+                    style={{
+                      backgroundColor:
+                        data?.customization.button_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
                     className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
                     onClick={() => onOpen("signUp")}>
                     <ClipboardList />
                     Registrar
                   </Card>
                   <Card
+                    style={{
+                      backgroundColor:
+                        data?.customization.button_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
                     className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
                     onClick={() => onOpen("signIn")}>
                     <Key />
@@ -122,18 +134,34 @@ const ModalContent = ({
   modalType,
   categoryId,
   restaurantOwnerId,
+  fontColor,
+  buttonColor,
 }: {
   modalType: string;
   categoryId: string | null;
   restaurantOwnerId: string | undefined;
+  fontColor: string;
+  buttonColor: string;
 }) => {
   switch (modalType) {
     case "signUp":
-      return <SignUpForm restaurantOwnerId={restaurantOwnerId} />;
+      return (
+        <SignUpForm
+          buttonColor={buttonColor}
+          fontColor={fontColor}
+          restaurantOwnerId={restaurantOwnerId}
+        />
+      );
     case "signIn":
-      return <SignInForm />;
+      return <SignInForm buttonColor={buttonColor} fontColor={fontColor} />;
     case "products":
-      return <ProductsList categoryId={categoryId} />;
+      return (
+        <ProductsList
+          buttonColor={buttonColor}
+          fontColor={fontColor}
+          categoryId={categoryId}
+        />
+      );
     case "settings":
       return (
         <div className="p-4">

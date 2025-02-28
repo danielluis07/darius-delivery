@@ -47,7 +47,7 @@ import {
 } from "@react-pdf/renderer";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
-import { useGetOrdersReceipts } from "../../_queries/_orders/use-get-orders-receipts";
+import { useGetOrdersReceipts } from "@/app/_features/_user/_queries/_orders/use-get-orders-receipts";
 
 export type Receipt = InferResponseType<
   (typeof client.api.receipts.user)[":userId"]["$get"],
@@ -89,6 +89,8 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
   const finishedOrders = ordersData.filter(
     (item) => item.order.status === "FINISHED"
   );
+
+  console.log("orders", orders);
 
   const [ConfirmStatusDialog, confirmStatus] = useConfirm(
     "Tem certeza?",
@@ -467,8 +469,12 @@ const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
         <Text>Cliente: {receipt.customerName}</Text>
         <Text>Tel: {receipt.customerPhone}</Text>
         <Text>
-          Endereço: {receipt.customerStreet} - {receipt.customerNeighborhood} -{" "}
-          {receipt.customerCity} - {receipt.customerState}
+          Rua: {receipt?.customerStreet || "N/A"} - nº{" "}
+          {receipt?.customerStreetNumber} -{" "}
+          {receipt?.customerComplement &&
+            `Complemento: ${receipt?.customerComplement} - `}{" "}
+          {receipt?.customerNeighborhood || "N/A"} -{" "}
+          {receipt?.customerCity || "N/A"} - {receipt?.customerState || "N/A"}
         </Text>
 
         <View style={styles.dashedLine}></View>

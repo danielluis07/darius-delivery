@@ -53,6 +53,8 @@ const app = new Hono().get(
         customerState: customers.state,
         customerNeighborhood: customers.neighborhood,
         customerStreet: customers.street,
+        customerStreetNumber: customers.street_number,
+        customerComplement: customers.complement,
         orderTotalPrice: orders.total_price,
         orderPaymentType: orders.payment_type,
         orderPaymentStatus: orders.payment_status,
@@ -86,7 +88,9 @@ const app = new Hono().get(
         customers.city,
         customers.state,
         customers.neighborhood,
-        customers.street
+        customers.street,
+        customers.street_number,
+        customers.complement
       );
 
     if (!data || data.length === 0) {
