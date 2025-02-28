@@ -1,1 +1,0 @@
-ALTER TABLE "customizations" ALTER COLUMN "need_change" SET NOT NULL;

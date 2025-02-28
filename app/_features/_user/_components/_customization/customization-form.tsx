@@ -64,13 +64,16 @@ type FormData = z.infer<typeof insertCustomizationSchema>;
 const paymentOptions = [
   {
     value: "PIX",
-    icon: <FaMoneyBill1Wave className="mt-2 text-green-600" />,
+    icon: <FaPix className="mt-2 text-[#00BDAE]" />,
   },
   {
     value: "Cartão de Crédito",
     icon: <FaCreditCard className="mt-2 text-blue-700" />,
   },
-  { value: "Dinheiro", icon: <FaPix className="mt-2 text-[#00BDAE]" /> },
+  {
+    value: "Dinheiro",
+    icon: <FaMoneyBill1Wave className="mt-2 text-green-600" />,
+  },
   {
     value: "Cartão",
     icon: <BsCreditCard2FrontFill className="mt-2 text-blue-700" />,
@@ -98,6 +101,7 @@ export const CustomizationForm = ({
       button_color: customization?.button_color ?? "",
       footer_color: customization?.footer_color ?? "",
       header_color: customization?.header_color ?? "",
+      font_color: customization?.font_color ?? "",
       banner: [],
       logo: [],
       need_change: customization?.need_change ?? false,
@@ -117,7 +121,6 @@ export const CustomizationForm = ({
   };
 
   const onSubmit = (values: FormData) => {
-    console.log(values);
     startTransition(() => {
       createCustomization(values)
         .then((res) => {
@@ -149,7 +152,7 @@ export const CustomizationForm = ({
             <FormItem>
               <FormLabel>Nome da Loja</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} required />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -348,6 +351,23 @@ export const CustomizationForm = ({
           />
           <FormField
             control={form.control}
+            name="font_color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cor da Fonte</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="w-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="footer_color"
             render={({ field }) => (
               <FormItem>
@@ -466,6 +486,7 @@ export const CustomizationForm = ({
         <CustomizationPreview
           logo={desktopPreview}
           buttonColor={form.watch("button_color")}
+          fontColor={form.watch("font_color")}
           backgroundImage={bannerPreview}
         />
         <LoadingButton
@@ -484,10 +505,12 @@ export const CustomizationForm = ({
 const CustomizationPreview = ({
   logo,
   buttonColor,
+  fontColor,
   backgroundImage,
 }: {
   logo: string | null;
   buttonColor: string | null | undefined;
+  fontColor: string | null | undefined;
   backgroundImage: string | null;
 }) => {
   return (
@@ -521,13 +544,19 @@ const CustomizationPreview = ({
           <div className="flex justify-center gap-4">
             <Card
               className="text-black flex flex-col items-center min-w-28 cursor-pointer"
-              style={{ backgroundColor: buttonColor || "transparent" }}>
+              style={{
+                backgroundColor: buttonColor || "transparent",
+                color: fontColor || "black",
+              }}>
               <ClipboardList />
               Registrar
             </Card>
             <Card
               className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
-              style={{ backgroundColor: buttonColor || "transparent" }}>
+              style={{
+                backgroundColor: buttonColor || "transparent",
+                color: fontColor || "black",
+              }}>
               <Key />
               Login
             </Card>

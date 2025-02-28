@@ -283,6 +283,7 @@ export const customizations = pgTable("customizations", {
   banner: text("banner"),
   button_color: varchar("button_color", { length: 7 }), // Hexadecimal (ex: #FFFFFF)
   header_color: varchar("header_color", { length: 7 }),
+  font_color: varchar("font_color", { length: 7 }),
   footer_color: varchar("footer_color", { length: 7 }),
 });
 

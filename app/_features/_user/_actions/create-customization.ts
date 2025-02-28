@@ -82,6 +82,7 @@ export const createCustomization = async (
       banner,
       button_color,
       footer_color,
+      font_color,
       header_color,
       logo,
       payment_methods,
@@ -94,6 +95,7 @@ export const createCustomization = async (
       !banner ||
       !button_color ||
       !footer_color ||
+      !font_color ||
       !header_color ||
       !logo ||
       !payment_methods
@@ -134,6 +136,7 @@ export const createCustomization = async (
           banner: bannerUrl,
           button_color,
           footer_color,
+          font_color,
           header_color,
           logo: logoDesktopUrl,
           payment_methods,
@@ -156,6 +159,7 @@ export const createCustomization = async (
         banner: bannerUrl,
         button_color,
         footer_color,
+        font_color,
         header_color,
         logo: logoDesktopUrl,
         payment_methods,

@@ -1,9 +1,12 @@
-CREATE TYPE "public"."order_status" AS ENUM('ACCEPTED', 'PREPARING', 'FINISHED', 'IN_TRANSIT', 'DELIVERED');--> statement-breakpoint
+CREATE TYPE "public"."order_payment_type" AS ENUM('CASH', 'CREDIT_CARD', 'DEBIT_CARD', 'PIX');--> statement-breakpoint
+CREATE TYPE "public"."order_status" AS ENUM('ACCEPTED', 'PREPARING', 'FINISHED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED');--> statement-breakpoint
 CREATE TYPE "public"."order_type" AS ENUM('LOCAL', 'WEBSITE', 'WHATSAPP');--> statement-breakpoint
 CREATE TYPE "public"."payment_status" AS ENUM('PENDING', 'PAID', 'CANCELLED');--> statement-breakpoint
 CREATE TYPE "public"."role" AS ENUM('ADMIN', 'USER', 'CUSTOMER');--> statement-breakpoint
 CREATE TYPE "public"."subscription_type" AS ENUM('BASIC', 'PREMIUM');--> statement-breakpoint
 CREATE TYPE "public"."template_name" AS ENUM('TEMPLATE_1', 'TEMPLATE_2', 'TEMPLATE_3', 'TEMPLATE_4');--> statement-breakpoint
+CREATE TYPE "public"."transaction_status" AS ENUM('PENDING', 'COMPLETED', 'FAILED');--> statement-breakpoint
+CREATE TYPE "public"."transaction_type" AS ENUM('PAYMENT', 'REFUND', 'FEE');--> statement-breakpoint
 CREATE TABLE "account" (
 	"userId" text NOT NULL,
 	"type" text NOT NULL,
@@ -50,9 +53,9 @@ CREATE TABLE "combo_products" (
 CREATE TABLE "combos" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"description" text,
+	"description" text NOT NULL,
 	"price" integer NOT NULL,
-	"user_id" text NOT NULL,
+	"user_id" text,
 	"image" text,
 	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now()
@@ -66,6 +69,8 @@ CREATE TABLE "customers" (
 	"state" text NOT NULL,
 	"neighborhood" text NOT NULL,
 	"street" text NOT NULL,
+	"street_number" text NOT NULL,
+	"complement" text,
 	CONSTRAINT "customers_userId_unique" UNIQUE("userId")
 );
 --> statement-breakpoint
@@ -74,11 +79,13 @@ CREATE TABLE "customizations" (
 	"user_id" text,
 	"template_id" text NOT NULL,
 	"store_name" text NOT NULL,
-	"logo_desktop" text,
-	"logo_mobile" text,
+	"payment_methods" text[] DEFAULT '{}',
+	"need_change" boolean DEFAULT false NOT NULL,
+	"logo" text,
 	"banner" text,
 	"button_color" varchar(7),
 	"header_color" varchar(7),
+	"font_color" varchar(7),
 	"footer_color" varchar(7)
 );
 --> statement-breakpoint
@@ -126,7 +133,7 @@ CREATE TABLE "free_tests" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,
-	"subdomain" varchar(255) NOT NULL,
+	"domain" varchar(255) NOT NULL,
 	"whatsapp" varchar(20) NOT NULL,
 	"password" varchar(255) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -151,8 +158,9 @@ CREATE TABLE "orders" (
 	"type" "order_type" NOT NULL,
 	"total_price" integer NOT NULL,
 	"payment_status" "payment_status" NOT NULL,
-	"delivery_deadline" integer NOT NULL,
-	"pickup_deadline" integer NOT NULL,
+	"payment_type" "order_payment_type" NOT NULL,
+	"delivery_deadline" integer,
+	"pickup_deadline" integer,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "orders_number_unique" UNIQUE("number")
@@ -188,6 +196,16 @@ CREATE TABLE "products" (
 	"updated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
+CREATE TABLE "receipts" (
+	"id" text PRIMARY KEY NOT NULL,
+	"order_id" text NOT NULL,
+	"user_id" text,
+	"receipt_number" serial NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "receipts_receipt_number_unique" UNIQUE("receipt_number")
+);
+--> statement-breakpoint
 CREATE TABLE "session" (
 	"sessionToken" text PRIMARY KEY NOT NULL,
 	"userId" text NOT NULL,
@@ -214,6 +232,16 @@ CREATE TABLE "templates" (
 	"updated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
+CREATE TABLE "transactions" (
+	"id" text PRIMARY KEY NOT NULL,
+	"order_id" text NOT NULL,
+	"type" "transaction_type" NOT NULL,
+	"amount" integer NOT NULL,
+	"status" "transaction_status" NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "two_factor_confirmation" (
 	"id" varchar PRIMARY KEY NOT NULL,
 	"userId" text NOT NULL
@@ -238,11 +266,11 @@ CREATE TABLE "user" (
 	"phone" varchar(255),
 	"role" "role",
 	"google_api_key" varchar(255),
-	"subdomain" varchar(255),
+	"domain" varchar(255),
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "user_email_unique" UNIQUE("email"),
-	CONSTRAINT "user_subdomain_unique" UNIQUE("subdomain")
+	CONSTRAINT "user_domain_unique" UNIQUE("domain")
 );
 --> statement-breakpoint
 CREATE TABLE "verificationToken" (
@@ -274,6 +302,9 @@ ALTER TABLE "orders" ADD CONSTRAINT "orders_customer_id_customers_userId_fk" FOR
 ALTER TABLE "pixels" ADD CONSTRAINT "pixels_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "products" ADD CONSTRAINT "products_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "products" ADD CONSTRAINT "products_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "receipts" ADD CONSTRAINT "receipts_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "receipts" ADD CONSTRAINT "receipts_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "two_factor_confirmation" ADD CONSTRAINT "two_factor_confirmation_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;

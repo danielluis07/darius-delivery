@@ -1,1 +1,0 @@
-ALTER TABLE "customizations" ADD COLUMN "need_change" boolean DEFAULT false;
