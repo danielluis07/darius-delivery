@@ -14,6 +14,7 @@ import customers from "@/app/api/[[...route]]/customers";
 import receipts from "@/app/api/[[...route]]/receipts";
 import combos from "@/app/api/[[...route]]/combos";
 import pixels from "@/app/api/[[...route]]/pixels";
+import admin from "@/app/api/[[...route]]/admin";
 
 export const runtime = "nodejs";
 
@@ -41,7 +42,8 @@ const routes = app
   .route("/customers", customers)
   .route("/receipts", receipts)
   .route("/combos", combos)
-  .route("/pixels", pixels);
+  .route("/pixels", pixels)
+  .route("/admin", admin);
 
 export const GET = handle(app);
 export const POST = handle(app);

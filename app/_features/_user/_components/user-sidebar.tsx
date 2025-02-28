@@ -225,12 +225,13 @@ export function UserSidebar({ user }: { user: ExtendedUser }) {
                 side="top"
                 className="w-[--radix-popper-anchor-width]">
                 <DropdownMenuItem
+                  className="cursor-pointer"
                   onClick={() => router.push("/dashboard/settings")}>
                   <Settings />
-                  <span>Configurações</span>
+                  {open && <span>Configurações</span>}
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <LogOutButton />
+                <DropdownMenuItem className="cursor-pointer">
+                  <LogOutButton open={open} />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

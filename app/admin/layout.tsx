@@ -13,13 +13,13 @@ export default async function AdminLayout({
   const session = await auth();
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
 
-  if (!session) {
+  if (!session || !session.user) {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <AdminSidebar />
+      <AdminSidebar user={session.user} />
       <main className="w-full">
         <Navbar user={session?.user} />
         <div className="p-5 w-11/12 mx-auto">{children}</div>

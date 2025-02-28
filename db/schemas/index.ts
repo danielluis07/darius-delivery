@@ -168,6 +168,19 @@ export const credentialsSignInSchema = baseUserSchema.extend({
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
 
+export const updatePasswordSchema = z
+  .object({
+    password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+    new_password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+    repeat_new_password: z
+      .string()
+      .min(6, "A senha deve ter pelo menos 6 caracteres"),
+  })
+  .refine((data) => data.new_password === data.repeat_new_password, {
+    message: "As senhas não coincidem",
+    path: ["repeat_new_password"],
+  });
+
 export const baseCategorySchema = createInsertSchema(categories);
 
 export const insertCategorySchema = baseCategorySchema.extend({

@@ -63,6 +63,13 @@ export const transactionStatus = pgEnum("transaction_status", [
   "FAILED",
 ]);
 
+export const freeTestStatus = pgEnum("free_test_status", [
+  "ACTIVE",
+  "INACTIVE",
+  "EXPIRED",
+  "CONVERTED",
+]);
+
 // TABLES
 
 export const users = pgTable("user", {
@@ -79,6 +86,9 @@ export const users = pgTable("user", {
   role: role("role"),
   googleApiKey: varchar("google_api_key", { length: 255 }),
   domain: varchar("domain", { length: 255 }).unique(),
+  isTrial: boolean("is_trial").default(false),
+  isActive: boolean("is_active").default(true),
+  trialEndsAt: timestamp("trial_ends_at", { mode: "date" }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -277,6 +287,7 @@ export const customizations = pgTable("customizations", {
     .notNull()
     .references(() => templates.id, { onDelete: "cascade" }),
   store_name: text("store_name").notNull(),
+  store_phone: varchar("store_phone", { length: 255 }),
   payment_methods: text("payment_methods").array().default([]),
   need_change: boolean("need_change").default(false).notNull(),
   logo: text("logo"),
@@ -437,11 +448,9 @@ export const freeTests = pgTable("free_tests", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull(),
-  domain: varchar("domain", { length: 255 }).notNull(),
-  whatsapp: varchar("whatsapp", { length: 20 }).notNull(),
-  password: varchar("password", { length: 255 }).notNull(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   expiration_date: timestamp("expiration_date").notNull(),
+  status: freeTestStatus("status").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
 });

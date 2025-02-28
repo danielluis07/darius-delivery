@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Sidebar,
   SidebarContent,
@@ -8,8 +10,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { ChevronUp, House, Lock, User2, LayoutTemplate } from "lucide-react";
+import {
+  ChevronUp,
+  House,
+  User2,
+  LayoutTemplate,
+  Settings,
+  Users,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +28,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOutButton } from "@/components/logout-button";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ExtendedUser } from "@/next-auth";
 
 const items = [
   {
@@ -26,24 +39,48 @@ const items = [
     label: "Início",
   },
   {
+    url: "/admin/users",
+    icon: Users,
+    label: "Lojistas",
+  },
+  {
     url: "/admin/templates",
     icon: LayoutTemplate,
     label: "Templates",
   },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ user }: { user: ExtendedUser }) {
+  const { open } = useSidebar();
+  const router = useRouter();
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Image
-          src="/darius.png"
-          width={180}
-          height={180}
-          alt="logo"
-          className="mx-auto"
-          priority
-        />
+        {open ? (
+          <div className="relative w-5/6 h-16 mx-auto">
+            <Link href="/admin">
+              <Image
+                src="/darius.png"
+                fill
+                alt="logo"
+                priority
+                sizes="(max-width: 768px) 90vw, (max-width: 1200px) 75vw, 256px"
+              />
+            </Link>
+          </div>
+        ) : (
+          <div className="relative w-5/6 h-7 mx-auto">
+            <Link href="/admin">
+              <Image
+                src="/darius-mini.png"
+                fill
+                alt="logo"
+                priority
+                sizes="48px"
+              />
+            </Link>
+          </div>
+        )}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -52,10 +89,10 @@ export function AdminSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.label}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -69,19 +106,21 @@ export function AdminSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User2 /> Daniel
+                  <User2 /> {user.name}
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 side="top"
                 className="w-[--radix-popper-anchor-width]">
-                <DropdownMenuItem>
-                  <Lock />
-                  <span>Mudar Senha</span>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => router.push("/admin/settings")}>
+                  <Settings />
+                  {open && <span>Configurações</span>}
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <LogOutButton />
+                <DropdownMenuItem className="cursor-pointer">
+                  <LogOutButton open={open} />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

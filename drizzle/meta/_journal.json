@@ -8,6 +8,20 @@
       "when": 1740706873801,
       "tag": "0000_lush_shockwave",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1740742089709,
+      "tag": "0001_jazzy_christian_walker",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1740751284767,
+      "tag": "0002_keen_moondragon",
+      "breakpoints": true
     }
   ]
 }
