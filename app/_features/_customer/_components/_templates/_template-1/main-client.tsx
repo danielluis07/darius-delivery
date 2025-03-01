@@ -24,6 +24,8 @@ export const MainClient = ({
   const { modalType, onOpen, categoryId, onClose } = useModalStore();
   const { data: categories, isLoading } = useGetCategories(data?.userId);
 
+  console.log(data);
+
   return (
     <div className="flex h-screen items-center justify-center relative">
       <div
