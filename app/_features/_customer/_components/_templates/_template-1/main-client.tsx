@@ -120,7 +120,7 @@ export const MainClient = ({
                     className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
                     onClick={() => onOpen("signIn")}>
                     <Key />
-                    Login
+                    Entrar
                   </Card>
                 </div>
               )}
