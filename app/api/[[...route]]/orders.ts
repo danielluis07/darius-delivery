@@ -312,8 +312,16 @@ const app = new Hono()
   )
   .post("/", verifyAuth(), zValidator("json", insertOrderSchema), async (c) => {
     const auth = c.get("authUser");
-    const { customer_id, status, type, payment_status, items, payment_type } =
-      c.req.valid("json");
+    const {
+      customer_id,
+      status,
+      type,
+      payment_status,
+      items,
+      payment_type,
+      delivery_deadline,
+      pickup_deadline,
+    } = c.req.valid("json");
 
     if (!auth || !auth.token?.sub) {
       return c.json({ error: "Unauthorized" }, 401);
@@ -325,6 +333,8 @@ const app = new Hono()
       !type ||
       !payment_status ||
       !payment_type ||
+      !delivery_deadline ||
+      !pickup_deadline ||
       !items.length
     ) {
       return c.json({ error: "Missing data" }, 400);
@@ -341,6 +351,8 @@ const app = new Hono()
         user_id: auth.token.sub,
         customer_id,
         total_price,
+        delivery_deadline,
+        pickup_deadline,
         type,
         status,
         payment_status,

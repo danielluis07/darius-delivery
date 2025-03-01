@@ -342,6 +342,18 @@ export const orders = pgTable("orders", {
     .notNull(),
 });
 
+export const orderSettings = pgTable("order_settings", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  delivery_deadline: integer("delivery_deadline").notNull().default(30),
+  pickup_deadline: integer("pickup_deadline").notNull().default(15),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export const orderItems = pgTable("order_items", {
   id: text("id")
     .primaryKey()

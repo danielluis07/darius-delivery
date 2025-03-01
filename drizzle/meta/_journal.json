@@ -22,6 +22,27 @@
       "when": 1740751284767,
       "tag": "0002_keen_moondragon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1740827893504,
+      "tag": "0003_lucky_spiral",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1740828124402,
+      "tag": "0004_burly_carlie_cooper",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1740835717013,
+      "tag": "0005_salty_vapor",
+      "breakpoints": true
     }
   ]
 }

@@ -46,9 +46,15 @@ import { NewCustomerForm } from "./new-customer-form";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useCreateOrder } from "@/app/_features/_user/_queries/_orders/use-create-order";
+import { toast } from "sonner";
 
 type Products = InferResponseType<
   (typeof client.api.products)[":userId"]["$get"],
+  200
+>["data"];
+
+type OrderSettings = InferResponseType<
+  (typeof client.api.ordersettings.user)[":userId"]["$get"],
   200
 >["data"];
 
@@ -79,10 +85,12 @@ type FormData = z.infer<typeof insertOrderSchema>;
 
 export const NewOrderForm = ({
   products,
+  orderSettings,
   userId,
 }: {
   products: Products;
   userId: string;
+  orderSettings: OrderSettings | null;
 }) => {
   const { data, isLoading } = useGetCustomers(userId);
   const { mutate, isPending } = useCreateOrder(userId);
@@ -124,11 +132,24 @@ export const NewOrderForm = ({
   };
 
   const onSubmit = async (values: FormData) => {
-    mutate(values, {
-      onSuccess: () => {
-        router.push("/dashboard/orders");
+    if (!orderSettings) {
+      toast.error(
+        "Você precisa definir os tempos de entrega e retirada do pedido"
+      );
+      return;
+    }
+    mutate(
+      {
+        ...values,
+        pickup_deadline: orderSettings?.pickup_deadline,
+        delivery_deadline: orderSettings?.delivery_deadline,
       },
-    });
+      {
+        onSuccess: () => {
+          router.push("/dashboard/orders");
+        },
+      }
+    );
   };
 
   if (isLoading) {

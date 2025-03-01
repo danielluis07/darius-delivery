@@ -148,7 +148,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
   return (
     <>
       <ConfirmStatusDialog />
-      <div className="w-full">
+      <div className="w-full mt-10">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">Pedidos</h1>
           <div className="flex items-center gap-x-2">

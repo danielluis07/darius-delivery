@@ -6,6 +6,7 @@ import {
   customizations,
   templates,
   orders,
+  orderSettings,
   deliveryAreasKm,
   deliveryAreas,
   deliverers,
@@ -180,6 +181,8 @@ export const updatePasswordSchema = z
     message: "As senhas não coincidem",
     path: ["repeat_new_password"],
   });
+
+export const insertOrderSettingsSchema = createInsertSchema(orderSettings);
 
 export const baseCategorySchema = createInsertSchema(categories);
 
