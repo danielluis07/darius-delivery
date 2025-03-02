@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/select";
 import { useModalStore } from "@/hooks/use-modal-store";
 import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useStore } from "@/context/store-context";
 
@@ -269,12 +268,12 @@ export const SignUpForm = () => {
             </FormItem>
           )}
         />
-        <Button
-          className="w-full"
+        <button
           style={{
             backgroundColor: data?.customization.button_color || "white",
             color: data?.customization.font_color || "black",
-          }}>
+          }}
+          className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
           {isPending ? (
             <div className="flex items-center justify-center gap-2 w-full mt-5">
               <Loader2 className="animate-spin" />
@@ -283,7 +282,7 @@ export const SignUpForm = () => {
           ) : (
             <span>Entrar</span>
           )}
-        </Button>
+        </button>
       </form>
     </Form>
   );

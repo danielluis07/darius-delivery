@@ -81,6 +81,7 @@ export const createCustomization = async (
       store_phone,
       template_id,
       banner,
+      background_color,
       button_color,
       footer_color,
       font_color,
@@ -90,91 +91,82 @@ export const createCustomization = async (
       need_change,
     } = validatedValues.data;
 
+    // For creation, enforce required fields
     if (
-      !store_name ||
-      !template_id ||
-      !banner ||
-      !button_color ||
-      !footer_color ||
-      !font_color ||
-      !header_color ||
-      !logo ||
-      !payment_methods
+      !id &&
+      (!store_name || !template_id || !banner || !logo || !payment_methods)
     ) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
 
-    /* Image Upload */
+    // Handle image uploads only if new files are provided
+    let bannerUrl: string | null | undefined;
+    let logoDesktopUrl: string | null | undefined;
 
-    const bannerFile = banner[0];
-    const logoDesktopFile = logo[0];
-
-    if (!bannerFile || !logoDesktopFile) {
-      return {
-        success: false,
-        message: "Algum dos arquivos de imagem não foi encontrado",
-      };
+    if (banner?.[0]) {
+      bannerUrl = await uploadImageToS3(banner[0]);
+      if (!bannerUrl) {
+        return { success: false, message: "Erro ao fazer upload do banner" };
+      }
     }
 
-    const [bannerUrl, logoDesktopUrl] = await Promise.all([
-      uploadImageToS3(bannerFile),
-      uploadImageToS3(logoDesktopFile),
-    ]);
-
-    if (!bannerUrl || !logoDesktopUrl) {
-      return {
-        success: false,
-        message: "Erro ao fazer upload das imagens",
-      };
+    if (logo?.[0]) {
+      logoDesktopUrl = await uploadImageToS3(logo[0]);
+      if (!logoDesktopUrl) {
+        return { success: false, message: "Erro ao fazer upload do logo" };
+      }
     }
 
     if (id) {
+      // Update case: only set fields that were provided
+      const updateData: Partial<typeof validatedValues.data> = {};
+
+      if (store_name !== undefined) updateData.store_name = store_name;
+      if (store_phone !== undefined)
+        updateData.store_phone = store_phone || null;
+      if (template_id !== undefined) updateData.template_id = template_id;
+      if (bannerUrl !== undefined) updateData.banner = bannerUrl;
+      if (background_color !== undefined)
+        updateData.background_color = background_color;
+      if (button_color !== undefined) updateData.button_color = button_color;
+      if (footer_color !== undefined) updateData.footer_color = footer_color;
+      if (font_color !== undefined) updateData.font_color = font_color;
+      if (header_color !== undefined) updateData.header_color = header_color;
+      if (logoDesktopUrl !== undefined) updateData.logo = logoDesktopUrl;
+      if (payment_methods !== undefined)
+        updateData.payment_methods = payment_methods;
+      if (need_change !== undefined) updateData.need_change = need_change;
+
       const updatedCustomization = await db
         .update(customizations)
-        .set({
-          store_name,
-          store_phone: store_phone || null,
-          template_id,
-          banner: bannerUrl,
-          button_color,
-          footer_color,
-          font_color,
-          header_color,
-          logo: logoDesktopUrl,
-          payment_methods,
-          need_change,
-        })
+        .set(updateData)
         .where(eq(customizations.id, id));
 
       if (!updatedCustomization) {
-        return {
-          success: false,
-          message: "Falha ao atualizar a customização",
-        };
+        return { success: false, message: "Falha ao atualizar a customização" };
       }
 
       return { success: true, message: "Customização atualizada com sucesso" };
     } else {
+      // Insert case: all required fields are already validated
       const customization = await db.insert(customizations).values({
         store_name,
         store_phone: store_phone || null,
         template_id,
-        banner: bannerUrl,
+        banner: bannerUrl!,
         button_color,
+        background_color,
         footer_color,
         font_color,
         header_color,
-        logo: logoDesktopUrl,
+        logo: logoDesktopUrl!,
         payment_methods,
         need_change,
         user_id: session.user.id,
       });
 
       if (!customization) {
-        return {
-          success: false,
-          message: "Falha criar a customização",
-        };
+        return { success: false, message: "Falha ao criar a customização" };
       }
 
       return { success: true, message: "Customização criada com sucesso" };

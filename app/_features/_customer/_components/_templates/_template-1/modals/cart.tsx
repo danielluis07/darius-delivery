@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useCartStore } from "@/hooks/use-cart-store";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { CartItem, OrderData } from "@/types";
 import { useStore } from "@/context/store-context";
@@ -29,7 +28,12 @@ export const Cart = () => {
   };
 
   return (
-    <div className="p-4">
+    <div
+      style={{
+        backgroundColor: data?.customization.background_color || "white",
+        color: data?.customization.font_color || "black",
+      }}
+      className="p-4">
       {cart.length === 0 ? (
         <p>Você não possui itens no carrinho</p>
       ) : (
@@ -95,12 +99,15 @@ export const Cart = () => {
               )}
             </span>
           </p>
-          <Button
-            className="w-full mt-4"
-            variant="secondary"
+          <button
+            style={{
+              backgroundColor: data?.customization.button_color || "white",
+              color: data?.customization.font_color || "black",
+            }}
+            className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
             onClick={() => onSubmit(cart)}>
             Finalizar Compra
-          </Button>
+          </button>
         </div>
       )}
     </div>

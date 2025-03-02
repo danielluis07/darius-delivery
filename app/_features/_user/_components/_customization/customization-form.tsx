@@ -99,6 +99,7 @@ export const CustomizationForm = ({
       id: customization?.id ?? "",
       store_name: customization?.store_name ?? "",
       store_phone: customization?.store_phone ?? "",
+      background_color: customization?.background_color ?? "",
       button_color: customization?.button_color ?? "",
       footer_color: customization?.footer_color ?? "",
       header_color: customization?.header_color ?? "",
@@ -341,6 +342,23 @@ export const CustomizationForm = ({
           )}
         />
         <div className="flex items-center gap-10">
+          <FormField
+            control={form.control}
+            name="background_color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cor de Fundo</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="w-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="header_color"

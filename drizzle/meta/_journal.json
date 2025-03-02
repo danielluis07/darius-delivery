@@ -43,6 +43,13 @@
       "when": 1740835717013,
       "tag": "0005_salty_vapor",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1740937966145,
+      "tag": "0006_tan_iron_lad",
+      "breakpoints": true
     }
   ]
 }

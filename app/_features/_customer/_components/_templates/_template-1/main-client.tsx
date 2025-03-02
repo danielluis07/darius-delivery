@@ -41,7 +41,12 @@ export const MainClient = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="absolute inset-0 z-10 bg-white p-6 overflow-y-auto shadow-2xl rounded-lg">
+              style={{
+                backgroundColor:
+                  data?.customization.background_color || "white",
+                color: data?.customization.font_color || "black",
+              }}
+              className="absolute inset-0 z-10 p-6 overflow-y-auto shadow-2xl rounded-lg">
               <div className="flex justify-end mb-4">
                 <div onClick={onClose} className="text-gray-600 cursor-pointer">
                   <X />
@@ -71,7 +76,8 @@ export const MainClient = () => {
             <div className="grid grid-cols-2 gap-4">
               <Card
                 style={{
-                  backgroundColor: data?.customization.button_color || "white",
+                  backgroundColor:
+                    data?.customization.background_color || "white",
                   color: data?.customization.font_color || "black",
                 }}
                 className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
@@ -81,7 +87,8 @@ export const MainClient = () => {
               </Card>
               <Card
                 style={{
-                  backgroundColor: data?.customization.button_color || "white",
+                  backgroundColor:
+                    data?.customization.background_color || "white",
                   color: data?.customization.font_color || "black",
                 }}
                 className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
@@ -94,7 +101,8 @@ export const MainClient = () => {
             <div className="flex items-center justify-center gap-4">
               <Card
                 style={{
-                  backgroundColor: data?.customization.button_color || "white",
+                  backgroundColor:
+                    data?.customization.background_color || "white",
                   color: data?.customization.font_color || "black",
                 }}
                 className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
@@ -104,7 +112,8 @@ export const MainClient = () => {
               </Card>
               <Card
                 style={{
-                  backgroundColor: data?.customization.button_color || "white",
+                  backgroundColor:
+                    data?.customization.background_color || "white",
                   color: data?.customization.font_color || "black",
                 }}
                 className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
@@ -114,7 +123,8 @@ export const MainClient = () => {
               </Card>
               <Card
                 style={{
-                  backgroundColor: data?.customization.button_color || "white",
+                  backgroundColor:
+                    data?.customization.background_color || "white",
                   color: data?.customization.font_color || "black",
                 }}
                 className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
