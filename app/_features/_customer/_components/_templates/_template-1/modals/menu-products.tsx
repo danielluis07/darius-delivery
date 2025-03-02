@@ -1,10 +1,6 @@
 "use client";
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState, useTransition } from "react";
-import { useForm, FieldErrors } from "react-hook-form";
-import { insertCustomerOrderSchema } from "@/db/schemas";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -13,54 +9,20 @@ import { useGetProducts } from "@/app/_features/_customer/_queries/use-get-produ
 import { Product } from "@/types";
 import { MoveLeft } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { createOrder } from "@/app/_features/_customer/_actions/create-order";
-import { useModalStore } from "@/hooks/use-modal-store";
-import { Loader2 } from "lucide-react";
 import { useStore } from "@/context/store-context";
-
-type FormData = z.infer<typeof insertCustomerOrderSchema>;
 
 export const MenuProducts = ({
   categoryId,
 }: {
   categoryId: string | null | undefined;
 }) => {
-  const { onClose } = useModalStore();
   const { data } = useStore();
-  const [isPending, startTransition] = useTransition();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data: products, isLoading: isProductsLoading } = useGetProducts(
     data?.userId,
     categoryId
   );
-  const form = useForm<FormData>({
-    resolver: zodResolver(insertCustomerOrderSchema),
-    defaultValues: {
-      user_id: data?.userId,
-      quantity: 1,
-      price: 0,
-      product_id: "",
-    },
-  });
-
-  useEffect(() => {
-    if (selectedProduct) {
-      form.setValue("product_id", selectedProduct.id);
-      form.setValue("price", selectedProduct.price);
-    }
-  }, [selectedProduct, form]);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -73,30 +35,6 @@ export const MenuProducts = ({
     } else {
       setSelectedProduct(null);
     }
-  };
-
-  const onInvalid = (errors: FieldErrors) => {
-    console.log(errors);
-  };
-
-  const onSubmit = (values: FormData) => {
-    startTransition(() => {
-      createOrder(values)
-        .then((res) => {
-          if (!res.success) {
-            toast.error(res.message);
-          }
-
-          if (res.success) {
-            toast.success(res.message);
-            onClose();
-          }
-        })
-        .catch((error) => {
-          console.error("Error creating order:", error);
-          toast.error("Erro ao enviar o pedido");
-        });
-    });
   };
 
   if (isProductsLoading) {
