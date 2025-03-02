@@ -1,10 +1,6 @@
 "use client";
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { insertCustomerOrderSchema } from "@/db/schemas";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -14,12 +10,9 @@ import { CartItem } from "@/types";
 import { MoveLeft } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useModalStore } from "@/hooks/use-modal-store";
 import { useStore } from "@/context/store-context";
 import { useCartStore } from "@/hooks/use-cart-store";
 import { toast } from "sonner";
-
-type FormData = z.infer<typeof insertCustomerOrderSchema>;
 
 export const ProductsList = ({
   categoryId,
@@ -27,7 +20,6 @@ export const ProductsList = ({
   categoryId: string | null | undefined;
 }) => {
   const { data } = useStore();
-  const { onClose } = useModalStore();
   const addToCart = useCartStore((state) => state.addToCart);
   const [selectedProduct, setSelectedProduct] = useState<CartItem | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
@@ -35,22 +27,6 @@ export const ProductsList = ({
     data?.userId,
     categoryId
   );
-  const form = useForm<FormData>({
-    resolver: zodResolver(insertCustomerOrderSchema),
-    defaultValues: {
-      user_id: data?.userId,
-      quantity: 1,
-      price: 0,
-      product_id: "",
-    },
-  });
-
-  useEffect(() => {
-    if (selectedProduct) {
-      form.setValue("product_id", selectedProduct.id);
-      form.setValue("price", selectedProduct.price);
-    }
-  }, [selectedProduct, form]);
 
   const handleProductClick = (product: CartItem) => {
     setSelectedProduct(product);
