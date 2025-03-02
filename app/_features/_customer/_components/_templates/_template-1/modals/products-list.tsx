@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
 import { useGetProducts } from "@/app/_features/_customer/_queries/use-get-products";
-import { CartItem, Product } from "@/types";
+import { Product } from "@/types";
 import { MoveLeft } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
