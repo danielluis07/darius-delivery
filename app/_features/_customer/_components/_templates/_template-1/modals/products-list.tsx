@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
 import { useGetProducts } from "@/app/_features/_customer/_queries/use-get-products";
-import { CartItem } from "@/types";
+import { CartItem, Product } from "@/types";
 import { MoveLeft } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,14 +21,14 @@ export const ProductsList = ({
 }) => {
   const { data } = useStore();
   const addToCart = useCartStore((state) => state.addToCart);
-  const [selectedProduct, setSelectedProduct] = useState<CartItem | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data: products, isLoading: isProductsLoading } = useGetProducts(
     data?.userId,
     categoryId
   );
 
-  const handleProductClick = (product: CartItem) => {
+  const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setShowOrderDetails(false);
   };
