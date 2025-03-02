@@ -3,21 +3,30 @@ import { create } from "zustand";
 type ModalType =
   | "signUp"
   | "signIn"
+  | "categories"
   | "products"
-  | "settings"
+  | "menu"
+  | "menuProducts"
   | "productDetails"
-  | null;
+  | "cart"
+  | "checkout";
 
 type UseModalStore = {
-  modalType: ModalType;
-  categoryId: string | null;
+  modalStack: { type: ModalType; categoryId?: string | null | undefined }[];
   onOpen: (type: ModalType, id?: string) => void;
   onClose: () => void;
 };
 
 export const useModalStore = create<UseModalStore>((set) => ({
-  modalType: null,
-  categoryId: null,
-  onOpen: (type, id) => set({ modalType: type, categoryId: id }),
-  onClose: () => set({ modalType: null }),
+  modalStack: [],
+
+  onOpen: (type, id) =>
+    set((state) => ({
+      modalStack: [...state.modalStack, { type, categoryId: id }],
+    })),
+
+  onClose: () =>
+    set((state) => ({
+      modalStack: state.modalStack.slice(0, -1), // Remove only the last opened modal
+    })),
 }));

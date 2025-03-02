@@ -27,20 +27,14 @@ import { useModalStore } from "@/hooks/use-modal-store";
 import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useStore } from "@/context/store-context";
 
 type FormData = z.infer<typeof insertCustomerSchema>;
 
-export const SignUpForm = ({
-  fontColor,
-  buttonColor,
-  restaurantOwnerId,
-}: {
-  fontColor: string;
-  buttonColor: string;
-  restaurantOwnerId: string | undefined;
-}) => {
+export const SignUpForm = () => {
   const [isPending, startTransition] = useTransition();
   const { onClose } = useModalStore();
+  const { data } = useStore();
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomerSchema),
     defaultValues: {
@@ -48,7 +42,7 @@ export const SignUpForm = ({
       email: "",
       password: "",
       repeat_password: "",
-      restaurantOwnerId: restaurantOwnerId || "",
+      restaurantOwnerId: data?.userId || "",
       phone: "",
       street: "",
       street_number: "",
@@ -277,7 +271,10 @@ export const SignUpForm = ({
         />
         <Button
           className="w-full"
-          style={{ backgroundColor: buttonColor, color: fontColor }}>
+          style={{
+            backgroundColor: data?.customization.button_color || "white",
+            color: data?.customization.font_color || "black",
+          }}>
           {isPending ? (
             <div className="flex items-center justify-center gap-2 w-full mt-5">
               <Loader2 className="animate-spin" />

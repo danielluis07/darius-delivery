@@ -6,4 +6,17 @@ export type CustomizationWithTemplate = {
   userId: string;
 };
 
+export type CartItem = {
+  id: string;
+  name: string;
+  image: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  userId: string | null;
+  price: number;
+  description: string | null;
+  category_id: string | null;
+  quantity?: number;
+};
+
 export type Product = typeof products.$inferSelect;

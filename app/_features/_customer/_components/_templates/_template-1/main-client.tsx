@@ -3,28 +3,29 @@
 import Image from "next/image";
 import { SignUpForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-up-form";
 import { Card } from "@/components/ui/card";
-import { ClipboardList, Key, X } from "lucide-react";
+import {
+  ClipboardList,
+  Key,
+  Sandwich,
+  ShoppingCart,
+  UtensilsCrossed,
+  X,
+} from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useModalStore } from "@/hooks/use-modal-store";
 import { SignInForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-in-form";
 import placeholder from "@/public/placeholder-image.jpg";
-import { Session } from "next-auth";
-import { ProductsList } from "@/app/_features/_customer/_components/_templates/_template-1/products-list";
-import { CustomizationWithTemplate } from "@/types";
-import { useGetCategories } from "@/app/_features/_customer/_queries/use-get-categories";
-import { ClockLoader } from "react-spinners";
+import { ProductsList } from "@/app/_features/_customer/_components/_templates/_template-1/modals/products-list";
+import { Menu } from "@/app/_features/_customer/_components/_templates/_template-1/modals/menu";
+import { useStore } from "@/context/store-context";
+import { MenuProducts } from "@/app/_features/_customer/_components/_templates/_template-1/modals/menu-products";
+import { Cart } from "@/app/_features/_customer/_components/_templates/_template-1/modals/cart";
+import { Categories } from "@/app/_features/_customer/_components/_templates/_template-1/modals/categories";
 
-export const MainClient = ({
-  data,
-  session,
-}: {
-  data: CustomizationWithTemplate | null;
-  session: Session | null;
-}) => {
-  const { modalType, onOpen, categoryId, onClose } = useModalStore();
-  const { data: categories, isLoading } = useGetCategories(data?.userId);
-
-  console.log(data);
+export const MainClient = () => {
+  const { modalStack, onOpen, onClose } = useModalStore();
+  const currentModal = modalStack[modalStack.length - 1] || null;
+  const { data, session } = useStore();
 
   return (
     <div className="flex h-screen items-center justify-center relative">
@@ -33,100 +34,97 @@ export const MainClient = ({
         style={{
           backgroundImage: `url(${data?.customization.banner})`,
         }}>
-        {isLoading ? (
-          <div className="flex justify-center items-center h-full">
-            <ClockLoader color="#ffffff" />
-          </div>
-        ) : (
-          <>
-            <div className="absolute inset-0 bg-black opacity-50"></div>
-            <AnimatePresence>
-              {modalType && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="absolute inset-0 z-10 bg-white p-6 overflow-y-auto shadow-2xl rounded-lg">
-                  <div className="flex justify-end mb-4">
-                    <div
-                      onClick={onClose}
-                      className="text-gray-600 cursor-pointer">
-                      <X />
-                    </div>
-                  </div>
-                  {modalType === "signIn" && (
-                    <h2 className="text-xl text-center font-bold mb-4">
-                      Entre em sua Conta
-                    </h2>
-                  )}
-                  {modalType === "signUp" && (
-                    <h2 className="text-xl text-center font-bold mb-4">
-                      Crie sua Conta
-                    </h2>
-                  )}
-                  <ModalContent
-                    modalType={modalType}
-                    categoryId={categoryId}
-                    fontColor={data?.customization.font_color || "black"}
-                    buttonColor={data?.customization.button_color || "white"}
-                    restaurantOwnerId={data?.userId}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div className="relative size-32 mx-auto mb-4">
-              <Image
-                src={data?.customization.logo || placeholder}
-                alt="logo"
-                fill
-                sizes="(max-width: 768px) 25vw, (max-width: 1200px) 10vw, 200px"
-                className="object-contain"
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <AnimatePresence>
+          {currentModal && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="absolute inset-0 z-10 bg-white p-6 overflow-y-auto shadow-2xl rounded-lg">
+              <div className="flex justify-end mb-4">
+                <div onClick={onClose} className="text-gray-600 cursor-pointer">
+                  <X />
+                </div>
+              </div>
+              <ModalContent
+                modalType={currentModal.type}
+                categoryId={currentModal.categoryId}
               />
-            </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-            {/* Main Content */}
-            <div className="relative z-0">
-              {session ? (
-                <div className="space-y-4">
-                  {categories?.map((category, i) => (
-                    <Card
-                      key={i}
-                      className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
-                      onClick={() => onOpen("products", category.id)}>
-                      {category.name}
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex justify-center gap-4">
-                  <Card
-                    style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
-                      color: data?.customization.font_color || "black",
-                    }}
-                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
-                    onClick={() => onOpen("signUp")}>
-                    <ClipboardList />
-                    Registrar
-                  </Card>
-                  <Card
-                    style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
-                      color: data?.customization.font_color || "black",
-                    }}
-                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
-                    onClick={() => onOpen("signIn")}>
-                    <Key />
-                    Entrar
-                  </Card>
-                </div>
-              )}
+        <div className="relative size-32 mx-auto mb-4">
+          <Image
+            src={data?.customization.logo || placeholder}
+            alt="logo"
+            fill
+            sizes="(max-width: 768px) 25vw, (max-width: 1200px) 10vw, 200px"
+            className="object-contain"
+          />
+        </div>
+
+        {/* Main Content */}
+        <div className="relative z-0">
+          {session ? (
+            <div className="grid grid-cols-2 gap-4">
+              <Card
+                style={{
+                  backgroundColor: data?.customization.button_color || "white",
+                  color: data?.customization.font_color || "black",
+                }}
+                className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                onClick={() => onOpen("categories")}>
+                <Sandwich />
+                Categorias
+              </Card>
+              <Card
+                style={{
+                  backgroundColor: data?.customization.button_color || "white",
+                  color: data?.customization.font_color || "black",
+                }}
+                className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                onClick={() => onOpen("cart")}>
+                <ShoppingCart />
+                Meu carrinho
+              </Card>
             </div>
-          </>
-        )}
+          ) : (
+            <div className="flex items-center justify-center gap-4">
+              <Card
+                style={{
+                  backgroundColor: data?.customization.button_color || "white",
+                  color: data?.customization.font_color || "black",
+                }}
+                className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                onClick={() => onOpen("signUp")}>
+                <ClipboardList />
+                Registrar
+              </Card>
+              <Card
+                style={{
+                  backgroundColor: data?.customization.button_color || "white",
+                  color: data?.customization.font_color || "black",
+                }}
+                className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                onClick={() => onOpen("signIn")}>
+                <Key />
+                Entrar
+              </Card>
+              <Card
+                style={{
+                  backgroundColor: data?.customization.button_color || "white",
+                  color: data?.customization.font_color || "black",
+                }}
+                className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                onClick={() => onOpen("menu")}>
+                <UtensilsCrossed />
+                Menu
+              </Card>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -135,41 +133,25 @@ export const MainClient = ({
 const ModalContent = ({
   modalType,
   categoryId,
-  restaurantOwnerId,
-  fontColor,
-  buttonColor,
 }: {
   modalType: string;
-  categoryId: string | null;
-  restaurantOwnerId: string | undefined;
-  fontColor: string;
-  buttonColor: string;
+  categoryId: string | null | undefined;
 }) => {
   switch (modalType) {
     case "signUp":
-      return (
-        <SignUpForm
-          buttonColor={buttonColor}
-          fontColor={fontColor}
-          restaurantOwnerId={restaurantOwnerId}
-        />
-      );
+      return <SignUpForm />;
     case "signIn":
-      return <SignInForm buttonColor={buttonColor} fontColor={fontColor} />;
+      return <SignInForm />;
+    case "categories":
+      return <Categories />;
     case "products":
-      return (
-        <ProductsList
-          buttonColor={buttonColor}
-          fontColor={fontColor}
-          categoryId={categoryId}
-        />
-      );
-    case "settings":
-      return (
-        <div className="p-4">
-          <p>Settings content goes here.</p>
-        </div>
-      );
+      return <ProductsList categoryId={categoryId} />;
+    case "menu":
+      return <Menu />;
+    case "menuProducts":
+      return <MenuProducts categoryId={categoryId} />;
+    case "cart":
+      return <Cart />;
     default:
       return null;
   }

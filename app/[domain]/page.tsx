@@ -1,6 +1,7 @@
 import { MainClient } from "@/app/_features/_customer/_components/_templates/_template-1/main-client";
 import { auth } from "@/auth";
 import { getCustomizationByDomain } from "@/app/_features/_customer/_queries/get-customization";
+import { StoreProvider } from "@/context/store-context";
 
 const DomainPage = async ({
   params,
@@ -12,7 +13,11 @@ const DomainPage = async ({
 
   const data = await getCustomizationByDomain(domain);
 
-  return <MainClient session={session} data={data} />;
+  return (
+    <StoreProvider session={session} data={data}>
+      <MainClient />
+    </StoreProvider>
+  );
 };
 
 export default DomainPage;

@@ -19,18 +19,14 @@ import { credentialsSignIn } from "@/app/_features/_customer/_actions/credential
 import { useModalStore } from "@/hooks/use-modal-store";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useStore } from "@/context/store-context";
 
 type FormData = z.infer<typeof credentialsSignInSchema>;
 
-export const SignInForm = ({
-  fontColor,
-  buttonColor,
-}: {
-  fontColor: string;
-  buttonColor: string;
-}) => {
+export const SignInForm = () => {
   const [isPending, startTransition] = useTransition();
   const { onClose } = useModalStore();
+  const { data } = useStore();
   const form = useForm<FormData>({
     resolver: zodResolver(credentialsSignInSchema),
     defaultValues: {
@@ -108,9 +104,12 @@ export const SignInForm = ({
         />
         <Button
           className="w-full"
-          style={{ backgroundColor: buttonColor, color: fontColor }}>
+          style={{
+            backgroundColor: data?.customization.button_color || "white",
+            color: data?.customization.font_color || "black",
+          }}>
           {isPending ? (
-            <div className="flex items-center justify-center gap-2 w-full mt-5">
+            <div className="flex items-center justify-center gap-2">
               <Loader2 className="animate-spin" />
               Entrando
             </div>
