@@ -12,7 +12,7 @@ import { useCreateOrder } from "@/app/_features/_customer/_queries/use-create-or
 export const Cart = () => {
   const { cart, removeFromCart, updateQuantity } = useCartStore();
   const { data, session } = useStore();
-  const { mutate, isPending } = useCreateOrder();
+  const { mutate } = useCreateOrder();
 
   const onSubmit = async (values: CartItem[]) => {
     const orderData: OrderData = {

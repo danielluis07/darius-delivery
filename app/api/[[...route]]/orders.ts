@@ -24,7 +24,6 @@ import {
 } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 import { alias } from "drizzle-orm/pg-core";
-import { insertOrderSchema } from "@/db/schemas";
 
 type Products = {
   id: number;
