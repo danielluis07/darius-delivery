@@ -24,6 +24,7 @@ import {
 } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 import { alias } from "drizzle-orm/pg-core";
+import { insertOrderSchema } from "@/db/schemas";
 
 type Products = {
   id: number;
@@ -309,8 +310,82 @@ const app = new Hono()
       return c.json({ data });
     }
   )
+  .post("/", verifyAuth(), zValidator("json", insertOrderSchema), async (c) => {
+    const auth = c.get("authUser");
+    const {
+      customer_id,
+      status,
+      type,
+      payment_status,
+      items,
+      payment_type,
+      delivery_deadline,
+      pickup_deadline,
+    } = c.req.valid("json");
+
+    if (!auth || !auth.token?.sub) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    if (
+      !customer_id ||
+      !status ||
+      !type ||
+      !payment_status ||
+      !payment_type ||
+      !delivery_deadline ||
+      !pickup_deadline ||
+      !items.length
+    ) {
+      return c.json({ error: "Missing data" }, 400);
+    }
+
+    const total_price = items.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
+
+    const [order] = await db
+      .insert(orders)
+      .values({
+        user_id: auth.token.sub,
+        customer_id,
+        total_price,
+        delivery_deadline,
+        pickup_deadline,
+        type,
+        status,
+        payment_status,
+        payment_type,
+      })
+      .returning({ id: orders.id });
+
+    if (!order) {
+      return c.json({ error: "Failed to create order" }, 500);
+    }
+
+    await db.insert(orderItems).values(
+      items.map((item) => ({
+        order_id: order.id,
+        product_id: item.productId,
+        price: item.price,
+        quantity: item.quantity,
+      }))
+    );
+
+    const receipt = await db.insert(receipts).values({
+      order_id: order.id,
+      user_id: auth.token.sub,
+    });
+
+    if (!receipt) {
+      return c.json({ error: "Failed to create receipt" }, 500);
+    }
+
+    return c.json({ order, receipt });
+  })
   .post(
-    "/",
+    "/customer",
     verifyAuth(),
     zValidator(
       "json",
