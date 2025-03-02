@@ -5,9 +5,29 @@ import { useCartStore } from "@/hooks/use-cart-store";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyFromCents } from "@/lib/utils";
+import { CartItem, OrderData } from "@/types";
+import { useStore } from "@/context/store-context";
+import { useCreateOrder } from "@/app/_features/_customer/_queries/use-create-order";
 
 export const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, clearCart } = useCartStore();
+  const { cart, removeFromCart, updateQuantity } = useCartStore();
+  const { data, session } = useStore();
+  const { mutate, isPending } = useCreateOrder();
+
+  const onSubmit = async (values: CartItem[]) => {
+    const orderData: OrderData = {
+      items: values,
+      totalPrice: values.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0
+      ),
+      customerId: session?.user?.id || "",
+      restaurantOwnerId: data?.userId || "",
+    };
+
+    mutate(orderData);
+  };
+
   return (
     <div className="p-4">
       {cart.length === 0 ? (
@@ -63,10 +83,22 @@ export const Cart = () => {
               </div>
             </div>
           ))}
+          <p className="flex justify-between text-lg font-semibold mt-5">
+            <span>Total:</span>
+            <span>
+              {" "}
+              {formatCurrencyFromCents(
+                cart.reduce(
+                  (total, item) => total + item.price * item.quantity,
+                  0
+                )
+              )}
+            </span>
+          </p>
           <Button
             className="w-full mt-4"
             variant="secondary"
-            onClick={clearCart}>
+            onClick={() => onSubmit(cart)}>
             Finalizar Compra
           </Button>
         </div>

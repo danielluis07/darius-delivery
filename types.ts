@@ -16,7 +16,14 @@ export type CartItem = {
   price: number;
   description: string | null;
   category_id: string | null;
-  quantity?: number;
+  quantity: number;
+};
+
+export type OrderData = {
+  items: CartItem[];
+  totalPrice: number;
+  customerId: string;
+  restaurantOwnerId: string;
 };
 
 export type Product = typeof products.$inferSelect;
