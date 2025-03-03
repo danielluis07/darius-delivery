@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FieldErrors, useForm } from "react-hook-form";
@@ -25,11 +25,40 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { LoadingButton } from "@/components/ui/loading-button";
 import Image from "next/image";
-import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
+import {
+  formatCnpj,
+  formatCurrency,
+  formatPhoneNumber,
+  formatPostalCode,
+  removeFormatting,
+} from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+enum STEPS {
+  FIRST = 0,
+  SECOND = 1,
+}
 
 type FormData = z.infer<typeof credentialsSignUpSchema>;
 
+const companyTypes = ["ASSOCIATION", "MEI", "LIMITED", "INDIVIDUAL"];
+
+const translatedCompanyTypes: Record<string, string> = {
+  ASSOCIATION: "Associação",
+  MEI: "Microempreendedor Individual",
+  LIMITED: "Limitada",
+  INDIVIDUAL: "Individual",
+};
+
 export const SignUpForm = () => {
+  const [step, setStep] = useState<STEPS>(STEPS.FIRST);
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
     resolver: zodResolver(credentialsSignUpSchema),
@@ -39,9 +68,25 @@ export const SignUpForm = () => {
       password: "",
       repeat_password: "",
       phone: "",
+      // asaas fields
+      address: "",
+      addressNumber: "",
+      companyType: "",
+      cpfCnpj: "",
+      province: "",
+      incomeValue: null,
+      postalCode: "",
     },
   });
   const router = useRouter();
+
+  const handleNextStep = () => {
+    setStep(STEPS.SECOND);
+  };
+
+  const handlePreviousStep = () => {
+    setStep(STEPS.FIRST);
+  };
 
   const onInvalid = (errors: FieldErrors) => {
     console.log(errors);
@@ -52,6 +97,7 @@ export const SignUpForm = () => {
       credentialsSignUp({
         ...values,
         phone: removeFormatting(values.phone || ""),
+        cpfCnpj: removeFormatting(values.cpfCnpj || ""),
       })
         .then((res) => {
           if (!res.success) {
@@ -73,7 +119,7 @@ export const SignUpForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
-        <Card className="w-[350px]">
+        <Card className="w-[400px]">
           <CardHeader>
             <Image
               src="/darius.png"
@@ -87,114 +133,297 @@ export const SignUpForm = () => {
               Crie sua Conta
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value ?? ""}
-                      disabled={isPending}
-                      placeholder="Nome"
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value ?? ""}
-                      disabled={isPending}
-                      placeholder="Email"
-                      type="email"
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(event) => {
-                        const formattedPhoneNumber = formatPhoneNumber(
-                          event.target.value
-                        );
-                        field.onChange(formattedPhoneNumber);
-                      }}
-                      disabled={isPending}
-                      placeholder="Telefone"
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="password"
-                      value={field.value}
-                      disabled={isPending}
-                      placeholder="Senha"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="repeat_password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="password"
-                      value={field.value}
-                      disabled={isPending}
-                      placeholder="Repita a senha"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
+          {step === STEPS.FIRST && (
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={isPending}
+                        placeholder="Nome"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={isPending}
+                        placeholder="Email"
+                        type="email"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(event) => {
+                          const formattedPhoneNumber = formatPhoneNumber(
+                            event.target.value
+                          );
+                          field.onChange(formattedPhoneNumber);
+                        }}
+                        disabled={isPending}
+                        placeholder="Telefone"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={isPending}
+                        placeholder="Endereço"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="addressNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={isPending}
+                        placeholder="Número"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="province"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={isPending}
+                        placeholder="Bairro"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="postalCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          const formattedValue = formatPostalCode(value);
+                          field.onChange(formattedValue);
+                        }}
+                        disabled={isPending}
+                        placeholder="CEP"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          )}
+
+          {step === STEPS.SECOND && (
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="companyType"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value ?? ""}
+                      required>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo de empresa" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {companyTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {translatedCompanyTypes[type]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cpfCnpj"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          const formattedValue = formatCnpj(value);
+                          field.onChange(formattedValue);
+                        }}
+                        disabled={isPending}
+                        placeholder="CNPJ"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="incomeValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={formatCurrency(field.value ?? "")}
+                        placeholder="Renda Mensal"
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/\D/g, "");
+                          const numericValue = rawValue
+                            ? parseInt(rawValue, 10)
+                            : 0;
+                          field.onChange(numericValue);
+                        }}
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* password */}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        value={field.value}
+                        disabled={isPending}
+                        placeholder="Senha"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="repeat_password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        value={field.value}
+                        disabled={isPending}
+                        placeholder="Repita a senha"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          )}
+
           <CardFooter>
-            <LoadingButton
-              type="submit"
-              className="w-full"
-              isPending={isPending}
-              disabled={isPending}
-              label="Finalizar Cadastro"
-              loadingLabel="Finalizando"
-            />
+            {step === STEPS.FIRST && (
+              <Button
+                className="w-full"
+                type="button"
+                variant="secondary"
+                onClick={handleNextStep}>
+                Continuar
+              </Button>
+            )}
+            {step === STEPS.SECOND && (
+              <div className="flex justify-between w-full">
+                <Button
+                  className="w-40"
+                  type="button"
+                  variant="secondary"
+                  disabled={isPending}
+                  onClick={handlePreviousStep}>
+                  Voltar
+                </Button>
+                <LoadingButton
+                  type="submit"
+                  className="w-40"
+                  isPending={isPending}
+                  disabled={isPending}
+                  label="Finalizar Cadastro"
+                  loadingLabel="Finalizando"
+                />
+              </div>
+            )}
           </CardFooter>
         </Card>
       </form>

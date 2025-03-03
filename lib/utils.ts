@@ -44,6 +44,31 @@ export const formatPhoneNumber = (value: string) => {
   return formattedNumber;
 };
 
-export const removeFormatting = (phone: string) => {
-  return phone.replace(/\D/g, ""); // Remove tudo que não for número
+export const removeFormatting = (value: string) => {
+  return value.replace(/\D/g, ""); // Remove tudo que não for número
+};
+
+export const formatCpf = (value: string): string => {
+  // Remove caracteres não numéricos
+  const digits = value.replace(/\D/g, "").slice(0, 11); // Limita a 11 dígitos
+  return digits
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+};
+
+export const formatCnpj = (value: string): string => {
+  // Remove caracteres não numéricos
+  const digits = value.replace(/\D/g, "").slice(0, 14); // Limita a 14 dígitos
+  return digits
+    .replace(/(\d{2})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,4})/, "$1/$2")
+    .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+};
+
+export const formatPostalCode = (value: string): string => {
+  // Remove caracteres não numéricos e limita a 8 dígitos
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+  return digits.replace(/(\d{5})(\d{1,3})/, "$1-$2");
 };

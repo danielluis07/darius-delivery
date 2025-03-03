@@ -84,6 +84,16 @@ export const users = pgTable("user", {
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   phone: varchar("phone", { length: 255 }),
   role: role("role"),
+  // asaas fields
+  cpfCnpj: varchar("cpf_cnpj", { length: 20 }),
+  incomeValue: integer("income_value"),
+  address: text("address"),
+  addressNumber: text("address_number"),
+  province: text("province"),
+  postalCode: text("postal_code"),
+  companyType: text("company_type"),
+  walletId: text("wallet_id"),
+  //
   googleApiKey: varchar("google_api_key", { length: 255 }),
   domain: varchar("domain", { length: 255 }).unique(),
   isTrial: boolean("is_trial").default(false),
