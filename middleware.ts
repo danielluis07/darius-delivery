@@ -1,22 +1,16 @@
 import NextAuth from "next-auth";
 import authConfig from "@/auth.config";
-import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
-import { publicRoutes, apiAuthPrefix, authRoutes } from "@/routes";
+import { apiAuthPrefix } from "@/routes";
 
 const { auth } = NextAuth(authConfig);
 
 export default auth(async (req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
-  const secret = process.env.AUTH_SECRET!;
-  const token = await getToken({ req, secret, secureCookie: false });
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-
-  const role = token?.role as "ADMIN" | "USER" | undefined;
+  const isWebhookRoute = nextUrl.pathname === "/api/webhook/asaas";
 
   // Get domain from request
   const hostname = req.headers.get("host");
@@ -25,22 +19,32 @@ export default auth(async (req) => {
     ""
   );
 
-  console.log("Hostname: ", hostname);
-  console.log("Main Domain: ", mainDomain);
-
   if (!hostname) {
     return NextResponse.next();
   }
 
-  // Exclude dashboard, admin, and auth routes from rewrite
-  if (hostname === mainDomain) {
-    if (
-      nextUrl.pathname.startsWith("/dashboard") ||
-      nextUrl.pathname.startsWith("/admin") ||
-      nextUrl.pathname.startsWith("/auth")
-    ) {
-      return NextResponse.next();
+  // Skip middleware for webhook routes
+  if (isWebhookRoute) {
+    return NextResponse.next(); // Let the request pass through unchanged
+  }
+
+  // Protect dashboard and admin routes on the main domain
+  if (
+    hostname === mainDomain &&
+    (nextUrl.pathname.startsWith("/dashboard") ||
+      nextUrl.pathname.startsWith("/admin"))
+  ) {
+    if (!isLoggedIn) {
+      let callbackUrl = nextUrl.pathname;
+      if (nextUrl.search) {
+        callbackUrl += nextUrl.search;
+      }
+      const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+      return NextResponse.redirect(
+        new URL(`/auth/sign-in?callbackUrl=${encodedCallbackUrl}`, nextUrl)
+      );
     }
+    return NextResponse.next();
   }
 
   // Rewrite only for custom domains (excluding main domain)
@@ -52,46 +56,8 @@ export default auth(async (req) => {
     }
   }
 
-  // Existing authentication checks
   if (isApiAuthRoute) {
     return undefined;
-  }
-
-  if (isLoggedIn && !role && nextUrl.pathname !== "/auth/register") {
-    return NextResponse.redirect(new URL("/auth/register", nextUrl));
-  }
-
-  if (isLoggedIn) {
-    const isUserRoute = nextUrl.pathname.startsWith("/dashboard");
-    const isAdminRoute = nextUrl.pathname.startsWith("/admin");
-
-    if (role === "USER" && !isUserRoute && !isPublicRoute) {
-      return NextResponse.redirect(new URL("/dashboard", nextUrl));
-    }
-
-    if (role === "ADMIN" && !isAdminRoute && !isPublicRoute) {
-      return NextResponse.redirect(new URL("/admin", nextUrl));
-    }
-  }
-
-  if (isAuthRoute) {
-    if (isLoggedIn) {
-      return NextResponse.redirect(new URL("/dashboard", nextUrl));
-    }
-    return undefined;
-  }
-
-  if (!isLoggedIn && !isPublicRoute) {
-    let callbackUrl = nextUrl.pathname;
-    if (nextUrl.search) {
-      callbackUrl += nextUrl.search;
-    }
-
-    const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-
-    return NextResponse.redirect(
-      new URL(`/auth/sign-in?callbackUrl=${encodedCallbackUrl}`, nextUrl)
-    );
   }
 });
 

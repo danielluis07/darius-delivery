@@ -41,7 +41,24 @@ export type AsaasPayment = {
   billingType: "PIX" | "CREDIT_CARD" | "BOLETO";
   value: number;
   externalReference: string;
-  creditCard: {
+  creditCard:
+    | {
+        holderName: string;
+        number: string;
+        expiryMonth: string;
+        expiryYear: string;
+        ccv: string;
+      }
+    | undefined;
+};
+
+export type PaymentBody = {
+  customer: string;
+  billingType: string;
+  value: number;
+  dueDate: string;
+  externalReference?: string;
+  creditCard?: {
     holderName: string;
     number: string;
     expiryMonth: string;

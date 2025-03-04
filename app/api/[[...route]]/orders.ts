@@ -25,7 +25,7 @@ import {
 import { verifyAuth } from "@hono/auth-js";
 import { alias } from "drizzle-orm/pg-core";
 import { insertOrderSchema } from "@/db/schemas";
-import { createPayment } from "@/lib/asaas";
+import { createPayment, generatePixQrCode } from "@/lib/asaas";
 
 type Products = {
   id: number;
@@ -462,7 +462,7 @@ const app = new Hono()
     async (c) => {
       const values = c.req.valid("json");
 
-      if (!values || !values.asaasCustomerId || !values.creditCard) {
+      if (!values || !values.asaasCustomerId) {
         return c.json({ error: "Missing data" }, 400);
       }
 
@@ -492,7 +492,7 @@ const app = new Hono()
         }))
       );
 
-      const { success, data, message } = await createPayment({
+      const { success, data, message, paymentId } = await createPayment({
         customer: values.asaasCustomerId,
         billingType: values.paymentMethod as "PIX" | "CREDIT_CARD" | "BOLETO",
         value: values.totalPrice,
@@ -502,6 +502,21 @@ const app = new Hono()
 
       if (!success) {
         return c.json({ error: message }, 500);
+      }
+
+      if (values.paymentMethod === "PIX" && paymentId) {
+        const { encodedImage, expirationDate, payload } =
+          await generatePixQrCode(paymentId);
+
+        if (!encodedImage || !expirationDate || !payload) {
+          return c.json({ error: "Failed to generate PIX QR Code" }, 500);
+        }
+
+        return c.json({
+          order,
+          payment: data,
+          qrCode: { encodedImage, expirationDate, payload },
+        });
       }
 
       return c.json({ order, payment: data });

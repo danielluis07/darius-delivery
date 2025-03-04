@@ -25,6 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { PixModal } from "@/components/pix-modal";
 
 enum STEPS {
   FIRST = 0,
@@ -217,197 +218,257 @@ export const Cart = () => {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: data?.customization.background_color || "white",
-        color: data?.customization.font_color || "black",
-      }}
-      className="p-4">
-      {cart.length === 0 ? (
-        <p>Você não possui itens no carrinho</p>
-      ) : (
-        <div>
-          {step === STEPS.FIRST && (
-            <ScrollArea className="h-72 px-2 rounded-md border">
-              {cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center border-b py-4 gap-4">
-                  <div className="relative w-24 h-24">
-                    <Image
-                      src={item.image || "/placeholder.png"}
-                      alt={item.name}
-                      fill
-                      sizes="(max-width: 768px) 100px, (max-width: 1200px) 150px, 200px"
-                      className="object-cover rounded"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{item.name}</h3>
-                    <p className="text-gray-600">
-                      {formatCurrencyFromCents(item.price * item.quantity)}
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <button
-                        className="px-2 py-1 bg-gray-200 rounded"
-                        onClick={() =>
-                          updateQuantity(
-                            item.id,
-                            Math.max(1, item.quantity - 1)
-                          )
-                        }>
-                        -
-                      </button>
-                      <span className="px-2">{item.quantity}</span>
-                      <div
-                        className="px-2 py-1 bg-gray-200 rounded cursor-pointer"
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }>
-                        +
+    <>
+      <PixModal />
+      <div
+        style={{
+          backgroundColor: data?.customization.background_color || "white",
+          color: data?.customization.font_color || "black",
+        }}
+        className="p-4">
+        {cart.length === 0 ? (
+          <p>Você não possui itens no carrinho</p>
+        ) : (
+          <div>
+            {step === STEPS.FIRST && (
+              <ScrollArea className="h-72 px-2 rounded-md border">
+                {cart.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center border-b py-4 gap-4">
+                    <div className="relative w-24 h-24">
+                      <Image
+                        src={item.image || "/placeholder.png"}
+                        alt={item.name}
+                        fill
+                        sizes="(max-width: 768px) 100px, (max-width: 1200px) 150px, 200px"
+                        className="object-cover rounded"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{item.name}</h3>
+                      <p className="text-gray-600">
+                        {formatCurrencyFromCents(item.price * item.quantity)}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <button
+                          className="px-2 py-1 bg-gray-200 rounded"
+                          onClick={() =>
+                            updateQuantity(
+                              item.id,
+                              Math.max(1, item.quantity - 1)
+                            )
+                          }>
+                          -
+                        </button>
+                        <span className="px-2">{item.quantity}</span>
+                        <div
+                          className="px-2 py-1 bg-gray-200 rounded cursor-pointer"
+                          onClick={() =>
+                            updateQuantity(item.id, item.quantity + 1)
+                          }>
+                          +
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    className="text-error cursor-pointer"
-                    onClick={() => removeFromCart(item.id)}>
-                    <X />
-                  </div>
-                </div>
-              ))}
-            </ScrollArea>
-          )}
-
-          {step === STEPS.SECOND && (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-                <h3 className="text-lg font-semibold mb-5 text-center">
-                  Forma de Pagamento
-                </h3>
-                <div className="space-y-4">
-                  {/* Pagamento pelo site */}
-                  {sitePayments.length > 0 && (
-                    <div className="border border-gray-200 p-4 rounded-md">
-                      <h3 className="font-semibold mb-5">Darius Pay</h3>
-                      <FormField
-                        control={form.control}
-                        name="paymentMethod"
-                        render={({ field }) => (
-                          <FormItem className="space-y-3">
-                            <FormControl>
-                              <RadioGroup
-                                onValueChange={field.onChange}
-                                value={field.value}
-                                className="space-y-2">
-                                {sitePayments.map((method) => (
-                                  <FormItem
-                                    key={method}
-                                    className="flex items-center space-x-2 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem
-                                        value={method}
-                                        id={method}
-                                      />
-                                    </FormControl>
-                                    {paymentIcons[method]}
-                                    <FormLabel
-                                      className="font-normal"
-                                      htmlFor={method}>
-                                      {paymentTranslations[method] ?? method}
-                                    </FormLabel>
-                                  </FormItem>
-                                ))}
-                              </RadioGroup>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <div
+                      className="text-error cursor-pointer"
+                      onClick={() => removeFromCart(item.id)}>
+                      <X />
                     </div>
-                  )}
+                  </div>
+                ))}
+              </ScrollArea>
+            )}
 
-                  {/* Pagamento na entrega */}
-                  {deliveryPayments.length > 0 && (
-                    <div className="border border-gray-200 p-4 rounded-md">
-                      <h3 className="font-semibold mb-5">
-                        Pagamento na entrega
-                      </h3>
-                      <FormField
-                        control={form.control}
-                        name="paymentMethod"
-                        render={({ field }) => (
-                          <FormItem className="space-y-3">
-                            <FormControl>
-                              <RadioGroup
-                                onValueChange={field.onChange}
-                                value={field.value}
-                                className="space-y-2">
-                                {deliveryPayments.map((method) => (
-                                  <FormItem
-                                    key={method}
-                                    className="flex items-center space-x-2 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem
-                                        value={method}
-                                        id={method}
-                                      />
-                                    </FormControl>
-                                    {paymentIcons[method]}
-                                    <FormLabel
-                                      className="font-normal"
-                                      htmlFor={method}>
-                                      {paymentTranslations[method] ?? method}
-                                    </FormLabel>
-                                  </FormItem>
-                                ))}
-                              </RadioGroup>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  )}
-
-                  {form.watch("paymentMethod") === "CREDIT_CARD" && (
-                    <div className="border border-gray-200 p-4 rounded-md mt-4">
-                      <h3 className="font-semibold mb-5">
-                        Detalhes do Cartão de Crédito
-                      </h3>
-                      <div className="space-y-4">
+            {step === STEPS.SECOND && (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+                  <h3 className="text-lg font-semibold mb-5 text-center">
+                    Forma de Pagamento
+                  </h3>
+                  <div className="space-y-4">
+                    {/* Pagamento pelo site */}
+                    {sitePayments.length > 0 && (
+                      <div className="border border-gray-200 p-4 rounded-md">
+                        <h3 className="font-semibold mb-5">Darius Pay</h3>
                         <FormField
                           control={form.control}
-                          name="creditCard.holderName"
+                          name="paymentMethod"
                           render={({ field }) => (
-                            <FormItem className="w-full">
-                              <FormLabel>Nome do Titular</FormLabel>
+                            <FormItem className="space-y-3">
                               <FormControl>
-                                <input
-                                  {...field}
-                                  placeholder="João Silva"
-                                  className="w-full p-2 border rounded-md"
-                                />
+                                <RadioGroup
+                                  onValueChange={field.onChange}
+                                  value={field.value}
+                                  className="space-y-2">
+                                  {sitePayments.map((method) => (
+                                    <FormItem
+                                      key={method}
+                                      className="flex items-center space-x-2 space-y-0">
+                                      <FormControl>
+                                        <RadioGroupItem
+                                          value={method}
+                                          id={method}
+                                        />
+                                      </FormControl>
+                                      {paymentIcons[method]}
+                                      <FormLabel
+                                        className="font-normal"
+                                        htmlFor={method}>
+                                        {paymentTranslations[method] ?? method}
+                                      </FormLabel>
+                                    </FormItem>
+                                  ))}
+                                </RadioGroup>
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                        <div>
+                      </div>
+                    )}
+
+                    {/* Pagamento na entrega */}
+                    {deliveryPayments.length > 0 && (
+                      <div className="border border-gray-200 p-4 rounded-md">
+                        <h3 className="font-semibold mb-5">
+                          Pagamento na entrega
+                        </h3>
+                        <FormField
+                          control={form.control}
+                          name="paymentMethod"
+                          render={({ field }) => (
+                            <FormItem className="space-y-3">
+                              <FormControl>
+                                <RadioGroup
+                                  onValueChange={field.onChange}
+                                  value={field.value}
+                                  className="space-y-2">
+                                  {deliveryPayments.map((method) => (
+                                    <FormItem
+                                      key={method}
+                                      className="flex items-center space-x-2 space-y-0">
+                                      <FormControl>
+                                        <RadioGroupItem
+                                          value={method}
+                                          id={method}
+                                        />
+                                      </FormControl>
+                                      {paymentIcons[method]}
+                                      <FormLabel
+                                        className="font-normal"
+                                        htmlFor={method}>
+                                        {paymentTranslations[method] ?? method}
+                                      </FormLabel>
+                                    </FormItem>
+                                  ))}
+                                </RadioGroup>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
+
+                    {form.watch("paymentMethod") === "CREDIT_CARD" && (
+                      <div className="border border-gray-200 p-4 rounded-md mt-4">
+                        <h3 className="font-semibold mb-5">
+                          Detalhes do Cartão de Crédito
+                        </h3>
+                        <div className="space-y-4">
                           <FormField
                             control={form.control}
-                            name="creditCard.number"
+                            name="creditCard.holderName"
                             render={({ field }) => (
                               <FormItem className="w-full">
-                                <FormLabel>Número do Cartão</FormLabel>
+                                <FormLabel>Nome do Titular</FormLabel>
                                 <FormControl>
-                                  <InputMask
-                                    mask="____ ____ ____ ____"
-                                    replacement={{ _: /\d/ }}
-                                    placeholder="1234 5678 9012 3456"
+                                  <input
+                                    {...field}
+                                    placeholder="João Silva"
                                     className="w-full p-2 border rounded-md"
-                                    onChange={field.onChange}
-                                    value={field.value}
-                                    showMask={false} // Optional: hides the mask characters when empty
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <div>
+                            <FormField
+                              control={form.control}
+                              name="creditCard.number"
+                              render={({ field }) => (
+                                <FormItem className="w-full">
+                                  <FormLabel>Número do Cartão</FormLabel>
+                                  <FormControl>
+                                    <InputMask
+                                      mask="____ ____ ____ ____"
+                                      replacement={{ _: /\d/ }}
+                                      placeholder="1234 5678 9012 3456"
+                                      className="w-full p-2 border rounded-md"
+                                      onChange={field.onChange}
+                                      value={field.value}
+                                      showMask={false} // Optional: hides the mask characters when empty
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <div className="flex gap-4">
+                            <div className="flex-1">
+                              <FormField
+                                control={form.control}
+                                name="creditCard.expiryMonth"
+                                render={({ field }) => (
+                                  <FormItem className="w-full">
+                                    <FormLabel>Mês de Validade</FormLabel>
+                                    <FormControl>
+                                      <input
+                                        {...field}
+                                        placeholder="12"
+                                        className="w-full p-2 border rounded-md"
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <FormField
+                                control={form.control}
+                                name="creditCard.expiryYear"
+                                render={({ field }) => (
+                                  <FormItem className="w-full">
+                                    <FormLabel>Ano de Validade</FormLabel>
+                                    <FormControl>
+                                      <input
+                                        {...field}
+                                        placeholder="2025"
+                                        className="w-full p-2 border rounded-md"
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name="creditCard.ccv"
+                            render={({ field }) => (
+                              <FormItem className="w-full">
+                                <FormLabel>CCV</FormLabel>
+                                <FormControl>
+                                  <input
+                                    {...field}
+                                    placeholder="123"
+                                    className="w-full p-2 border rounded-md"
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -415,129 +476,76 @@ export const Cart = () => {
                             )}
                           />
                         </div>
-                        <div className="flex gap-4">
-                          <div className="flex-1">
-                            <FormField
-                              control={form.control}
-                              name="creditCard.expiryMonth"
-                              render={({ field }) => (
-                                <FormItem className="w-full">
-                                  <FormLabel>Mês de Validade</FormLabel>
-                                  <FormControl>
-                                    <input
-                                      {...field}
-                                      placeholder="12"
-                                      className="w-full p-2 border rounded-md"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <FormField
-                              control={form.control}
-                              name="creditCard.expiryYear"
-                              render={({ field }) => (
-                                <FormItem className="w-full">
-                                  <FormLabel>Ano de Validade</FormLabel>
-                                  <FormControl>
-                                    <input
-                                      {...field}
-                                      placeholder="2025"
-                                      className="w-full p-2 border rounded-md"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="flex justify-between text-lg font-semibold mt-5">
+                    <span>Total:</span>
+                    <span>
+                      {formatCurrencyFromCents(
+                        cart.reduce(
+                          (total, item) => total + item.price * item.quantity,
+                          0
+                        )
+                      )}
+                    </span>
+                  </p>
+
+                  <div className="flex justify-between mt-4">
+                    <button
+                      type="button"
+                      onClick={handlePreviousStep}
+                      disabled={
+                        isPendingCashOnWebsite || isPendingCashOnDelivery
+                      }
+                      style={{
+                        backgroundColor:
+                          data?.customization.button_color || "white",
+                        color: data?.customization.font_color || "black",
+                      }}
+                      className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-40 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
+                      Voltar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={
+                        isPendingCashOnWebsite || isPendingCashOnDelivery
+                      }
+                      style={{
+                        backgroundColor:
+                          data?.customization.button_color || "white",
+                        color: data?.customization.font_color || "black",
+                      }}
+                      className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-40 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
+                      {isPendingCashOnWebsite || isPendingCashOnDelivery ? (
+                        <div className="flex items-center justify-center gap-2 w-44">
+                          <Loader2 className="animate-spin" />
+                          Finalizando
                         </div>
-                        <FormField
-                          control={form.control}
-                          name="creditCard.ccv"
-                          render={({ field }) => (
-                            <FormItem className="w-full">
-                              <FormLabel>CCV</FormLabel>
-                              <FormControl>
-                                <input
-                                  {...field}
-                                  placeholder="123"
-                                  className="w-full p-2 border rounded-md"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
+                      ) : (
+                        <span>Finalizar Pedido</span>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </Form>
+            )}
 
-                <p className="flex justify-between text-lg font-semibold mt-5">
-                  <span>Total:</span>
-                  <span>
-                    {formatCurrencyFromCents(
-                      cart.reduce(
-                        (total, item) => total + item.price * item.quantity,
-                        0
-                      )
-                    )}
-                  </span>
-                </p>
-
-                <div className="flex justify-between mt-4">
-                  <button
-                    type="button"
-                    onClick={handlePreviousStep}
-                    disabled={isPendingCashOnWebsite || isPendingCashOnDelivery}
-                    style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
-                      color: data?.customization.font_color || "black",
-                    }}
-                    className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-40 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
-                    Voltar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isPendingCashOnWebsite || isPendingCashOnDelivery}
-                    style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
-                      color: data?.customization.font_color || "black",
-                    }}
-                    className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-40 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
-                    {isPendingCashOnWebsite || isPendingCashOnDelivery ? (
-                      <div className="flex items-center justify-center gap-2 w-44">
-                        <Loader2 className="animate-spin" />
-                        Finalizando
-                      </div>
-                    ) : (
-                      <span>Finalizar Pedido</span>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </Form>
-          )}
-
-          {step === STEPS.FIRST && (
-            <button
-              onClick={handleNextStep}
-              style={{
-                backgroundColor: data?.customization.button_color || "white",
-                color: data?.customization.font_color || "black",
-              }}
-              className="inline-flex items-center justify-center gap-2 h-9 mt-3 px-4 py-2 w-full whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
-              Continuar
-            </button>
-          )}
-        </div>
-      )}
-    </div>
+            {step === STEPS.FIRST && (
+              <button
+                onClick={handleNextStep}
+                style={{
+                  backgroundColor: data?.customization.button_color || "white",
+                  color: data?.customization.font_color || "black",
+                }}
+                className="inline-flex items-center justify-center gap-2 h-9 mt-3 px-4 py-2 w-full whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
+                Continuar
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
