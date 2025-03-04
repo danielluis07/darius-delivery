@@ -21,6 +21,8 @@ const app = new Hono().post("/asaas", async (c) => {
     let paymentStatus = null;
     let orderStatus = null;
 
+    console.log(orderStatus);
+
     // Mapeia os eventos do ASAAS para os status do banco
     switch (event) {
       case "PAYMENT_CONFIRMED":
