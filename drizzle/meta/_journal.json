@@ -57,6 +57,13 @@
       "when": 1740950950294,
       "tag": "0007_bouncy_moon_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1740967716535,
+      "tag": "0008_rapid_vanisher",
+      "breakpoints": true
     }
   ]
 }

@@ -65,6 +65,7 @@ export const MainClient = () => {
             src={data?.customization.logo || placeholder}
             alt="logo"
             fill
+            priority
             sizes="(max-width: 768px) 25vw, (max-width: 1200px) 10vw, 200px"
             className="object-contain"
           />

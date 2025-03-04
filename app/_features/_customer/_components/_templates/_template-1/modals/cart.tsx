@@ -1,30 +1,219 @@
 "use client";
 
+import { z } from "zod";
+import { InputMask } from "@react-input/mask";
 import Image from "next/image";
+import { FaPix, FaCreditCard, FaMoneyBill1Wave } from "react-icons/fa6";
 import { useCartStore } from "@/hooks/use-cart-store";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
-import { CartItem, OrderData } from "@/types";
 import { useStore } from "@/context/store-context";
-import { useCreateOrder } from "@/app/_features/_customer/_queries/use-create-order";
+import {
+  useCreateCashOnDeliveryOrder,
+  useCreateCashWebsiteOrder,
+} from "@/app/_features/_customer/_queries/use-create-order";
+import { JSX, useState } from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+enum STEPS {
+  FIRST = 0,
+  SECOND = 1,
+}
+
+const orderSchema = z
+  .object({
+    items: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        image: z.string().nullable(),
+        createdAt: z.union([z.string(), z.date()]).nullable(),
+        updatedAt: z.union([z.string(), z.date()]).nullable(),
+        userId: z.string().nullable(),
+        price: z.number(),
+        description: z.string().nullable(),
+        category_id: z.string().nullable(),
+        quantity: z.number(),
+      })
+    ),
+    totalPrice: z.number(),
+    customerId: z.string(),
+    restaurantOwnerId: z.string(),
+    paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
+    asaasCustomerId: z.string().optional(),
+    creditCard: z
+      .object({
+        holderName: z.string(),
+        number: z.string(),
+        expiryMonth: z.string(),
+        expiryYear: z.string(),
+        ccv: z.string(),
+      })
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.paymentMethod === "CREDIT_CARD") {
+      if (!data.creditCard) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Os dados do cartão de crédito são obrigatórios",
+          path: ["creditCard"],
+        });
+        return;
+      }
+
+      // Validate each field and add specific issues
+      if (data.creditCard.holderName.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Nome do titular é obrigatório",
+          path: ["creditCard", "holderName"],
+        });
+      }
+
+      if (data.creditCard.number.length < 13) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Número do cartão deve ter pelo menos 13 dígitos",
+          path: ["creditCard", "number"],
+        });
+      }
+
+      if (!/^(0[1-9]|1[0-2])$/.test(data.creditCard.expiryMonth)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Mês deve ser entre 01 e 12",
+          path: ["creditCard", "expiryMonth"],
+        });
+      }
+
+      if (!/^\d{4}$/.test(data.creditCard.expiryYear)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Ano deve ter 4 dígitos",
+          path: ["creditCard", "expiryYear"],
+        });
+      }
+
+      if (!/^\d{3,4}$/.test(data.creditCard.ccv)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "CCV deve ter 3 ou 4 dígitos",
+          path: ["creditCard", "ccv"],
+        });
+      }
+    }
+    // No issues added for other payment methods, so validation passes
+  });
+
+type OrderData = z.infer<typeof orderSchema>;
 
 export const Cart = () => {
   const { cart, removeFromCart, updateQuantity } = useCartStore();
+  const [step, setStep] = useState<STEPS>(STEPS.FIRST);
   const { data, session } = useStore();
-  const { mutate } = useCreateOrder();
 
-  const onSubmit = async (values: CartItem[]) => {
-    const orderData: OrderData = {
-      items: values,
-      totalPrice: values.reduce(
+  const form = useForm<OrderData>({
+    resolver: zodResolver(orderSchema),
+    defaultValues: {
+      items: cart,
+      totalPrice: cart.reduce(
         (total, item) => total + item.price * item.quantity,
         0
       ),
       customerId: session?.user?.id || "",
       restaurantOwnerId: data?.userId || "",
+      asaasCustomerId: session?.user.asaasCustomerId,
+      paymentMethod: undefined,
+      creditCard: {
+        holderName: "",
+        number: "",
+        expiryMonth: "",
+        expiryYear: "",
+        ccv: "",
+      },
+    },
+  });
+
+  const { mutate: mutateCashOnWebsite, isPending: isPendingCashOnWebsite } =
+    useCreateCashWebsiteOrder();
+  const { mutate: mutateCashOnDelivery, isPending: isPendingCashOnDelivery } =
+    useCreateCashOnDeliveryOrder();
+
+  const paymentMethods = data?.customization.payment_methods || [];
+
+  // Mapeamento de ícones
+  const paymentIcons: Record<string, JSX.Element> = {
+    PIX: <FaPix className="text-[#00BDAE]" />,
+    CREDIT_CARD: <FaCreditCard className="text-blue-700" />,
+    CASH: <FaMoneyBill1Wave className="text-green-600" />,
+    CARD: <FaCreditCard className="text-blue-700" />,
+  };
+
+  // Mapeamento de tradução
+  const paymentTranslations: Record<string, string> = {
+    PIX: "PIX",
+    CREDIT_CARD: "Cartão de Crédito",
+    CASH: "Dinheiro",
+    CARD: "Cartão",
+  };
+
+  const onlinePayments = ["PIX", "CREDIT_CARD"];
+  const offlinePayments = ["CASH", "CARD"];
+
+  // Separar métodos entre os grupos
+  const sitePayments = paymentMethods.filter((method) =>
+    onlinePayments.includes(method)
+  );
+  const deliveryPayments = paymentMethods.filter((method) =>
+    offlinePayments.includes(method)
+  );
+
+  const handleNextStep = () => {
+    setStep(STEPS.SECOND);
+  };
+
+  const handlePreviousStep = () => {
+    setStep(STEPS.FIRST);
+  };
+
+  const onSubmit = (values: OrderData) => {
+    const cleanedCreditCard =
+      values.paymentMethod === "CREDIT_CARD" && values.creditCard
+        ? {
+            ...values.creditCard,
+            number: values.creditCard.number.replace(/\s/g, ""), // Remove all spaces
+          }
+        : undefined;
+    const orderData: OrderData = {
+      items: cart,
+      totalPrice: cart.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0
+      ),
+      customerId: session?.user?.id || "",
+      restaurantOwnerId: data?.userId || "",
+      paymentMethod: values.paymentMethod,
+      asaasCustomerId: session?.user.asaasCustomerId,
+      creditCard: cleanedCreditCard,
     };
 
-    mutate(orderData);
+    if (values.paymentMethod === "CASH" || values.paymentMethod === "CARD") {
+      mutateCashOnDelivery(orderData);
+    } else {
+      mutateCashOnWebsite(orderData);
+    }
   };
 
   return (
@@ -38,76 +227,315 @@ export const Cart = () => {
         <p>Você não possui itens no carrinho</p>
       ) : (
         <div>
-          {cart.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center border-b py-4 gap-4">
-              {/* Image Container */}
-              <div className="relative w-24 h-24">
-                <Image
-                  src={item.image || "/placeholder.png"} // Use a default placeholder if no image
-                  alt={item.name}
-                  fill
-                  sizes="(max-width: 768px) 100px, (max-width: 1200px) 150px, 200px"
-                  className="object-cover rounded"
-                />
-              </div>
-
-              {/* Product Info */}
-              <div className="flex-1">
-                <h3 className="font-semibold">{item.name}</h3>
-                <p className="text-gray-600">
-                  {formatCurrencyFromCents(item.price * item.quantity)}
-                </p>
-
-                {/* Quantity Controls */}
-                <div className="flex items-center gap-2 mt-2">
-                  <button
-                    className="px-2 py-1 bg-gray-200 rounded"
-                    onClick={() =>
-                      updateQuantity(item.id, Math.max(1, item.quantity - 1))
-                    }>
-                    -
-                  </button>
-                  <span className="px-2">{item.quantity}</span>
+          {step === STEPS.FIRST && (
+            <ScrollArea className="h-72 px-2 rounded-md border">
+              {cart.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center border-b py-4 gap-4">
+                  <div className="relative w-24 h-24">
+                    <Image
+                      src={item.image || "/placeholder.png"}
+                      alt={item.name}
+                      fill
+                      sizes="(max-width: 768px) 100px, (max-width: 1200px) 150px, 200px"
+                      className="object-cover rounded"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{item.name}</h3>
+                    <p className="text-gray-600">
+                      {formatCurrencyFromCents(item.price * item.quantity)}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        className="px-2 py-1 bg-gray-200 rounded"
+                        onClick={() =>
+                          updateQuantity(
+                            item.id,
+                            Math.max(1, item.quantity - 1)
+                          )
+                        }>
+                        -
+                      </button>
+                      <span className="px-2">{item.quantity}</span>
+                      <div
+                        className="px-2 py-1 bg-gray-200 rounded cursor-pointer"
+                        onClick={() =>
+                          updateQuantity(item.id, item.quantity + 1)
+                        }>
+                        +
+                      </div>
+                    </div>
+                  </div>
                   <div
-                    className="px-2 py-1 bg-gray-200 rounded cursor-pointer"
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}>
-                    +
+                    className="text-error cursor-pointer"
+                    onClick={() => removeFromCart(item.id)}>
+                    <X />
                   </div>
                 </div>
-              </div>
+              ))}
+            </ScrollArea>
+          )}
 
-              {/* Remove Button */}
+          {step === STEPS.SECOND && (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+                <h3 className="text-lg font-semibold mb-5 text-center">
+                  Forma de Pagamento
+                </h3>
+                <div className="space-y-4">
+                  {/* Pagamento pelo site */}
+                  {sitePayments.length > 0 && (
+                    <div className="border border-gray-200 p-4 rounded-md">
+                      <h3 className="font-semibold mb-5">Darius Pay</h3>
+                      <FormField
+                        control={form.control}
+                        name="paymentMethod"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                className="space-y-2">
+                                {sitePayments.map((method) => (
+                                  <FormItem
+                                    key={method}
+                                    className="flex items-center space-x-2 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem
+                                        value={method}
+                                        id={method}
+                                      />
+                                    </FormControl>
+                                    {paymentIcons[method]}
+                                    <FormLabel
+                                      className="font-normal"
+                                      htmlFor={method}>
+                                      {paymentTranslations[method] ?? method}
+                                    </FormLabel>
+                                  </FormItem>
+                                ))}
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
 
-              <div
-                className="text-error cursor-pointer"
-                onClick={() => removeFromCart(item.id)}>
-                <X />
-              </div>
-            </div>
-          ))}
-          <p className="flex justify-between text-lg font-semibold mt-5">
-            <span>Total:</span>
-            <span>
-              {" "}
-              {formatCurrencyFromCents(
-                cart.reduce(
-                  (total, item) => total + item.price * item.quantity,
-                  0
-                )
-              )}
-            </span>
-          </p>
-          <button
-            style={{
-              backgroundColor: data?.customization.button_color || "white",
-              color: data?.customization.font_color || "black",
-            }}
-            className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
-            onClick={() => onSubmit(cart)}>
-            Finalizar Compra
-          </button>
+                  {/* Pagamento na entrega */}
+                  {deliveryPayments.length > 0 && (
+                    <div className="border border-gray-200 p-4 rounded-md">
+                      <h3 className="font-semibold mb-5">
+                        Pagamento na entrega
+                      </h3>
+                      <FormField
+                        control={form.control}
+                        name="paymentMethod"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                className="space-y-2">
+                                {deliveryPayments.map((method) => (
+                                  <FormItem
+                                    key={method}
+                                    className="flex items-center space-x-2 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem
+                                        value={method}
+                                        id={method}
+                                      />
+                                    </FormControl>
+                                    {paymentIcons[method]}
+                                    <FormLabel
+                                      className="font-normal"
+                                      htmlFor={method}>
+                                      {paymentTranslations[method] ?? method}
+                                    </FormLabel>
+                                  </FormItem>
+                                ))}
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+
+                  {form.watch("paymentMethod") === "CREDIT_CARD" && (
+                    <div className="border border-gray-200 p-4 rounded-md mt-4">
+                      <h3 className="font-semibold mb-5">
+                        Detalhes do Cartão de Crédito
+                      </h3>
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="creditCard.holderName"
+                          render={({ field }) => (
+                            <FormItem className="w-full">
+                              <FormLabel>Nome do Titular</FormLabel>
+                              <FormControl>
+                                <input
+                                  {...field}
+                                  placeholder="João Silva"
+                                  className="w-full p-2 border rounded-md"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div>
+                          <FormField
+                            control={form.control}
+                            name="creditCard.number"
+                            render={({ field }) => (
+                              <FormItem className="w-full">
+                                <FormLabel>Número do Cartão</FormLabel>
+                                <FormControl>
+                                  <InputMask
+                                    mask="____ ____ ____ ____"
+                                    replacement={{ _: /\d/ }}
+                                    placeholder="1234 5678 9012 3456"
+                                    className="w-full p-2 border rounded-md"
+                                    onChange={field.onChange}
+                                    value={field.value}
+                                    showMask={false} // Optional: hides the mask characters when empty
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="flex gap-4">
+                          <div className="flex-1">
+                            <FormField
+                              control={form.control}
+                              name="creditCard.expiryMonth"
+                              render={({ field }) => (
+                                <FormItem className="w-full">
+                                  <FormLabel>Mês de Validade</FormLabel>
+                                  <FormControl>
+                                    <input
+                                      {...field}
+                                      placeholder="12"
+                                      className="w-full p-2 border rounded-md"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <FormField
+                              control={form.control}
+                              name="creditCard.expiryYear"
+                              render={({ field }) => (
+                                <FormItem className="w-full">
+                                  <FormLabel>Ano de Validade</FormLabel>
+                                  <FormControl>
+                                    <input
+                                      {...field}
+                                      placeholder="2025"
+                                      className="w-full p-2 border rounded-md"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name="creditCard.ccv"
+                          render={({ field }) => (
+                            <FormItem className="w-full">
+                              <FormLabel>CCV</FormLabel>
+                              <FormControl>
+                                <input
+                                  {...field}
+                                  placeholder="123"
+                                  className="w-full p-2 border rounded-md"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <p className="flex justify-between text-lg font-semibold mt-5">
+                  <span>Total:</span>
+                  <span>
+                    {formatCurrencyFromCents(
+                      cart.reduce(
+                        (total, item) => total + item.price * item.quantity,
+                        0
+                      )
+                    )}
+                  </span>
+                </p>
+
+                <div className="flex justify-between mt-4">
+                  <button
+                    type="button"
+                    onClick={handlePreviousStep}
+                    disabled={isPendingCashOnWebsite || isPendingCashOnDelivery}
+                    style={{
+                      backgroundColor:
+                        data?.customization.button_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
+                    className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-40 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
+                    Voltar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isPendingCashOnWebsite || isPendingCashOnDelivery}
+                    style={{
+                      backgroundColor:
+                        data?.customization.button_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
+                    className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-40 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
+                    {isPendingCashOnWebsite || isPendingCashOnDelivery ? (
+                      <div className="flex items-center justify-center gap-2 w-44">
+                        <Loader2 className="animate-spin" />
+                        Finalizando
+                      </div>
+                    ) : (
+                      <span>Finalizar Pedido</span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </Form>
+          )}
+
+          {step === STEPS.FIRST && (
+            <button
+              onClick={handleNextStep}
+              style={{
+                backgroundColor: data?.customization.button_color || "white",
+                color: data?.customization.font_color || "black",
+              }}
+              className="inline-flex items-center justify-center gap-2 h-9 mt-3 px-4 py-2 w-full whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
+              Continuar
+            </button>
+          )}
         </div>
       )}
     </div>

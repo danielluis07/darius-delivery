@@ -45,8 +45,8 @@ export const orderStatus = pgEnum("order_status", [
 export const orderPaymentType = pgEnum("order_payment_type", [
   "CASH",
   "CREDIT_CARD",
-  "DEBIT_CARD",
   "PIX",
+  "CARD",
 ]);
 
 export const orderType = pgEnum("order_type", ["LOCAL", "WEBSITE", "WHATSAPP"]);
@@ -260,6 +260,7 @@ export const customers = pgTable("customers", {
   userId: text("userId")
     .references(() => users.id, { onDelete: "cascade" })
     .unique(), // Ensures each customer has one record in customers
+  asaasCustomerId: text("asaas_customer_id"),
   restaurantOwnerId: text("restaurantOwnerId").references(() => users.id, {
     onDelete: "cascade",
   }),

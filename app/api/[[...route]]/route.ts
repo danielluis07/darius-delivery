@@ -16,6 +16,7 @@ import combos from "@/app/api/[[...route]]/combos";
 import pixels from "@/app/api/[[...route]]/pixels";
 import admin from "@/app/api/[[...route]]/admin";
 import orderSettings from "@/app/api/[[...route]]/order-settings";
+import webhook from "@/app/api/[[...route]]/webhook";
 
 export const runtime = "nodejs";
 
@@ -45,7 +46,8 @@ const routes = app
   .route("/combos", combos)
   .route("/pixels", pixels)
   .route("/admin", admin)
-  .route("/ordersettings", orderSettings);
+  .route("/ordersettings", orderSettings)
+  .route("/webhook", webhook);
 
 export const GET = handle(app);
 export const POST = handle(app);

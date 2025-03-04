@@ -10,8 +10,8 @@ export type CartItem = {
   id: string;
   name: string;
   image: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
+  createdAt: string | Date | null;
+  updatedAt: string | Date | null;
   userId: string | null;
   price: number;
   description: string | null;
@@ -19,11 +19,35 @@ export type CartItem = {
   quantity: number;
 };
 
-export type OrderData = {
+export type CashOnDeliveryOrderData = {
   items: CartItem[];
   totalPrice: number;
   customerId: string;
   restaurantOwnerId: string;
+  paymentMethod: "CASH" | "CARD";
+};
+
+export type CashOnWebsiteOrderData = {
+  items: CartItem[];
+  totalPrice: number;
+  customerId: string;
+  restaurantOwnerId: string;
+  asaasCustomerId: string | undefined;
+  paymentMethod: "CREDIT_CARD" | "PIX";
+};
+
+export type AsaasPayment = {
+  customer: string;
+  billingType: "PIX" | "CREDIT_CARD" | "BOLETO";
+  value: number;
+  externalReference: string;
+  creditCard: {
+    holderName: string;
+    number: string;
+    expiryMonth: string;
+    expiryYear: string;
+    ccv: string;
+  };
 };
 
 export type Product = typeof products.$inferSelect;

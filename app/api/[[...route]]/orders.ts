@@ -25,6 +25,7 @@ import {
 import { verifyAuth } from "@hono/auth-js";
 import { alias } from "drizzle-orm/pg-core";
 import { insertOrderSchema } from "@/db/schemas";
+import { createPayment } from "@/lib/asaas";
 
 type Products = {
   id: number;
@@ -385,7 +386,7 @@ const app = new Hono()
     return c.json({ order, receipt });
   })
   .post(
-    "/customer",
+    "/payment/ondelivery",
     verifyAuth(),
     zValidator(
       "json",
@@ -407,6 +408,7 @@ const app = new Hono()
         totalPrice: z.number(),
         customerId: z.string(),
         restaurantOwnerId: z.string(),
+        paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
       })
     ),
     async (c) => {
@@ -416,7 +418,94 @@ const app = new Hono()
         return c.json({ error: "Missing data" }, 400);
       }
 
+      console.log("api endpoint is payment on delivery", values);
+
       return c.json({ data: values });
+    }
+  )
+  .post(
+    "/payment/website",
+    verifyAuth(),
+    zValidator(
+      "json",
+      z.object({
+        items: z.array(
+          z.object({
+            id: z.string(),
+            name: z.string(),
+            image: z.string().nullable(),
+            createdAt: z.union([z.string(), z.date()]).nullable(),
+            updatedAt: z.union([z.string(), z.date()]).nullable(),
+            userId: z.string().nullable(),
+            price: z.number(),
+            description: z.string().nullable(),
+            category_id: z.string().nullable(),
+            quantity: z.number(),
+          })
+        ),
+        totalPrice: z.number(),
+        customerId: z.string(),
+        restaurantOwnerId: z.string(),
+        paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
+        asaasCustomerId: z.string().optional(),
+        creditCard: z
+          .object({
+            holderName: z.string(),
+            number: z.string(),
+            expiryMonth: z.string(),
+            expiryYear: z.string(),
+            ccv: z.string(),
+          })
+          .optional(),
+      })
+    ),
+    async (c) => {
+      const values = c.req.valid("json");
+      const ip = c.req.header("");
+
+      if (!values || !values.asaasCustomerId || !values.creditCard) {
+        return c.json({ error: "Missing data" }, 400);
+      }
+
+      const [order] = await db
+        .insert(orders)
+        .values({
+          user_id: values.restaurantOwnerId,
+          customer_id: values.customerId,
+          total_price: values.totalPrice,
+          status: "PREPARING",
+          payment_status: "PENDING",
+          payment_type: values.paymentMethod,
+          type: "WEBSITE",
+        })
+        .returning({ id: orders.id });
+
+      if (!order) {
+        return c.json({ error: "Failed to create order" }, 500);
+      }
+
+      await db.insert(orderItems).values(
+        values.items.map((item) => ({
+          order_id: order.id,
+          product_id: item.id,
+          price: item.price,
+          quantity: item.quantity,
+        }))
+      );
+
+      const { success, data, message } = await createPayment({
+        customer: values.asaasCustomerId,
+        billingType: values.paymentMethod as "PIX" | "CREDIT_CARD" | "BOLETO",
+        value: values.totalPrice,
+        externalReference: order.id,
+        creditCard: values.creditCard,
+      });
+
+      if (!success) {
+        return c.json({ error: message }, 500);
+      }
+
+      return c.json({ order, payment: data });
     }
   )
   .post(

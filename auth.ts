@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import { db } from "@/db/drizzle";
 import authConfig from "@/auth.config";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { users, account } from "@/db/schema";
+import { users, account, customers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export const {
@@ -59,6 +59,11 @@ export const {
         session.user.email = token.email as string;
         session.user.isOAuth = token.isOAuth as boolean;
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
+
+        // Apenas adiciona o asaasCustomerId se existir no token
+        if (token.asaasCustomerId) {
+          session.user.asaasCustomerId = token.asaasCustomerId as string;
+        }
       }
 
       return session;
@@ -84,6 +89,16 @@ export const {
       token.email = existingUser.email;
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
       token.image = existingUser.image;
+
+      // Se o usuário for CUSTOMER, buscar o asaas_customer_id
+      if (existingUser.role === "CUSTOMER") {
+        const [customer] = await db
+          .select({ asaasCustomerId: customers.asaasCustomerId })
+          .from(customers)
+          .where(eq(customers.userId, token.sub));
+
+        token.asaasCustomerId = customer?.asaasCustomerId || null;
+      }
 
       return token;
     },

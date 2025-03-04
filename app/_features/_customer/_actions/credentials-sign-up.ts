@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { users, customers } from "@/db/schema";
 import { insertCustomerSchema } from "@/db/schemas";
 import { signIn } from "@/auth";
+import { createCustomer } from "@/lib/asaas";
 
 // Helper function to hash a password using SHA-256
 async function hashPassword(password: string): Promise<string> {
@@ -33,6 +34,8 @@ export const credentialsSignUp = async (
       street,
       street_number,
       complement,
+      cpfCnpj,
+      postalCode,
       restaurantOwnerId,
       city,
       neighborhood,
@@ -45,6 +48,8 @@ export const credentialsSignUp = async (
       !phone ||
       !password ||
       !street ||
+      !postalCode ||
+      !cpfCnpj ||
       !street_number ||
       !city ||
       !neighborhood ||
@@ -65,6 +70,15 @@ export const credentialsSignUp = async (
       };
     }
 
+    const { customerId, success, message } = await createCustomer(values);
+
+    if (!success) {
+      return {
+        success: false,
+        message, // Retorna os erros específicos do Asaas
+      };
+    }
+
     // Hash the password using SHA-256
     const hashedPassword = await hashPassword(password);
 
@@ -73,7 +87,9 @@ export const credentialsSignUp = async (
       .values({
         name,
         role: "CUSTOMER",
+        cpfCnpj,
         phone,
+        postalCode,
         email,
         password: hashedPassword,
       })
@@ -89,6 +105,7 @@ export const credentialsSignUp = async (
       street_number,
       complement: complement || null,
       restaurantOwnerId,
+      asaasCustomerId: customerId,
       city,
       neighborhood,
       state,

@@ -64,18 +64,22 @@ type FormData = z.infer<typeof insertCustomizationSchema>;
 const paymentOptions = [
   {
     value: "PIX",
+    label: "PIX",
     icon: <FaPix className="mt-2 text-[#00BDAE]" />,
   },
   {
-    value: "Cartão de Crédito",
+    value: "CREDIT_CARD",
+    label: "Cartão de Crédito",
     icon: <FaCreditCard className="mt-2 text-blue-700" />,
   },
   {
-    value: "Dinheiro",
+    value: "CASH",
+    label: "Dinheiro",
     icon: <FaMoneyBill1Wave className="mt-2 text-green-600" />,
   },
   {
-    value: "Cartão",
+    value: "CARD",
+    label: "Cartão",
     icon: <BsCreditCard2FrontFill className="mt-2 text-blue-700" />,
   },
 ];
@@ -462,7 +466,7 @@ export const CustomizationForm = ({
                           }}
                         />
                       </FormControl>
-                      <FormLabel className="capitalize">{item.value}</FormLabel>
+                      <FormLabel className="capitalize">{item.label}</FormLabel>
                     </FormItem>
                   ))}
                 </div>
