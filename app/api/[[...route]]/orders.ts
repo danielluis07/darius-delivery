@@ -461,7 +461,6 @@ const app = new Hono()
     ),
     async (c) => {
       const values = c.req.valid("json");
-      const ip = c.req.header("");
 
       if (!values || !values.asaasCustomerId || !values.creditCard) {
         return c.json({ error: "Missing data" }, 400);
