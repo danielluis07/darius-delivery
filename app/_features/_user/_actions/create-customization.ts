@@ -88,7 +88,13 @@ export const createCustomization = async (
       header_color,
       logo,
       payment_methods,
-      need_change,
+      city,
+      state,
+      street,
+      street_number,
+      neighborhood,
+      opening_hours,
+      isOpen,
     } = validatedValues.data;
 
     // For creation, enforce required fields
@@ -135,7 +141,13 @@ export const createCustomization = async (
       if (logoDesktopUrl !== undefined) updateData.logo = logoDesktopUrl;
       if (payment_methods !== undefined)
         updateData.payment_methods = payment_methods;
-      if (need_change !== undefined) updateData.need_change = need_change;
+      if (city !== undefined) updateData.city = city;
+      if (state !== undefined) updateData.state = state;
+      if (street !== undefined) updateData.street = street;
+      if (street_number !== undefined) updateData.street_number = street_number;
+      if (neighborhood !== undefined) updateData.neighborhood = neighborhood;
+      if (isOpen !== undefined) updateData.isOpen = isOpen;
+      if (opening_hours !== undefined) updateData.opening_hours = opening_hours;
 
       const updatedCustomization = await db
         .update(customizations)
@@ -156,12 +168,18 @@ export const createCustomization = async (
         banner: bannerUrl!,
         button_color,
         background_color,
+        opening_hours,
         footer_color,
         font_color,
         header_color,
         logo: logoDesktopUrl!,
+        city,
+        state,
+        street,
+        street_number,
+        neighborhood,
+        isOpen,
         payment_methods,
-        need_change,
         user_id: session.user.id,
       });
 

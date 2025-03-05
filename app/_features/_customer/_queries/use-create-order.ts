@@ -10,7 +10,49 @@ type RequestTypeCashWebsite = InferRequestType<
 
 type SuccessResponseCashWebsite = {
   order: { id: string };
-  payment: string;
+  payment: {
+    object: string;
+    id: string;
+    dateCreated: string;
+    customer: string;
+    paymentLink: string | null;
+    value: number;
+    netValue: number;
+    originalValue: number | null;
+    interestValue: number | null;
+    description: string | null;
+    billingType: string;
+    confirmedDate: string;
+    creditCard?: {
+      creditCardNumber: string;
+      creditCardBrand: string;
+      creditCardToken: string;
+    };
+    pixTransaction: any | null;
+    status: string;
+    dueDate: string;
+    originalDueDate: string;
+    paymentDate: string | null;
+    clientPaymentDate: string;
+    installmentNumber: number | null;
+    invoiceUrl: string;
+    invoiceNumber: string;
+    externalReference: string;
+    deleted: boolean;
+    anticipated: boolean;
+    anticipable: boolean;
+    creditDate: string;
+    estimatedCreditDate: string;
+    transactionReceiptUrl: string;
+    nossoNumero: string | null;
+    bankSlipUrl: string | null;
+    lastInvoiceViewedDate: string | null;
+    lastBankSlipViewedDate: string | null;
+    postalService: boolean;
+    custody: any | null;
+    escrow: any | null;
+    refunds: any | null;
+  };
   qrCode: {
     encodedImage: string;
     expirationDate: string | number;
@@ -37,7 +79,12 @@ export const useCreateCashWebsiteOrder = () => {
     },
     onSuccess: (data) => {
       toast.success("Pedido feito com sucesso!");
-      openModal(data.qrCode);
+
+      console.log(data);
+
+      if (!data.payment.creditCard) {
+        openModal(data.qrCode);
+      }
     },
     onError: (error) => {
       toast.error(`Houve um erro ao fazer o pedido! ${error.message}`);

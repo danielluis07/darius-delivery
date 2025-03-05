@@ -64,6 +64,34 @@
       "when": 1740967716535,
       "tag": "0008_rapid_vanisher",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1741126928726,
+      "tag": "0009_broad_wind_dancer",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1741129810067,
+      "tag": "0010_violet_madrox",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1741174591683,
+      "tag": "0011_common_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1741189711119,
+      "tag": "0012_unique_the_hood",
+      "breakpoints": true
     }
   ]
 }

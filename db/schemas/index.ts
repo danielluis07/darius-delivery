@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { string, z } from "zod";
 import {
   users,
   categories,
@@ -182,6 +182,34 @@ export const updatePasswordSchema = z
     path: ["repeat_new_password"],
   });
 
+export const insertBankAccountSchema = z.object({
+  bankCode: string().length(3, "O código do banco deve ter 3 dígitos"),
+  ownerName: string().min(
+    3,
+    "O nome do titular deve ter pelo menos 3 caracteres"
+  ),
+  bankAgency: string(),
+  bankAccount: string().max(10, "A conta deve ter no máximo 10 caracteres"),
+  bankAccountDigit: string().length(
+    1,
+    "O dígito da conta deve ter 1 caractere"
+  ),
+  bankAccountType: string(),
+  pixAddressKey: string().optional(),
+});
+
+export const requestWithdrawlSchema = z.object({
+  value: z.string(),
+  bankCode: string(),
+  ownerName: string(),
+  cpfCnpj: string(),
+  bankAgency: string(),
+  bankAccount: string(),
+  bankAccountDigit: string(),
+  bankAccountType: string(),
+  pixAddressKey: string().optional(),
+});
+
 export const insertOrderSettingsSchema = createInsertSchema(orderSettings);
 
 export const baseCategorySchema = createInsertSchema(categories);
@@ -209,6 +237,19 @@ export const insertCustomizationSchema = baseCreateCustomizationSchema.extend({
     typeof File !== "undefined"
       ? z.array(z.instanceof(File)).optional()
       : z.any().optional(),
+  opening_hours: z
+    .array(
+      z.object({
+        day: z.string(),
+        open: z
+          .string()
+          .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format"),
+        close: z
+          .string()
+          .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format"),
+      })
+    )
+    .min(1, "At least one opening hour is required"),
 });
 
 export const insertCustomerSchema = z

@@ -1,3 +1,4 @@
+import { BankAccountForm } from "@/app/_features/_user/_components/_settings/bank-account-form";
 import { DomainForm } from "@/app/_features/_user/_components/_settings/domain-form";
 import { GoogleApiKeyForm } from "@/app/_features/_user/_components/_settings/google-api-key-form";
 import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
@@ -16,7 +17,15 @@ const SettingsPage = async () => {
     <div className="space-y-4">
       <GoogleApiKeyForm userApiKey={data?.googleApiKey} />
       <DomainForm domain={data?.domain} />
-      <div>outras configurações</div>
+      <BankAccountForm
+        bankAccount={data?.bankAccount}
+        bankAccountDigit={data?.bankAccountDigit}
+        bankAccountType={data?.bankAccountType}
+        bankAgency={data?.bankAgency}
+        bankCode={data?.bankCode}
+        ownerName={data?.ownerName}
+        pixAddressKey={data?.pixAddressKey}
+      />
     </div>
   );
 };

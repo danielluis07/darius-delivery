@@ -1,7 +1,9 @@
 import { customizations, products } from "@/db/schema";
 
 export type CustomizationWithTemplate = {
-  customization: typeof customizations.$inferSelect;
+  customization: typeof customizations.$inferSelect & {
+    opening_hours: { day: string; open: string; close: string }[];
+  };
   templateName: string;
   userId: string;
 };

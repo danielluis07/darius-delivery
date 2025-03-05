@@ -9,6 +9,7 @@ import {
   serial,
   primaryKey,
   real,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 import { createId } from "@paralleldrive/cuid2";
@@ -93,6 +94,14 @@ export const users = pgTable("user", {
   postalCode: text("postal_code"),
   companyType: text("company_type"),
   walletId: text("wallet_id"),
+  // asaas bank account
+  bankCode: varchar("bank_code", { length: 10 }),
+  ownerName: varchar("owner_name", { length: 255 }),
+  bankAgency: varchar("bank_agency", { length: 10 }),
+  bankAccount: varchar("bank_account", { length: 20 }),
+  bankAccountDigit: varchar("bank_account_digit", { length: 2 }),
+  bankAccountType: text("bank_account_type"),
+  pixAddressKey: varchar("pix_address_key", { length: 255 }),
   //
   googleApiKey: varchar("google_api_key", { length: 255 }),
   domain: varchar("domain", { length: 255 }).unique(),
@@ -299,8 +308,13 @@ export const customizations = pgTable("customizations", {
     .references(() => templates.id, { onDelete: "cascade" }),
   store_name: text("store_name").notNull(),
   store_phone: varchar("store_phone", { length: 255 }),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  neighborhood: text("neighborhood").notNull(),
+  street: text("street").notNull(),
+  street_number: text("street_number").notNull(),
+  isOpen: boolean("is_open").default(false).notNull(),
   payment_methods: text("payment_methods").array().default([]),
-  need_change: boolean("need_change").default(false).notNull(),
   logo: text("logo"),
   banner: text("banner"),
   button_color: varchar("button_color", { length: 7 }), // Hexadecimal (ex: #FFFFFF)
@@ -308,6 +322,7 @@ export const customizations = pgTable("customizations", {
   header_color: varchar("header_color", { length: 7 }),
   font_color: varchar("font_color", { length: 7 }),
   footer_color: varchar("footer_color", { length: 7 }),
+  opening_hours: jsonb("opening_hours").default([]).notNull(),
 });
 
 export const subscriptions = pgTable("subscriptions", {
@@ -342,7 +357,10 @@ export const orders = pgTable("orders", {
   status: orderStatus("status").notNull(),
   type: orderType("type").notNull(),
   total_price: integer("total_price").notNull(),
+  obs: text("obs"),
   payment_status: paymentStatus("payment_status").notNull(),
+  need_change: boolean("need_change").default(false).notNull(),
+  change_value: integer("change_value"),
   payment_type: orderPaymentType("payment_type").notNull(),
   delivery_deadline: integer("delivery_deadline"), // Tempo máximo para entrega (em minutos)
   pickup_deadline: integer("pickup_deadline"), // Tempo máximo para retirada (em minutos)

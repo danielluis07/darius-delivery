@@ -71,57 +71,29 @@ export const MainClient = () => {
           />
         </div>
 
-        {/* Main Content */}
-        <div className="relative z-0">
-          {session ? (
-            <div className="grid grid-cols-2 gap-4">
-              <Card
-                style={{
-                  backgroundColor:
-                    data?.customization.background_color || "white",
-                  color: data?.customization.font_color || "black",
-                }}
-                className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
-                onClick={() => onOpen("categories")}>
-                <Sandwich />
-                Categorias
-              </Card>
-              <Card
-                style={{
-                  backgroundColor:
-                    data?.customization.background_color || "white",
-                  color: data?.customization.font_color || "black",
-                }}
-                className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
-                onClick={() => onOpen("cart")}>
-                <ShoppingCart />
-                Meu carrinho
-              </Card>
+        {!data?.customization.isOpen && (
+          <Card
+            style={{
+              backgroundColor: data?.customization.background_color || "white",
+            }}
+            className="text-center mb-10 relative z-0 text-sm">
+            A loja está fechada no momento. Volte mais tarde.
+            <div>
+              <p className="font-semibold my-2">Horários de funcionamento</p>
+              {data?.customization.opening_hours.map((item, index) => (
+                <p key={index} className="text-xs">
+                  {item.day}: {item.open} - {item.close}
+                </p>
+              ))}
             </div>
-          ) : (
-            <div className="flex items-center justify-center gap-4">
-              <Card
-                style={{
-                  backgroundColor:
-                    data?.customization.background_color || "white",
-                  color: data?.customization.font_color || "black",
-                }}
-                className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
-                onClick={() => onOpen("signUp")}>
-                <ClipboardList />
-                Registrar
-              </Card>
-              <Card
-                style={{
-                  backgroundColor:
-                    data?.customization.background_color || "white",
-                  color: data?.customization.font_color || "black",
-                }}
-                className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
-                onClick={() => onOpen("signIn")}>
-                <Key />
-                Entrar
-              </Card>
+          </Card>
+        )}
+
+        {/* Main Content */}
+
+        <div className="relative z-0">
+          {!data?.customization.isOpen ? (
+            <div className="flex justify-center">
               <Card
                 style={{
                   backgroundColor:
@@ -133,6 +105,71 @@ export const MainClient = () => {
                 <UtensilsCrossed />
                 Menu
               </Card>
+            </div>
+          ) : (
+            <div>
+              {session ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <Card
+                    style={{
+                      backgroundColor:
+                        data?.customization.background_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
+                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    onClick={() => onOpen("categories")}>
+                    <Sandwich />
+                    Categorias
+                  </Card>
+                  <Card
+                    style={{
+                      backgroundColor:
+                        data?.customization.background_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
+                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    onClick={() => onOpen("cart")}>
+                    <ShoppingCart />
+                    Meu carrinho
+                  </Card>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-4">
+                  <Card
+                    style={{
+                      backgroundColor:
+                        data?.customization.background_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
+                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    onClick={() => onOpen("signUp")}>
+                    <ClipboardList />
+                    Registrar
+                  </Card>
+                  <Card
+                    style={{
+                      backgroundColor:
+                        data?.customization.background_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
+                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    onClick={() => onOpen("signIn")}>
+                    <Key />
+                    Entrar
+                  </Card>
+                  <Card
+                    style={{
+                      backgroundColor:
+                        data?.customization.background_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
+                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    onClick={() => onOpen("menu")}>
+                    <UtensilsCrossed />
+                    Menu
+                  </Card>
+                </div>
+              )}
             </div>
           )}
         </div>

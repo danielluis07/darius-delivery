@@ -47,6 +47,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { RiMotorbikeFill } from "react-icons/ri";
+import { TbCircleLetterD } from "react-icons/tb";
 import { ExtendedUser } from "@/next-auth";
 import Link from "next/link";
 
@@ -120,6 +121,11 @@ const items = [
     url: "/dashboard/pixels",
     icon: ChartPie,
     label: "Pixels",
+  },
+  {
+    url: "/dashboard/darius-pay",
+    icon: TbCircleLetterD,
+    label: "Darius Pay",
   },
 ];
 

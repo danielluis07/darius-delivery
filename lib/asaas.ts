@@ -201,3 +201,154 @@ export const generatePixQrCode = async (paymentId: string) => {
     };
   }
 };
+
+export const createPixKey = async () => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/pix/addressKeys`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
+      },
+      body: JSON.stringify({ type: "EVP" }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create pix key:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao criar a chave pix.",
+      };
+    }
+
+    return { success: true, pixKey: data.key };
+  } catch (error) {
+    console.error("Error creating pix key", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const requesAsaastWithDrawl = async ({
+  value,
+  bankAccount,
+  bankAgency,
+  bankCode,
+  cpfCnpj,
+  bankAccountDigit,
+  bankAccountType,
+  ownerName,
+  pixAddressKey,
+}: {
+  value: number;
+  bankAccount: string | null | undefined;
+  bankAgency: string | null | undefined;
+  bankCode: string | null | undefined;
+  cpfCnpj: string | null | undefined;
+  bankAccountDigit: string | null | undefined;
+  bankAccountType: string | null | undefined;
+  ownerName: string | null | undefined;
+  pixAddressKey: string | null | undefined;
+}) => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/transfers`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
+      },
+      body: JSON.stringify({
+        value,
+        bankAccount: {
+          account: bankAccount,
+          ownerName: ownerName,
+          cpfCnpj: cpfCnpj,
+          agency: bankAgency,
+          accountDigit: bankAccountDigit,
+          bankAccountType: bankAccountType,
+          bank: { code: bankCode },
+        },
+        pixAddressKey,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create user account:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return { success: false, message: "Erro desconhecido ao criar a conta." };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error requesting withdrawl", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const transferRequests = async () => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/transfers`, {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create get transfer requests:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao requisitar as transferências",
+      };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error getting transfer requests", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};

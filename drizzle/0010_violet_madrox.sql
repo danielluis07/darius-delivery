@@ -1,0 +1,1 @@
+ALTER TABLE "user" ALTER COLUMN "bank_account_type" SET DATA TYPE text;
