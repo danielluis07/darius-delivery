@@ -16,7 +16,6 @@ import { toast } from "sonner";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/utils";
 import { requestWithDrawl } from "@/app/_features/_user/_actions/request-withdrawl";
 
 // Define o tipo de dados do formulário

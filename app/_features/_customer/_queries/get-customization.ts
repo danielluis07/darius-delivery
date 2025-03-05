@@ -18,7 +18,7 @@ export const getCustomizationByDomain = async (
       .innerJoin(templates, eq(customizations.template_id, templates.id))
       .where(eq(users.domain, domain));
 
-    // @ts-ignore
+    // @ts-expect-error
     return data ?? null;
   } catch (error) {
     console.error("Error fetching customization:", error);

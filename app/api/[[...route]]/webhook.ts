@@ -25,7 +25,7 @@ type Body = {
       creditCardBrand: string;
       creditCardToken: string;
     };
-    pixTransaction: any | null;
+    pixTransaction: string | null;
     status: string;
     dueDate: string;
     originalDueDate: string;
@@ -46,9 +46,9 @@ type Body = {
     lastInvoiceViewedDate: string | null;
     lastBankSlipViewedDate: string | null;
     postalService: boolean;
-    custody: any | null;
-    escrow: any | null;
-    refunds: any | null;
+    custody: string | null;
+    escrow: string | null;
+    refunds: string | null;
   };
 };
 

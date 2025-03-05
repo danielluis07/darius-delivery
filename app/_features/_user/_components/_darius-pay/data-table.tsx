@@ -16,7 +16,6 @@ import {
   getFilteredRowModel,
   useReactTable,
   getSortedRowModel,
-  Row,
 } from "@tanstack/react-table";
 
 import {
