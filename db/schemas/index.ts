@@ -92,6 +92,7 @@ export const insertOrderSchema = baseOrderSchema.extend({
   quantity: z.number().int().positive(),
   price: z.number().int(),
   total_price: z.number().int().optional(),
+  daily_number: z.number().int().optional(),
   items: z
     .array(
       z.object({

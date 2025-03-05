@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { gte, lt, and, desc } from "drizzle-orm"; // Replace "some-library" with the actual library name
 import { db } from "@/db/drizzle";
 import { orders, orderItems, receipts } from "@/db/schema";
 import { insertOrderSchema } from "@/db/schemas";
@@ -37,6 +38,24 @@ export const createOrder = async (
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    // Busca o último pedido do dia atual
+    const lastOrder = await db
+      .select({
+        daily_number: orders.daily_number,
+        createdAt: orders.createdAt,
+      })
+      .from(orders)
+      .where(and(gte(orders.createdAt, today), lt(orders.createdAt, tomorrow)))
+      .orderBy(desc(orders.createdAt))
+      .limit(1);
+
+    const nextDailyNumber = lastOrder[0] ? lastOrder[0].daily_number + 1 : 1;
+
     const total_price = items.reduce(
       (acc, item) => acc + item.price * item.quantity,
       0
@@ -46,6 +65,7 @@ export const createOrder = async (
       .insert(orders)
       .values({
         user_id: session.user.id,
+        daily_number: nextDailyNumber,
         customer_id,
         total_price,
         type,

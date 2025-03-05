@@ -48,6 +48,7 @@ import {
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import { useGetOrdersReceipts } from "@/app/_features/_user/_queries/_orders/use-get-orders-receipts";
+import { CloseCashRegister } from "@/app/_features/_user/_components/_orders/close-cash-register";
 
 export type Receipt = InferResponseType<
   (typeof client.api.receipts.user)[":userId"]["$get"],
@@ -89,8 +90,6 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
   const finishedOrders = ordersData.filter(
     (item) => item.order.status === "FINISHED"
   );
-
-  console.log("orders", orders);
 
   const [ConfirmStatusDialog, confirmStatus] = useConfirm(
     "Tem certeza?",
@@ -162,6 +161,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                 Roteirização <Route />
               </Button>
             </Link>
+            <CloseCashRegister />
           </div>
         </div>
         <div className="grid md:grid-cols-3 gap-4 mt-10">
@@ -176,7 +176,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                     className="p-3 border rounded-lg mb-3">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">
-                        Pedido #{item.order.number}
+                        Pedido #{item.order.daily_number}
                       </span>
                       <Badge
                         className={cn(statusColors[item.order.status], "px-2")}>
@@ -270,7 +270,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                     className="p-3 border rounded-lg mb-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">
-                        Pedido #{item.order.number}
+                        Pedido #{item.order.daily_number}
                       </span>
                       <Badge className={cn(statusColors["IN_TRANSIT"], "px-2")}>
                         {statusIcons["IN_TRANSIT"]} Em Trânsito
@@ -355,7 +355,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                     className="p-3 border rounded-lg mb-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">
-                        Pedido #{item.order.number}
+                        Pedido #{item.order.daily_number}
                       </span>
                       <Badge className={cn(statusColors["FINISHED"], "px-2")}>
                         {statusIcons["FINISHED"]} Finalizado

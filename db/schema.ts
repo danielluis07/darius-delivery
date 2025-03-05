@@ -354,6 +354,7 @@ export const orders = pgTable("orders", {
     onDelete: "cascade",
   }),
   number: serial("number").notNull().unique(),
+  daily_number: integer("daily_number").notNull(),
   status: orderStatus("status").notNull(),
   type: orderType("type").notNull(),
   total_price: integer("total_price").notNull(),

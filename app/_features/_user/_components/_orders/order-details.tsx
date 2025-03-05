@@ -154,7 +154,7 @@ export const OrderDetails = ({
           <Separator className="my-2" />
           <div className="flex justify-between">
             <span className="text-sm text-gray-600">
-              Pedido #{data.order.number}
+              Pedido #{data.order.dailyNumber}
             </span>
             <div className="flex flex-col gap-y-2">
               <Badge

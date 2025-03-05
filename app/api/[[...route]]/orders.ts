@@ -17,9 +17,11 @@ import {
   inArray,
   sql,
   isNull,
+  lt,
   and,
   gte,
   lte,
+  desc,
   count,
 } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
@@ -98,6 +100,7 @@ const app = new Hono()
             customerStreetNumber: customers.street_number,
             customerComplement: customers.complement,
             orderTotalPrice: orders.total_price,
+            orderDailyNumber: orders.daily_number,
             orderPaymentType: orders.payment_type,
             orderPaymentStatus: orders.payment_status,
             orderStatus: orders.status,
@@ -183,6 +186,7 @@ const app = new Hono()
             number: orders.number,
             createdAt: orders.createdAt,
             totalPrice: orders.total_price,
+            dailyNumber: orders.daily_number,
             status: orders.status,
             payment_status: orders.payment_status,
             type: orders.type,
@@ -311,6 +315,68 @@ const app = new Hono()
       return c.json({ data });
     }
   )
+  // Abrir caixa
+  .post("/cash-register/open", async (c) => {
+    const openedAt = new Date();
+    return c.json(
+      {
+        message: "Caixa aberto com sucesso",
+        openedAt: openedAt.toISOString(),
+      },
+      200
+    );
+  })
+  // Fechar caixa
+  .post("/cash-register/close", async (c) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const dailyOrders = await db
+      .select({
+        id: orders.id,
+        total_price: orders.total_price,
+        status: orders.status,
+        payment_status: orders.payment_status,
+        createdAt: orders.createdAt,
+      })
+      .from(orders)
+      .where(
+        and(gte(orders.createdAt, today), lte(orders.createdAt, tomorrow))
+      );
+
+    if (!dailyOrders || dailyOrders.length === 0) {
+      return c.json(
+        { error: "Nenhum pedido encontrado para o dia atual" },
+        404
+      );
+    }
+
+    const totalRevenue = dailyOrders
+      .filter(
+        (order) =>
+          order.status === "FINISHED" && order.payment_status === "PAID"
+      )
+      .reduce((sum, order) => sum + order.total_price, 0);
+
+    const report = {
+      date: today.toISOString().split("T")[0],
+      totalRevenue,
+      orderCount: dailyOrders.length,
+      completedOrders: dailyOrders.filter((o) => o.status === "FINISHED")
+        .length,
+      pendingOrders: dailyOrders.filter((o) => o.status === "PREPARING").length,
+    };
+
+    return c.json(
+      {
+        message: "Caixa fechado com sucesso",
+        report,
+      },
+      200
+    );
+  })
   .post("/", verifyAuth(), zValidator("json", insertOrderSchema), async (c) => {
     const auth = c.get("authUser");
     const {
@@ -341,6 +407,24 @@ const app = new Hono()
       return c.json({ error: "Missing data" }, 400);
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    // Busca o último pedido do dia atual
+    const lastOrder = await db
+      .select({
+        daily_number: orders.daily_number,
+        createdAt: orders.createdAt,
+      })
+      .from(orders)
+      .where(and(gte(orders.createdAt, today), lt(orders.createdAt, tomorrow)))
+      .orderBy(desc(orders.createdAt))
+      .limit(1);
+
+    const nextDailyNumber = lastOrder[0] ? lastOrder[0].daily_number + 1 : 1;
+
     const total_price = items.reduce(
       (acc, item) => acc + item.price * item.quantity,
       0
@@ -350,6 +434,7 @@ const app = new Hono()
       .insert(orders)
       .values({
         user_id: auth.token.sub,
+        daily_number: nextDailyNumber,
         customer_id,
         total_price,
         delivery_deadline,
@@ -466,11 +551,32 @@ const app = new Hono()
         return c.json({ error: "Missing data" }, 400);
       }
 
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+
+      // Busca o último pedido do dia atual
+      const lastOrder = await db
+        .select({
+          daily_number: orders.daily_number,
+          createdAt: orders.createdAt,
+        })
+        .from(orders)
+        .where(
+          and(gte(orders.createdAt, today), lt(orders.createdAt, tomorrow))
+        )
+        .orderBy(desc(orders.createdAt))
+        .limit(1);
+
+      const nextDailyNumber = lastOrder[0] ? lastOrder[0].daily_number + 1 : 1;
+
       const [order] = await db
         .insert(orders)
         .values({
           user_id: values.restaurantOwnerId,
           customer_id: values.customerId,
+          daily_number: nextDailyNumber,
           total_price: values.totalPrice,
           status: "PREPARING",
           payment_status: "PENDING",
