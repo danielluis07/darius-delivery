@@ -24,7 +24,6 @@ const SettingsPage = async () => {
         bankAgency={data?.bankAgency}
         bankCode={data?.bankCode}
         ownerName={data?.ownerName}
-        pixAddressKey={data?.pixAddressKey}
       />
     </div>
   );
