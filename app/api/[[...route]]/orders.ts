@@ -617,7 +617,6 @@ const app = new Hono()
     ),
     async (c) => {
       const values = c.req.valid("json");
-      const domain = c.req.header("Host");
 
       if (!values || !values.asaasCustomerId || !values.apiKey) {
         return c.json({ error: "Missing data" }, 400);

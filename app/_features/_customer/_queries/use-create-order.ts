@@ -1,4 +1,4 @@
-import { InferRequestType, InferResponseType } from "hono";
+import { InferRequestType } from "hono";
 import { useMutation } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 import { toast } from "sonner";

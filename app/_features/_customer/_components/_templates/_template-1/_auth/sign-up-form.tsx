@@ -77,8 +77,6 @@ export const SignUpForm = () => {
     console.log(errors);
   };
 
-  data?.apiKey;
-
   const onSubmit = (values: FormData) => {
     startTransition(() => {
       credentialsSignUp(
