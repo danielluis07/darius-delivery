@@ -23,17 +23,6 @@ export default auth(async (req) => {
     return NextResponse.next();
   }
 
-  // Check if the hostname is a Vercel preview URL
-  const isVercelPreview =
-    hostname.endsWith(".vercel.app") &&
-    hostname.split(".").length > 2 && // Ensures it's a subdomain of vercel.app
-    hostname.includes("-"); // Vercel preview URLs typically have hyphens
-
-  // Skip middleware for Vercel preview URLs
-  if (isVercelPreview) {
-    return NextResponse.next();
-  }
-
   // Skip middleware for webhook routes
   if (isWebhookRoute) {
     return NextResponse.next(); // Let the request pass through unchanged
