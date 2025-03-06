@@ -44,7 +44,19 @@ export const insertBankAccount = async (
       return { success: false, message: "Campos obrigatórios estão faltando" };
     }
 
-    const { success, message, pixKey } = await createPixKey();
+    const [user] = await db
+      .select({ apiKey: users.asaasApiKey })
+      .from(users)
+      .where(eq(users.id, session.user.id));
+
+    if (!user || !user.apiKey) {
+      return {
+        success: false,
+        message: "Usuário não possui os dados necessários",
+      };
+    }
+
+    const { success, message, pixKey } = await createPixKey(user.apiKey);
 
     if (!success) {
       return { message };

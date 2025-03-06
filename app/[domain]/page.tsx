@@ -13,6 +13,10 @@ const DomainPage = async ({
 
   const data = await getCustomizationByDomain(domain);
 
+  if (!data) {
+    return <div>Customization not found</div>;
+  }
+
   return (
     <StoreProvider session={session} data={data}>
       <MainClient />

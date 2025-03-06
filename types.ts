@@ -1,10 +1,12 @@
-import { customizations, products } from "@/db/schema";
+import { customizations, orderSettings, products } from "@/db/schema";
 
 export type CustomizationWithTemplate = {
   customization: typeof customizations.$inferSelect & {
     opening_hours: { day: string; open: string; close: string }[];
   };
+  orderSettings: typeof orderSettings.$inferSelect;
   templateName: string;
+  apiKey: string;
   userId: string;
 };
 

@@ -145,6 +145,12 @@ export const insertUserDomainSchema = z.object({
 
 export const credentialsSignUpSchema = baseUserSchema
   .extend({
+    domain: z
+      .string()
+      .regex(
+        /^[a-z0-9-]+\.[a-z]{2,}(\.[a-z]{2,})?$/,
+        "Formato inválido. O domínio deve ser nesse formato: meudominio.com ou meudominio.com.br"
+      ),
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
     repeat_password: z
       .string()

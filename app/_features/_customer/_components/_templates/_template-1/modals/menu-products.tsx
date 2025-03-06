@@ -117,6 +117,7 @@ export const MenuProducts = ({
                       src={product.image || placeholder}
                       alt={product.name}
                       fill
+                      sizes="96px"
                     />
                   </div>
                 </div>

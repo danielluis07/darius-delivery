@@ -6,7 +6,7 @@ import Image from "next/image";
 import { FaPix, FaCreditCard, FaMoneyBill1Wave } from "react-icons/fa6";
 import { useCartStore } from "@/hooks/use-cart-store";
 import { Loader2, X } from "lucide-react";
-import { formatCurrencyFromCents } from "@/lib/utils";
+import { formatCurrency, formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
 import {
   useCreateCashOnDeliveryOrder,
@@ -15,7 +15,7 @@ import {
 import { JSX, useState } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -26,6 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { PixModal } from "@/components/pix-modal";
+import { useParams } from "next/navigation";
 
 enum STEPS {
   FIRST = 0,
@@ -49,9 +50,15 @@ const orderSchema = z
       })
     ),
     totalPrice: z.number(),
+    obs: z.string().optional(),
     customerId: z.string(),
+    needChange: z.preprocess((val) => val === "true", z.boolean()),
+    changeValue: z.number().optional(),
     restaurantOwnerId: z.string(),
     paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
+    deliveryDeadline: z.number().optional(),
+    pickupDeadline: z.number().optional(),
+    apiKey: z.string(),
     asaasCustomerId: z.string().optional(),
     creditCard: z
       .object({
@@ -121,6 +128,7 @@ const orderSchema = z
 type OrderData = z.infer<typeof orderSchema>;
 
 export const Cart = () => {
+  const params = useParams<{ domain: string }>();
   const { cart, removeFromCart, updateQuantity } = useCartStore();
   const [step, setStep] = useState<STEPS>(STEPS.FIRST);
   const { data, session } = useStore();
@@ -137,6 +145,10 @@ export const Cart = () => {
       restaurantOwnerId: data?.userId || "",
       asaasCustomerId: session?.user.asaasCustomerId,
       paymentMethod: undefined,
+      needChange: false,
+      apiKey: data?.apiKey,
+      changeValue: undefined,
+      obs: "",
       creditCard: {
         holderName: "",
         number: "",
@@ -148,9 +160,9 @@ export const Cart = () => {
   });
 
   const { mutate: mutateCashOnWebsite, isPending: isPendingCashOnWebsite } =
-    useCreateCashWebsiteOrder();
+    useCreateCashWebsiteOrder(params.domain);
   const { mutate: mutateCashOnDelivery, isPending: isPendingCashOnDelivery } =
-    useCreateCashOnDeliveryOrder();
+    useCreateCashOnDeliveryOrder(params.domain);
 
   const paymentMethods = data?.customization.payment_methods || [];
 
@@ -189,6 +201,10 @@ export const Cart = () => {
     setStep(STEPS.FIRST);
   };
 
+  const onInvalid = (errors: FieldErrors) => {
+    console.log(errors);
+  };
+
   const onSubmit = (values: OrderData) => {
     const cleanedCreditCard =
       values.paymentMethod === "CREDIT_CARD" && values.creditCard
@@ -203,10 +219,15 @@ export const Cart = () => {
         (total, item) => total + item.price * item.quantity,
         0
       ),
-      customerId: session?.user?.id || "",
+      customerId: values.customerId,
+      needChange: values.needChange,
+      obs: values.obs || "",
+      changeValue: values.changeValue || undefined,
+      apiKey: values.apiKey,
+      deliveryDeadline: data?.orderSettings.delivery_deadline || undefined,
       restaurantOwnerId: data?.userId || "",
       paymentMethod: values.paymentMethod,
-      asaasCustomerId: session?.user.asaasCustomerId,
+      asaasCustomerId: values.asaasCustomerId,
       creditCard: cleanedCreditCard,
     };
 
@@ -283,7 +304,9 @@ export const Cart = () => {
 
             {step === STEPS.SECOND && (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+                  className="w-full">
                   <h3 className="text-lg font-semibold mb-5 text-center">
                     Forma de Pagamento
                   </h3>
@@ -478,7 +501,93 @@ export const Cart = () => {
                         </div>
                       </div>
                     )}
+
+                    {form.watch("paymentMethod") === "CASH" && (
+                      <div>
+                        <FormField
+                          control={form.control}
+                          name="needChange"
+                          render={({ field }) => (
+                            <FormItem className="space-y-3">
+                              <FormLabel>Precisa de troco?</FormLabel>
+                              <FormControl>
+                                <RadioGroup
+                                  onValueChange={field.onChange}
+                                  value={field.value?.toString()}
+                                  className="flex flex-col space-y-1">
+                                  <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value="true" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      Sim
+                                    </FormLabel>
+                                  </FormItem>
+                                  <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value="false" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      Não
+                                    </FormLabel>
+                                  </FormItem>
+                                </RadioGroup>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {form.watch("needChange")?.toString() === "true" && (
+                          <FormField
+                            control={form.control}
+                            name="changeValue"
+                            render={({ field }) => (
+                              <FormItem className="w-full mt-5">
+                                <FormControl>
+                                  <input
+                                    {...field}
+                                    placeholder="Informe o valor"
+                                    value={formatCurrency(field.value || 0)}
+                                    onChange={(e) => {
+                                      const rawValue = e.target.value.replace(
+                                        /\D/g,
+                                        ""
+                                      );
+                                      const numericValue = rawValue
+                                        ? parseInt(rawValue, 10)
+                                        : 0;
+                                      field.onChange(numericValue);
+                                    }}
+                                    className="w-full p-2 border rounded-md"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                      </div>
+                    )}
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name="obs"
+                    render={({ field }) => (
+                      <FormItem className="mt-5 w-full">
+                        <FormControl>
+                          <textarea
+                            placeholder="Insira alguma observação ou detalhe (opcional)"
+                            className="resize-none text-sm w-full p-2 border rounded-md"
+                            rows={3}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <p className="flex justify-between text-lg font-semibold mt-5">
                     <span>Total:</span>

@@ -492,6 +492,11 @@ const app = new Hono()
         ),
         totalPrice: z.number(),
         customerId: z.string(),
+        apiKey: z.string().optional(),
+        deliveryDeadline: z.number().optional(),
+        needChange: z.preprocess((val) => val === "true", z.boolean()),
+        changeValue: z.number().optional(),
+        obs: z.string().optional(),
         restaurantOwnerId: z.string(),
         paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
       })
@@ -503,9 +508,73 @@ const app = new Hono()
         return c.json({ error: "Missing data" }, 400);
       }
 
-      console.log("api endpoint is payment on delivery", values);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
 
-      return c.json({ data: values });
+      // Busca o último pedido do dia atual
+      const lastOrder = await db
+        .select({
+          daily_number: orders.daily_number,
+          createdAt: orders.createdAt,
+        })
+        .from(orders)
+        .where(
+          and(gte(orders.createdAt, today), lt(orders.createdAt, tomorrow))
+        )
+        .orderBy(desc(orders.createdAt))
+        .limit(1);
+
+      const nextDailyNumber = lastOrder[0] ? lastOrder[0].daily_number + 1 : 1;
+
+      const [order] = await db
+        .insert(orders)
+        .values({
+          user_id: values.restaurantOwnerId,
+          customer_id: values.customerId,
+          need_change: values.needChange,
+          change_value: values.changeValue,
+          obs: values.obs,
+          daily_number: nextDailyNumber,
+          delivery_deadline: values.deliveryDeadline,
+          total_price: values.totalPrice,
+          status: "PREPARING",
+          payment_status: "PENDING",
+          payment_type: values.paymentMethod,
+          type: "WEBSITE",
+        })
+        .returning({
+          id: orders.id,
+          daily_number: orders.daily_number,
+          total_price: orders.total_price,
+          delivery_deadline: orders.delivery_deadline,
+          status: orders.status,
+          payment_status: orders.payment_status,
+        });
+
+      if (!order) {
+        return c.json({ error: "Failed to create order" }, 500);
+      }
+
+      await db.insert(orderItems).values(
+        values.items.map((item) => ({
+          order_id: order.id,
+          product_id: item.id,
+          price: item.price,
+          quantity: item.quantity || 1,
+        }))
+      );
+
+      return c.json({
+        data: {
+          dailyNumber: order.daily_number,
+          totalPrice: order.total_price,
+          deliveryDeadline: order.delivery_deadline,
+          status: order.status,
+          paymentStatus: order.payment_status,
+        },
+      });
     }
   )
   .post(
@@ -531,8 +600,10 @@ const app = new Hono()
         totalPrice: z.number(),
         customerId: z.string(),
         restaurantOwnerId: z.string(),
+        deliveryDeadline: z.number().optional(),
         paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
         asaasCustomerId: z.string().optional(),
+        apiKey: z.string().optional(),
         creditCard: z
           .object({
             holderName: z.string(),
@@ -546,8 +617,9 @@ const app = new Hono()
     ),
     async (c) => {
       const values = c.req.valid("json");
+      const domain = c.req.header("Host");
 
-      if (!values || !values.asaasCustomerId) {
+      if (!values || !values.asaasCustomerId || !values.apiKey) {
         return c.json({ error: "Missing data" }, 400);
       }
 
@@ -578,12 +650,20 @@ const app = new Hono()
           customer_id: values.customerId,
           daily_number: nextDailyNumber,
           total_price: values.totalPrice,
+          delivery_deadline: values.deliveryDeadline,
           status: "PREPARING",
           payment_status: "PENDING",
           payment_type: values.paymentMethod,
           type: "WEBSITE",
         })
-        .returning({ id: orders.id });
+        .returning({
+          id: orders.id,
+          daily_number: orders.daily_number,
+          total_price: orders.total_price,
+          delivery_deadline: orders.delivery_deadline,
+          status: orders.status,
+          payment_status: orders.payment_status,
+        });
 
       if (!order) {
         return c.json({ error: "Failed to create order" }, 500);
@@ -598,34 +678,52 @@ const app = new Hono()
         }))
       );
 
-      const { success, data, message, paymentId } = await createPayment({
-        customer: values.asaasCustomerId,
-        billingType: values.paymentMethod as "PIX" | "CREDIT_CARD" | "BOLETO",
-        value: values.totalPrice,
-        externalReference: order.id,
-        creditCard: values.creditCard,
-      });
+      const { success, data, message, paymentId } = await createPayment(
+        {
+          customer: values.asaasCustomerId,
+          billingType: values.paymentMethod as "PIX" | "CREDIT_CARD" | "BOLETO",
+          value: values.totalPrice,
+          externalReference: order.id,
+          creditCard: values.creditCard,
+        },
+        values.apiKey
+      );
 
       if (!success) {
         return c.json({ error: message }, 500);
       }
 
+      await db
+        .update(orders)
+        .set({
+          payment_status: values.paymentMethod === "PIX" ? "PENDING" : "PAID",
+        })
+        .where(eq(orders.id, order.id));
+
       if (values.paymentMethod === "PIX" && paymentId) {
         const { encodedImage, expirationDate, payload } =
-          await generatePixQrCode(paymentId);
-
+          await generatePixQrCode(paymentId, values.apiKey);
         if (!encodedImage || !expirationDate || !payload) {
           return c.json({ error: "Failed to generate PIX QR Code" }, 500);
         }
-
         return c.json({
-          order,
+          order: { ...order, payment_status: "PENDING" }, // Reflete o status atualizado
+          paymentMethod: "PIX",
           payment: data,
           qrCode: { encodedImage, expirationDate, payload },
         });
       }
 
-      return c.json({ order, payment: data });
+      return c.json({
+        data: {
+          dailyNumber: order.daily_number,
+          totalPrice: order.total_price,
+          deliveryDeadline: order.delivery_deadline,
+          status: order.status,
+          paymentMethod: "CREDIT_CARD",
+          paymentStatus: "PAID", // Reflete o sucesso do pagamento
+        },
+      });
     }
   )
   .post(

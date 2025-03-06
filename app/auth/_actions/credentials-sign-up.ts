@@ -7,6 +7,7 @@ import { users } from "@/db/schema";
 import { credentialsSignUpSchema } from "@/db/schemas";
 import { signIn } from "@/auth";
 import { createUserAccount } from "@/lib/asaas";
+import { createVercelDomain } from "@/lib/vercel";
 
 // Helper function to hash a password using SHA-256
 async function hashPassword(password: string): Promise<string> {
@@ -37,10 +38,24 @@ export const credentialsSignUp = async (
       cpfCnpj,
       incomeValue,
       postalCode,
+      domain,
       province,
     } = validatedValues.data;
 
-    if (!name || !email || !phone || !password) {
+    if (
+      !name ||
+      !email ||
+      !phone ||
+      !password ||
+      !domain ||
+      !province ||
+      !address ||
+      !addressNumber ||
+      !companyType ||
+      !cpfCnpj ||
+      !incomeValue ||
+      !postalCode
+    ) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
 
@@ -56,19 +71,40 @@ export const credentialsSignUp = async (
       };
     }
 
-    const { success, walletId, message } = await createUserAccount(values);
+    const { failed, failedMessage } = await createVercelDomain(domain);
+
+    if (failed) {
+      return {
+        success: false,
+        message: failedMessage,
+      };
+    }
+
+    const { success, walletId, message, apiKey } = await createUserAccount({
+      name,
+      email,
+      phone,
+      address,
+      addressNumber,
+      companyType,
+      cpfCnpj,
+      incomeValue,
+      postalCode,
+      domain,
+      province,
+    });
 
     if (!success) {
       return {
         success: false,
-        message, // Retorna os erros específicos do Asaas
+        message,
       };
     }
 
-    if (!walletId) {
+    if (!apiKey) {
       return {
         success: false,
-        message: "Erro ao criar conta de usuário",
+        message: "Erro ao criar conta no Asaas",
       };
     }
 
@@ -85,8 +121,10 @@ export const credentialsSignUp = async (
         password: hashedPassword,
         walletId,
         address,
+        asaasApiKey: apiKey,
         addressNumber,
         companyType,
+        domain,
         cpfCnpj,
         incomeValue,
         postalCode,

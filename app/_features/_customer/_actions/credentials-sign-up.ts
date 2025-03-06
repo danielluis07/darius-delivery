@@ -17,7 +17,8 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 export const credentialsSignUp = async (
-  values: z.infer<typeof insertCustomerSchema>
+  values: z.infer<typeof insertCustomerSchema>,
+  apiKey: string
 ) => {
   try {
     const validatedValues = insertCustomerSchema.safeParse(values);
@@ -53,7 +54,8 @@ export const credentialsSignUp = async (
       !street_number ||
       !city ||
       !neighborhood ||
-      !state
+      !state ||
+      !apiKey
     ) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
@@ -70,7 +72,17 @@ export const credentialsSignUp = async (
       };
     }
 
-    const { customerId, success, message } = await createCustomer(values);
+    const { customerId, success, message } = await createCustomer({
+      name,
+      email,
+      cpfCnpj,
+      phone,
+      postalCode,
+      street,
+      street_number,
+      neighborhood,
+      apiKey,
+    });
 
     if (!success) {
       return {

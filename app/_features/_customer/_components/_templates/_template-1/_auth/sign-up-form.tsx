@@ -2,7 +2,6 @@
 
 import { z } from "zod";
 import { useState, useTransition } from "react";
-import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FieldErrors, useForm } from "react-hook-form";
 import {
@@ -78,9 +77,14 @@ export const SignUpForm = () => {
     console.log(errors);
   };
 
+  data?.apiKey;
+
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      credentialsSignUp({ ...values, phone: removeFormatting(values.phone) })
+      credentialsSignUp(
+        { ...values, phone: removeFormatting(values.phone) },
+        data?.apiKey ?? ""
+      )
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -110,11 +114,12 @@ export const SignUpForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
+                    <input
                       {...field}
                       value={field.value}
                       disabled={isPending}
                       placeholder="Nome"
+                      className="h-9 px-4 py-2 w-full"
                       required
                     />
                   </FormControl>
@@ -128,12 +133,13 @@ export const SignUpForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
+                    <input
                       {...field}
                       value={field.value}
                       disabled={isPending}
                       placeholder="Email"
                       type="email"
+                      className="h-9 px-4 py-2 w-full"
                       required
                     />
                   </FormControl>
@@ -147,7 +153,7 @@ export const SignUpForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
+                    <input
                       {...field}
                       value={field.value ?? ""}
                       onChange={(event) => {
@@ -157,6 +163,7 @@ export const SignUpForm = () => {
                       }}
                       disabled={isPending}
                       placeholder="CPF"
+                      className="h-9 px-4 py-2 w-full"
                       required
                     />
                   </FormControl>
@@ -170,7 +177,7 @@ export const SignUpForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
+                    <input
                       {...field}
                       value={field.value}
                       onChange={(event) => {
@@ -180,6 +187,7 @@ export const SignUpForm = () => {
                         field.onChange(formattedPhoneNumber);
                       }}
                       disabled={isPending}
+                      className="h-9 px-4 py-2 w-full"
                       placeholder="Telefone"
                       required
                     />
@@ -200,7 +208,12 @@ export const SignUpForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input {...field} placeholder="Endereço" required />
+                      <input
+                        {...field}
+                        className="h-9 px-4 py-2 w-full"
+                        placeholder="Endereço"
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -212,7 +225,12 @@ export const SignUpForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input {...field} placeholder="Número" required />
+                      <input
+                        {...field}
+                        className="h-9 px-4 py-2 w-full"
+                        placeholder="Número"
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -224,7 +242,12 @@ export const SignUpForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input {...field} placeholder="Bairro" required />
+                      <input
+                        {...field}
+                        className="h-9 px-4 py-2 w-full"
+                        placeholder="Bairro"
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -236,7 +259,11 @@ export const SignUpForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input {...field} placeholder="Complemento" />
+                      <input
+                        {...field}
+                        className="h-9 px-4 py-2 w-full"
+                        placeholder="Complemento"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -249,7 +276,12 @@ export const SignUpForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input {...field} placeholder="Cidade" required />
+                    <input
+                      {...field}
+                      className="h-9 px-4 py-2 w-full"
+                      placeholder="Cidade"
+                      required
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -287,8 +319,9 @@ export const SignUpForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
+                    <input
                       {...field}
+                      className="h-9 px-4 py-2 w-full"
                       value={field.value ?? ""}
                       onChange={(event) => {
                         const value = event.target.value;
@@ -310,9 +343,10 @@ export const SignUpForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
+                    <input
                       {...field}
                       type="password"
+                      className="h-9 px-4 py-2 w-full"
                       value={field.value}
                       disabled={isPending}
                       placeholder="Senha"
@@ -328,9 +362,10 @@ export const SignUpForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
+                    <input
                       {...field}
                       type="password"
+                      className="h-9 px-4 py-2 w-full"
                       value={field.value}
                       disabled={isPending}
                       placeholder="Repita a senha"

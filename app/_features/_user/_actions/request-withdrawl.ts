@@ -3,7 +3,10 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { requestWithdrawlSchema } from "@/db/schemas";
-import { requesAsaastWithDrawl } from "@/lib/asaas";
+import { requestAsaastWithDrawl } from "@/lib/asaas";
+import { db } from "@/db/drizzle";
+import { eq } from "drizzle-orm";
+import { users } from "@/db/schema";
 
 export const requestWithDrawl = async (
   values: z.infer<typeof requestWithdrawlSchema>
@@ -42,10 +45,25 @@ export const requestWithDrawl = async (
       !bankCode ||
       !ownerName
     ) {
-      return { success: false, message: "Campos obrigatórios estão faltando" };
+      return {
+        success: false,
+        message: "Preencha suas informações bancárias primeiro",
+      };
     }
 
-    const { success, message } = await requesAsaastWithDrawl({
+    const [user] = await db
+      .select({ apiKey: users.asaasApiKey })
+      .from(users)
+      .where(eq(users.id, session.user.id));
+
+    if (!user || !user.apiKey) {
+      return {
+        success: false,
+        message: "Usuário não possui os dados necessários",
+      };
+    }
+
+    const { success, message } = await requestAsaastWithDrawl({
       value: Number(value),
       bankAccount,
       bankAgency,
@@ -55,6 +73,7 @@ export const requestWithDrawl = async (
       bankAccountType,
       ownerName,
       pixAddressKey,
+      apiKey: user.apiKey,
     });
 
     if (!success) {

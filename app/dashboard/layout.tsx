@@ -3,8 +3,6 @@ import { UserSidebar } from "@/app/_features/_user/_components/user-sidebar";
 import { cookies } from "next/headers";
 import { Navbar } from "@/components/navbar";
 import { auth } from "@/auth";
-import { getDomain } from "@/app/_features/_user/_queries/get-domain";
-import { DomainModalProvider } from "@/providers/domain-modal-provider";
 
 export default async function UserDashboardLayout({
   children,
@@ -19,11 +17,8 @@ export default async function UserDashboardLayout({
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const data = await getDomain(session.user.id);
-
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <DomainModalProvider userDomain={data?.domain} />
       <UserSidebar user={session.user} />
       <main className="w-full">
         <Navbar user={session?.user} />

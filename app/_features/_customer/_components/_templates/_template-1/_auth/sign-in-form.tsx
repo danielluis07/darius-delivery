@@ -2,7 +2,6 @@
 
 import { z } from "zod";
 import { useTransition } from "react";
-import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FieldErrors, useForm } from "react-hook-form";
 import {
@@ -71,7 +70,8 @@ export const SignInForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input
+                <input
+                  className="h-9 px-4 py-2 w-full"
                   disabled={isPending}
                   type="email"
                   {...field}
@@ -89,8 +89,9 @@ export const SignInForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input
+                <input
                   disabled={isPending}
+                  className="h-9 px-4 py-2 w-full"
                   type="password"
                   {...field}
                   value={field.value}

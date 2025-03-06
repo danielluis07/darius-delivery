@@ -755,7 +755,7 @@ const CustomizationPreview = ({
           </div>
           <div className="flex justify-center gap-4">
             <Card
-              className="text-black flex flex-col items-center min-w-28 cursor-pointer"
+              className="flex flex-col items-center min-w-28 cursor-pointer"
               style={{
                 backgroundColor: buttonColor || "transparent",
                 color: fontColor || "black",
@@ -764,7 +764,7 @@ const CustomizationPreview = ({
               Registrar
             </Card>
             <Card
-              className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+              className="flex flex-col items-center min-w-28 cursor-pointer"
               style={{
                 backgroundColor: buttonColor || "transparent",
                 color: fontColor || "black",

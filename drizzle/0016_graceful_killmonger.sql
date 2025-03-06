@@ -1,0 +1,1 @@
+ALTER TABLE "user" ALTER COLUMN "asaas_api_key" DROP NOT NULL;

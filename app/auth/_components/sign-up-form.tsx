@@ -65,6 +65,7 @@ export const SignUpForm = () => {
     defaultValues: {
       name: "",
       email: "",
+      domain: "",
       password: "",
       repeat_password: "",
       phone: "",
@@ -172,6 +173,7 @@ export const SignUpForm = () => {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="phone"
@@ -287,6 +289,7 @@ export const SignUpForm = () => {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value ?? ""}
+                      disabled={isPending}
                       required>
                       <FormControl>
                         <SelectTrigger>
@@ -339,6 +342,7 @@ export const SignUpForm = () => {
                         {...field}
                         value={formatCurrency(field.value ?? "")}
                         placeholder="Renda Mensal"
+                        disabled={isPending}
                         onChange={(e) => {
                           const rawValue = e.target.value.replace(/\D/g, "");
                           const numericValue = rawValue
@@ -347,6 +351,24 @@ export const SignUpForm = () => {
                           field.onChange(numericValue);
                         }}
                         required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="domain"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ""}
+                        placeholder="Seu domínio (exemplo: meusite.com)"
+                        disabled={isPending}
                       />
                     </FormControl>
                     <FormMessage />

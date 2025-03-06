@@ -137,6 +137,7 @@ export const ProductsList = ({
                     <Image
                       src={product.image || placeholder}
                       alt={product.name}
+                      sizes="96px"
                       fill
                     />
                   </div>

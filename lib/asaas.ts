@@ -1,12 +1,38 @@
-import { z } from "zod";
-import { credentialsSignUpSchema, insertCustomerSchema } from "@/db/schemas";
 import { AsaasPayment, PaymentBody } from "@/types";
 
 // asaas functions
 
-export const createUserAccount = async (
-  values: z.infer<typeof credentialsSignUpSchema>
-) => {
+export const createUserAccount = async ({
+  name,
+  email,
+  phone,
+  cpfCnpj,
+  address,
+  addressNumber,
+  province,
+  postalCode,
+  companyType,
+  domain,
+  incomeValue,
+}: {
+  name: string;
+  email: string;
+  phone: string;
+  cpfCnpj: string;
+  address: string;
+  addressNumber: string;
+  province: string;
+  postalCode: string;
+  companyType: string;
+  domain: string;
+  incomeValue: number;
+}) => {
+  const url = domain || "mywebsite.com";
+  const formattedUrl =
+    url.startsWith("http://") || url.startsWith("https://")
+      ? url
+      : `https://${url}`;
+
   try {
     const res = await fetch(`${process.env.ASAAS_API_URL}/accounts`, {
       method: "POST",
@@ -16,16 +42,17 @@ export const createUserAccount = async (
         access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
       },
       body: JSON.stringify({
-        name: values.name,
-        email: values.email,
-        mobilePhone: values.phone,
-        cpfCnpj: values.cpfCnpj,
-        incomeValue: values.incomeValue,
-        address: values.address,
-        addressNumber: values.addressNumber,
-        province: values.province,
-        postalCode: values.postalCode,
-        companyType: values.companyType,
+        name: name,
+        email: email,
+        mobilePhone: phone,
+        cpfCnpj: cpfCnpj,
+        site: formattedUrl,
+        incomeValue: incomeValue,
+        address: address,
+        addressNumber: addressNumber,
+        province: province,
+        postalCode: postalCode,
+        companyType: companyType,
       }),
     });
 
@@ -45,7 +72,7 @@ export const createUserAccount = async (
       return { success: false, message: "Erro desconhecido ao criar a conta." };
     }
 
-    return { success: true, walletId: data.walletId };
+    return { success: true, walletId: data.walletId, apiKey: data.apiKey };
   } catch (error) {
     console.error("Error creating user account:", error);
     return {
@@ -55,27 +82,45 @@ export const createUserAccount = async (
   }
 };
 
-export const createCustomer = async (
-  values: z.infer<typeof insertCustomerSchema>
-) => {
+export const createCustomer = async ({
+  name,
+  email,
+  cpfCnpj,
+  phone,
+  postalCode,
+  street,
+  street_number,
+  neighborhood,
+  apiKey,
+}: {
+  name: string;
+  email: string;
+  cpfCnpj: string;
+  phone: string;
+  postalCode: string;
+  street: string;
+  street_number: string;
+  neighborhood: string;
+  apiKey: string;
+}) => {
   try {
     const res = await fetch(`${process.env.ASAAS_API_URL}/customers`, {
       method: "POST",
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
-        access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
+        access_token: apiKey,
       },
       body: JSON.stringify({
-        name: values.name,
-        cpfCnpj: values.cpfCnpj,
-        email: values.email,
-        phone: values.phone,
-        mobilePhone: values.phone,
-        address: values.street,
-        addressNumber: values.street_number,
-        province: values.neighborhood,
-        postalCode: values.postalCode,
+        name: name,
+        cpfCnpj: cpfCnpj,
+        email: email,
+        phone: phone,
+        mobilePhone: phone,
+        address: street,
+        addressNumber: street_number,
+        province: neighborhood,
+        postalCode: postalCode,
       }),
     });
 
@@ -105,7 +150,7 @@ export const createCustomer = async (
   }
 };
 
-export const createPayment = async (values: AsaasPayment) => {
+export const createPayment = async (values: AsaasPayment, apiKey: string) => {
   try {
     const body: PaymentBody = {
       customer: values.customer,
@@ -131,7 +176,7 @@ export const createPayment = async (values: AsaasPayment) => {
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
-        access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
+        access_token: apiKey,
       },
       body: JSON.stringify(body),
     });
@@ -168,7 +213,7 @@ export const createPayment = async (values: AsaasPayment) => {
   }
 };
 
-export const generatePixQrCode = async (paymentId: string) => {
+export const generatePixQrCode = async (paymentId: string, apiKey: string) => {
   try {
     const res = await fetch(
       `${process.env.ASAAS_API_URL}/payments/${paymentId}/pixQrCode`,
@@ -177,7 +222,7 @@ export const generatePixQrCode = async (paymentId: string) => {
         headers: {
           accept: "application/json",
           "Content-Type": "application/json",
-          access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
+          access_token: apiKey,
         },
       }
     );
@@ -202,14 +247,14 @@ export const generatePixQrCode = async (paymentId: string) => {
   }
 };
 
-export const createPixKey = async () => {
+export const createPixKey = async (apikey: string) => {
   try {
     const res = await fetch(`${process.env.ASAAS_API_URL}/pix/addressKeys`, {
       method: "POST",
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
-        access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
+        access_token: apikey,
       },
       body: JSON.stringify({ type: "EVP" }),
     });
@@ -243,7 +288,7 @@ export const createPixKey = async () => {
   }
 };
 
-export const requesAsaastWithDrawl = async ({
+export const requestAsaastWithDrawl = async ({
   value,
   bankAccount,
   bankAgency,
@@ -253,6 +298,7 @@ export const requesAsaastWithDrawl = async ({
   bankAccountType,
   ownerName,
   pixAddressKey,
+  apiKey,
 }: {
   value: number;
   bankAccount: string | null | undefined;
@@ -263,6 +309,7 @@ export const requesAsaastWithDrawl = async ({
   bankAccountType: string | null | undefined;
   ownerName: string | null | undefined;
   pixAddressKey: string | null | undefined;
+  apiKey: string;
 }) => {
   try {
     const res = await fetch(`${process.env.ASAAS_API_URL}/transfers`, {
@@ -270,7 +317,7 @@ export const requesAsaastWithDrawl = async ({
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
-        access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
+        access_token: apiKey,
       },
       body: JSON.stringify({
         value,
@@ -313,16 +360,99 @@ export const requesAsaastWithDrawl = async ({
   }
 };
 
-export const transferRequests = async () => {
+export const getTransferRequests = async (apiKey: string) => {
   try {
     const res = await fetch(`${process.env.ASAAS_API_URL}/transfers`, {
       method: "GET",
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
-        access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
+        access_token: apiKey,
       },
     });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create get transfer requests:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao requisitar as transferências",
+      };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error getting transfer requests", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const getAccountBalance = async (apiKey: string) => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/finance/balance`, {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: apiKey,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create get transfer requests:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao requisitar as transferências",
+      };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error getting transfer requests", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const getPayments = async (apiKey: string) => {
+  try {
+    const res = await fetch(
+      `${process.env.ASAAS_API_URL}/payments?customer=cus_000006553975`,
+      {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          "Content-Type": "application/json",
+          access_token: apiKey,
+        },
+      }
+    );
 
     const data = await res.json();
 

@@ -94,6 +94,7 @@ export const users = pgTable("user", {
   postalCode: text("postal_code"),
   companyType: text("company_type"),
   walletId: text("wallet_id"),
+  asaasApiKey: text("asaas_api_key"),
   // asaas bank account
   bankCode: varchar("bank_code", { length: 10 }),
   ownerName: varchar("owner_name", { length: 255 }),
