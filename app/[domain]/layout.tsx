@@ -10,11 +10,11 @@ export default async function DomainLayout({
 }) {
   const domain = (await params).domain;
 
+  console.log("domain", domain);
+
   const data = await getCustomizationByDomain(domain);
 
-  if (!data) {
-    return <div>Domain not found</div>;
-  }
+  console.log("data", data);
 
   return (
     <main
