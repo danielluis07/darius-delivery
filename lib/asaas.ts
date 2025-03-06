@@ -39,7 +39,7 @@ export const createUserAccount = async ({
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
-        access_token: process.env.NEXT_PUBLIC_ASAAS_API_KEY!,
+        access_token: process.env.ASAAS_API_KEY!,
       },
       body: JSON.stringify({
         name: name,
