@@ -199,7 +199,7 @@ export const NewOrderForm = ({
                           <PopoverContent className="w-[300px] p-0">
                             <Command>
                               <CommandInput
-                                placeholder="Procurar cliente..."
+                                placeholder="Procurar cliente por nome ou telefone..."
                                 className="h-9"
                               />
                               <CommandList>
@@ -209,7 +209,7 @@ export const NewOrderForm = ({
                                 <CommandGroup>
                                   {customers.map((customer) => (
                                     <CommandItem
-                                      value={customer.name ?? ""}
+                                      value={`${customer.name} ${customer.phone}`} // Inclui nome e telefone no filtro
                                       key={customer.id}
                                       onSelect={() => {
                                         form.setValue(
@@ -218,7 +218,13 @@ export const NewOrderForm = ({
                                         );
                                         setSelectedCustomer(customer);
                                       }}>
-                                      {customer.name}
+                                      {/* Exibe nome e telefone na lista */}
+                                      <div>
+                                        <span>{customer.name}</span>
+                                        <span className="text-muted-foreground text-sm ml-2">
+                                          {customer.phone}
+                                        </span>
+                                      </div>
                                       <Check
                                         className={cn(
                                           "ml-auto",
