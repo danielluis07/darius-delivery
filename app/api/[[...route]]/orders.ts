@@ -10,6 +10,7 @@ import {
   users,
   deliverers,
   receipts,
+  commissions,
 } from "@/db/schema";
 import {
   asc,
@@ -27,7 +28,7 @@ import {
 import { verifyAuth } from "@hono/auth-js";
 import { alias } from "drizzle-orm/pg-core";
 import { insertOrderSchema } from "@/db/schemas";
-import { createPayment, generatePixQrCode } from "@/lib/asaas";
+import { createPayment, generatePixQrCode, simulatePayment } from "@/lib/asaas";
 
 type Products = {
   id: number;
@@ -603,6 +604,7 @@ const app = new Hono()
         deliveryDeadline: z.number().optional(),
         paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
         asaasCustomerId: z.string().optional(),
+        walletId: z.string().optional(),
         apiKey: z.string().optional(),
         creditCard: z
           .object({
@@ -618,8 +620,27 @@ const app = new Hono()
     async (c) => {
       const values = c.req.valid("json");
 
-      if (!values || !values.asaasCustomerId || !values.apiKey) {
+      if (
+        !values ||
+        !values.asaasCustomerId ||
+        !values.apiKey ||
+        !values.walletId
+      ) {
         return c.json({ error: "Missing data" }, 400);
+      }
+
+      const [admin] = await db
+        .select({ id: users.id, walletId: users.walletId })
+        .from(users)
+        .where(eq(users.id, "e53959ca-df8c-4a67-a755-54da4aaca736"));
+
+      const [comission] = await db
+        .select({ percentage: commissions.percentage })
+        .from(commissions)
+        .where(eq(commissions.adminId, admin.id));
+
+      if (!admin || !admin.walletId || !comission) {
+        return c.json({ error: "Failed to find admin or commission" }, 500);
       }
 
       const today = new Date();
@@ -660,6 +681,7 @@ const app = new Hono()
           daily_number: orders.daily_number,
           total_price: orders.total_price,
           delivery_deadline: orders.delivery_deadline,
+          payment_type: orders.payment_type,
           status: orders.status,
           payment_status: orders.payment_status,
         });
@@ -677,6 +699,16 @@ const app = new Hono()
         }))
       );
 
+      const { successful, netValue } = await simulatePayment(
+        order.total_price,
+        order.payment_type,
+        values.apiKey
+      );
+
+      if (!successful) {
+        return c.json({ error: "Failed to simulate payment" }, 500);
+      }
+
       const { success, data, message, paymentId } = await createPayment(
         {
           customer: values.asaasCustomerId,
@@ -685,7 +717,10 @@ const app = new Hono()
           externalReference: order.id,
           creditCard: values.creditCard,
         },
-        values.apiKey
+        values.apiKey,
+        comission.percentage,
+        admin.walletId,
+        netValue
       );
 
       if (!success) {

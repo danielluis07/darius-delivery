@@ -18,6 +18,7 @@ import admin from "@/app/api/[[...route]]/admin";
 import orderSettings from "@/app/api/[[...route]]/order-settings";
 import webhook from "@/app/api/[[...route]]/webhook";
 import finances from "@/app/api/[[...route]]/finances";
+import commissions from "@/app/api/[[...route]]/commissions";
 
 export const runtime = "nodejs";
 
@@ -49,7 +50,8 @@ const routes = app
   .route("/admin", admin)
   .route("/ordersettings", orderSettings)
   .route("/webhook", webhook)
-  .route("/finances", finances);
+  .route("/finances", finances)
+  .route("/commissions", commissions);
 
 export const GET = handle(app);
 export const POST = handle(app);

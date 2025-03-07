@@ -10,6 +10,7 @@ import {
   primaryKey,
   real,
   jsonb,
+  decimal,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 import { createId } from "@paralleldrive/cuid2";
@@ -497,4 +498,13 @@ export const freeTests = pgTable("free_tests", {
   expiration_date: timestamp("expiration_date").notNull(),
   status: freeTestStatus("status").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+});
+
+export const commissions = pgTable("commissions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  adminId: text("admin_id").references(() => users.id, { onDelete: "cascade" }),
+  percentage: decimal("percentage", { precision: 5, scale: 2 }).notNull(), // Ex: 10.00 para 10%
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });

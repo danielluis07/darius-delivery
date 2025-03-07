@@ -59,6 +59,7 @@ const orderSchema = z
     deliveryDeadline: z.number().optional(),
     pickupDeadline: z.number().optional(),
     apiKey: z.string(),
+    walletId: z.string().optional(),
     asaasCustomerId: z.string().optional(),
     creditCard: z
       .object({
@@ -147,6 +148,7 @@ export const Cart = () => {
       paymentMethod: undefined,
       needChange: false,
       apiKey: data?.apiKey,
+      walletId: data?.walletId,
       changeValue: undefined,
       obs: "",
       creditCard: {
@@ -226,6 +228,7 @@ export const Cart = () => {
       apiKey: values.apiKey,
       deliveryDeadline: data?.orderSettings.delivery_deadline || undefined,
       restaurantOwnerId: data?.userId || "",
+      walletId: values.walletId,
       paymentMethod: values.paymentMethod,
       asaasCustomerId: values.asaasCustomerId,
       creditCard: cleanedCreditCard,

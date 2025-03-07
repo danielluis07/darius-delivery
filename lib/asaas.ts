@@ -150,7 +150,66 @@ export const createCustomer = async ({
   }
 };
 
-export const createPayment = async (values: AsaasPayment, apiKey: string) => {
+export const simulatePayment = async (
+  value: number,
+  billingType: string,
+  apiKey: string
+) => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/payments/simulate`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: apiKey,
+      },
+      body: JSON.stringify({
+        value: value / 100,
+        billingTypes: [billingType],
+      }),
+    });
+
+    const data = await res.json();
+
+    console.log(data);
+
+    if (!res.ok) {
+      console.error("Failed to create payment:", data);
+
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { successful: false, message: errorMessages.join(" ") };
+      }
+
+      return {
+        successful: false,
+        message: "Erro desconhecido ao criar o pagamento.",
+      };
+    }
+
+    if (billingType === "PIX") {
+      return { successful: true, netValue: data.pix.netValue };
+    }
+
+    return { successful: true, netValue: data.creditCard.netValue };
+  } catch (error) {
+    console.error("Error creating payment:", error);
+    return {
+      successful: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const createPayment = async (
+  values: AsaasPayment,
+  apiKey: string,
+  commission: string,
+  adminWalletId: string,
+  netValue: number
+) => {
   try {
     const body: PaymentBody = {
       customer: values.customer,
@@ -158,6 +217,13 @@ export const createPayment = async (values: AsaasPayment, apiKey: string) => {
       value: values.value / 100,
       dueDate: new Date().toISOString().split("T")[0],
       externalReference: values.externalReference,
+      split: [
+        {
+          walletId: adminWalletId,
+          fixedValue: netValue,
+          percentageValue: 100 - parseFloat(commission),
+        },
+      ],
     };
 
     // Se o método de pagamento for cartão de crédito, adiciona os dados do cartão

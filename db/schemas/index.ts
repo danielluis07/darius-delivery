@@ -217,6 +217,10 @@ export const requestWithdrawlSchema = z.object({
   pixAddressKey: string().optional(),
 });
 
+export const insertAdminCommissionSchema = z.object({
+  percentage: z.string(),
+});
+
 export const insertOrderSettingsSchema = createInsertSchema(orderSettings);
 
 export const baseCategorySchema = createInsertSchema(categories);

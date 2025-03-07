@@ -8,6 +8,7 @@ export type CustomizationWithTemplate = {
   templateName: string;
   apiKey: string;
   userId: string;
+  walletId: string;
 };
 
 export type CartItem = {
@@ -62,6 +63,10 @@ export type PaymentBody = {
   value: number;
   dueDate: string;
   externalReference?: string;
+  split: Array<
+    | { walletId: string; fixedValue: number }
+    | { walletId: string; percentageValue: number }
+  >;
   creditCard?: {
     holderName: string;
     number: string;
