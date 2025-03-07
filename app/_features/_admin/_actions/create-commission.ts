@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
-import { commissions, users } from "@/db/schema";
+import { commissions } from "@/db/schema";
 import { insertAdminCommissionSchema } from "@/db/schemas";
 import { auth } from "@/auth";
 
