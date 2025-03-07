@@ -1,4 +1,5 @@
 import { OrderRoutingClient } from "@/app/_features/_user/_components/_order-routing/client";
+import { getCustomization } from "@/app/_features/_user/_queries/_customizations/get-customization";
 import { getGoogleApiKey } from "@/app/_features/_user/_queries/get-google-api-key";
 import { auth } from "@/auth";
 
@@ -9,7 +10,10 @@ const OrderRoutingPage = async () => {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const apiKey = await getGoogleApiKey(session.user.id);
+  const [apiKey, customization] = await Promise.all([
+    getGoogleApiKey(session.user.id),
+    getCustomization(session.user.id),
+  ]);
 
   if (!apiKey?.googleApiKey) {
     return (
@@ -22,8 +26,22 @@ const OrderRoutingPage = async () => {
     );
   }
 
+  if (!customization || !customization.latitude || !customization.longitude) {
+    return (
+      <div>
+        Para definir as áreas de entrega, é preciso definir o endereço de sua
+        loja
+      </div>
+    );
+  }
+
   return (
-    <OrderRoutingClient apiKey={apiKey.googleApiKey} userId={session.user.id} />
+    <OrderRoutingClient
+      apiKey={apiKey.googleApiKey}
+      userId={session.user.id}
+      customizationlatitude={customization.latitude}
+      customizationlongitude={customization.longitude}
+    />
   );
 };
 

@@ -3,12 +3,13 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { customizations } from "@/db/schema";
+import { customizations, users } from "@/db/schema";
 import { insertCustomizationSchema } from "@/db/schemas";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
+import { formatAddress, getGeoCode } from "@/lib/google-geocode";
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
@@ -90,6 +91,7 @@ export const createCustomization = async (
       payment_methods,
       city,
       state,
+      postalCode,
       street,
       street_number,
       neighborhood,
@@ -103,6 +105,37 @@ export const createCustomization = async (
       (!store_name || !template_id || !banner || !logo || !payment_methods)
     ) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
+    }
+
+    const [user] = await db
+      .select({ googleApiKey: users.googleApiKey })
+      .from(users)
+      .where(eq(users.id, session.user.id));
+
+    if (!user.googleApiKey) {
+      return {
+        success: false,
+        message:
+          "Você precisa configurar a chave da API do Google Maps antes de criar uma customização",
+      };
+    }
+
+    const formattedAddress = formatAddress({
+      street,
+      street_number,
+      neighborhood,
+      city,
+      state,
+      postalCode,
+    });
+
+    const { success, latitude, longitude, message, placeId } = await getGeoCode(
+      formattedAddress,
+      user.googleApiKey
+    );
+
+    if (!success) {
+      return { success: false, message };
     }
 
     // Handle image uploads only if new files are provided
@@ -145,6 +178,7 @@ export const createCustomization = async (
       if (state !== undefined) updateData.state = state;
       if (street !== undefined) updateData.street = street;
       if (street_number !== undefined) updateData.street_number = street_number;
+      if (postalCode !== undefined) updateData.postalCode = postalCode;
       if (neighborhood !== undefined) updateData.neighborhood = neighborhood;
       if (isOpen !== undefined) updateData.isOpen = isOpen;
       if (opening_hours !== undefined) updateData.opening_hours = opening_hours;
@@ -172,6 +206,10 @@ export const createCustomization = async (
         footer_color,
         font_color,
         header_color,
+        latitude,
+        longitude,
+        placeId,
+        postalCode,
         logo: logoDesktopUrl!,
         city,
         state,

@@ -171,8 +171,6 @@ export const simulatePayment = async (
 
     const data = await res.json();
 
-    console.log(data);
-
     if (!res.ok) {
       console.error("Failed to create payment:", data);
 

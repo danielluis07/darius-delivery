@@ -113,6 +113,7 @@ export const CustomizationForm = ({
       banner: [],
       logo: [],
       city: customization?.city ?? "",
+      postalCode: customization?.postalCode ?? "",
       state: customization?.state ?? "",
       street: customization?.street ?? "",
       street_number: customization?.street_number ?? "",
@@ -236,7 +237,7 @@ export const CustomizationForm = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="city"
@@ -258,6 +259,36 @@ export const CustomizationForm = ({
                 <FormLabel>Estado</FormLabel>
                 <FormControl>
                   <Input {...field} required />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="postalCode"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>CEP</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      const sanitizedValue = e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 8);
+                      let formattedCep = sanitizedValue;
+
+                      if (sanitizedValue.length > 5) {
+                        formattedCep = `${sanitizedValue.slice(
+                          0,
+                          5
+                        )}-${sanitizedValue.slice(5)}`;
+                      }
+                      field.onChange(formattedCep);
+                    }}
+                    required
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

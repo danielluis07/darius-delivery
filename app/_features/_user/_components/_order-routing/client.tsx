@@ -22,17 +22,16 @@ const mapContainerStyle = {
   borderRadius: "8px",
 };
 
-const center = {
-  lat: -23.55052,
-  lng: -46.633308,
-};
-
 export const OrderRoutingClient = ({
   apiKey,
   userId,
+  customizationlatitude,
+  customizationlongitude,
 }: {
   apiKey: string;
   userId: string;
+  customizationlatitude: number;
+  customizationlongitude: number;
 }) => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apiKey,
@@ -48,11 +47,6 @@ export const OrderRoutingClient = ({
     useGetDeliverers(userId);
   const { mutate } = useUpdateOrderStatus(userId);
   const { mutate: assignDeliverers } = useAssignDeliverers(userId);
-  const [latitude, setLatitude] = useState<number>(center.lat);
-  const [longitude, setLongitude] = useState<number>(center.lng);
-
-  console.log(latitude);
-  console.log(longitude);
 
   const toggleOrderSelection = (orderId: string) => {
     setSelectedOrders((prev) =>
@@ -78,34 +72,33 @@ export const OrderRoutingClient = ({
   );
 
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [latitude, setLatitude] = useState<number>(
+    customizationlatitude || -23.55052
+  );
+  const [longitude, setLongitude] = useState<number>(
+    customizationlongitude || -46.633308
+  );
   const [markerPosition, setMarkerPosition] = useState({
-    lat: -23.55052,
-    lng: -46.633308,
+    lat: customizationlatitude || -23.55052,
+    lng: customizationlongitude || -46.633308,
   });
+
+  console.log("latitude", latitude);
+  console.log("longitude", longitude);
 
   const orders = ordersData || [];
   const deliverers = deliverersData || [];
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setMarkerPosition({ lat: latitude, lng: longitude });
-          setLatitude(latitude);
-          setLongitude(longitude);
-        },
-        () => {
-          console.warn(
-            "Geolocation permission denied. Using default location."
-          );
-          setMarkerPosition({ lat: -23.55052, lng: -46.633308 }); // Default: São Paulo
-          setLatitude(-23.55052);
-          setLongitude(-46.633308);
-        }
-      );
+    if (customizationlatitude && customizationlongitude) {
+      setMarkerPosition({
+        lat: customizationlatitude,
+        lng: customizationlongitude,
+      });
+      setLatitude(customizationlatitude);
+      setLongitude(customizationlongitude);
     }
-  }, []);
+  }, [customizationlatitude, customizationlongitude]);
 
   if (loadError)
     return (
@@ -140,7 +133,7 @@ export const OrderRoutingClient = ({
           {orders.map((order, index) => {
             const totalOrders = orders.length;
             const angle = (index / totalOrders) * 2 * Math.PI; // Evenly distribute in a circle
-            const radius = 0.0005; // Adjust this to control the circle size
+            const radius = 0.0001; // Adjust this to control the circle size
 
             return (
               <Marker

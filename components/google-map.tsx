@@ -17,6 +17,8 @@ interface GoogleMapComponentProps {
   apiKey: string;
   setLatitude: (lat: number) => void;
   setLongitude: (lng: number) => void;
+  customizationlatitude: number;
+  customizationlongitude: number;
   radiusKmList: number[];
 }
 
@@ -24,6 +26,8 @@ export const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   apiKey,
   setLatitude,
   setLongitude,
+  customizationlatitude,
+  customizationlongitude,
   radiusKmList,
 }) => {
   const { isLoaded, loadError } = useLoadScript({
@@ -32,34 +36,28 @@ export const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const [markerPosition, setMarkerPosition] = useState({
-    lat: -23.55052,
-    lng: -46.633308,
+    lat: customizationlatitude || -23.55052, // Use customization coordinates
+    lng: customizationlongitude || -46.633308,
   });
 
-  // Use navigator.geolocation to get the user's current position (only if markerPosition is still the default)
+  // Update marker position when customization coordinates change
   useEffect(() => {
-    if (
-      markerPosition.lat === -23.55052 &&
-      markerPosition.lng === -46.633308 &&
-      navigator.geolocation
-    ) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setMarkerPosition({ lat: latitude, lng: longitude });
-          setLatitude(latitude);
-          setLongitude(longitude);
-        },
-        () => {
-          console.warn(
-            "Geolocation permission denied. Using default location."
-          );
-        }
-      );
+    if (customizationlatitude && customizationlongitude) {
+      setMarkerPosition({
+        lat: customizationlatitude,
+        lng: customizationlongitude,
+      });
+      setLatitude(customizationlatitude);
+      setLongitude(customizationlongitude);
     }
-  }, [markerPosition, setLatitude, setLongitude]);
+  }, [
+    customizationlatitude,
+    customizationlongitude,
+    setLatitude,
+    setLongitude,
+  ]);
 
-  // Handle map clicks and update state only if the position changes
+  // Handle map clicks and update state
   const handleMapClick = useCallback(
     (e: google.maps.MapMouseEvent) => {
       const lat = e.latLng?.lat() ?? 0;
@@ -80,6 +78,7 @@ export const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         Erro ao carregar o mapa. Verifique a API Key.
       </div>
     );
+
   if (!isLoaded) return <Skeleton className="h-[300px]" />;
 
   return (
@@ -92,7 +91,6 @@ export const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         mapRef.current = map;
       }}>
       <Marker position={markerPosition} />
-      {/* Render a Circle for each distance in radiusKmList */}
       {radiusKmList.map((radius, index) => (
         <Circle
           key={index}

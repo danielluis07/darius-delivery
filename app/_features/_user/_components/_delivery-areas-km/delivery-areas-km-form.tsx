@@ -34,9 +34,13 @@ type FormData = z.infer<typeof insertDeliveryAreaKmSchema>;
 export const DeliveryAreasKmForm = ({
   data,
   apikey,
+  customizationlatitude,
+  customizationlongitude,
 }: {
   data: ResponseType | null;
   apikey: string;
+  customizationlatitude: number;
+  customizationlongitude: number;
 }) => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
@@ -95,6 +99,8 @@ export const DeliveryAreasKmForm = ({
           <GoogleMapComponent
             key={radiusKmList.length}
             apiKey={apikey}
+            customizationlatitude={customizationlatitude}
+            customizationlongitude={customizationlongitude}
             setLatitude={(lat) => form.setValue("latitude", lat)}
             setLongitude={(lng) => form.setValue("longitude", lng)}
             radiusKmList={radiusKmList}
