@@ -60,14 +60,11 @@ type SuccessResponseCashWebsite = {
     expirationDate: string | number;
     payload: string;
   };
-  data: {
-    dailyNumber?: number;
-    totalPrice?: number;
-    deliveryDeadline?: number | null;
-    paymentMethod?: string;
-    status?: string;
-    paymentStatus?: string;
-  };
+  dailyNumber?: number;
+  totalPrice?: number;
+  deliveryDeadline?: number | null;
+  status?: string;
+  paymentStatus?: string;
 };
 
 export const useCreateCashWebsiteOrder = (domain: string) => {
@@ -91,23 +88,17 @@ export const useCreateCashWebsiteOrder = (domain: string) => {
     onSuccess: (data) => {
       toast.success("Pedido feito com sucesso!");
 
-      const {
-        dailyNumber,
-        deliveryDeadline,
-        totalPrice,
-        paymentStatus,
-        status,
-        paymentMethod,
-      } = data.data;
+      const orderData = data;
 
-      if (paymentMethod === "PIX" && data.qrCode) {
+      if (orderData.paymentMethod === "PIX" && data.qrCode) {
         openModal(data.qrCode);
+        return;
       }
 
       const isDev = process.env.NODE_ENV === "development";
       const baseUrl = isDev ? `http://localhost:3000` : "";
       const domainPath = isDev ? `/${domain}` : "";
-      const redirectUrl = `${baseUrl}${domainPath}/payment-confirmation?dailyNumber=${dailyNumber}&totalPrice=${totalPrice}&status=${status}&paymentStatus=${paymentStatus}&deliveryDeadline=${deliveryDeadline}`;
+      const redirectUrl = `${baseUrl}${domainPath}/payment-confirmation?dailyNumber=${orderData.dailyNumber}&totalPrice=${orderData.totalPrice}&status=${orderData.status}&paymentStatus=${orderData.paymentStatus}&deliveryDeadline=${orderData.deliveryDeadline}`;
 
       router.push(redirectUrl);
     },

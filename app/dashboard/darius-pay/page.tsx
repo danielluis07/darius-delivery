@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
 import { RequestWithDrawlForm } from "@/app/_features/_user/_components/_darius-pay/request-withdrawl-form";
 import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
-import { getTransferRequests } from "@/lib/asaas";
+import { getAccountStatus, getTransferRequests } from "@/lib/asaas";
 import { TransfersDataTable } from "@/app/_features/_user/_components/_darius-pay/data-table";
 import { columns } from "@/app/_features/_user/_components/_darius-pay/columns";
 

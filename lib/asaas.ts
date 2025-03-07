@@ -482,3 +482,43 @@ export const getPayments = async (apiKey: string) => {
     };
   }
 };
+
+export const getAccountStatus = async (apiKey: string) => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/myAccount/status`, {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: apiKey,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create get transfer requests:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao requisitar as transferências",
+      };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error getting transfer requests", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};

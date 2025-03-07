@@ -714,14 +714,12 @@ const app = new Hono()
       }
 
       return c.json({
-        data: {
-          dailyNumber: order.daily_number,
-          totalPrice: order.total_price,
-          deliveryDeadline: order.delivery_deadline,
-          status: order.status,
-          paymentMethod: "CREDIT_CARD",
-          paymentStatus: "PAID", // Reflete o sucesso do pagamento
-        },
+        dailyNumber: order.daily_number,
+        totalPrice: order.total_price,
+        deliveryDeadline: order.delivery_deadline,
+        status: order.status,
+        paymentMethod: "CREDIT_CARD",
+        paymentStatus: "PAID", // Reflete o sucesso do pagamento
       });
     }
   )
