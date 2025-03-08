@@ -175,6 +175,9 @@ export const createCustomization = async (
       if (payment_methods !== undefined)
         updateData.payment_methods = payment_methods;
       if (city !== undefined) updateData.city = city;
+      if (latitude !== undefined) updateData.latitude = latitude;
+      if (longitude !== undefined) updateData.longitude = longitude;
+      if (placeId !== undefined) updateData.placeId = placeId;
       if (state !== undefined) updateData.state = state;
       if (street !== undefined) updateData.street = street;
       if (street_number !== undefined) updateData.street_number = street_number;
