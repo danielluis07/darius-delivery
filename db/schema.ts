@@ -280,6 +280,7 @@ export const customers = pgTable("customers", {
   neighborhood: text("neighborhood").notNull(),
   street: text("street").notNull(),
   street_number: text("street_number").notNull(),
+  postalCode: text("postal_code").notNull(),
   complement: text("complement"),
 });
 
@@ -365,6 +366,9 @@ export const orders = pgTable("orders", {
   type: orderType("type").notNull(),
   total_price: integer("total_price").notNull(),
   obs: text("obs"),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  placeId: text("place_id"),
   payment_status: paymentStatus("payment_status").notNull(),
   need_change: boolean("need_change").default(false).notNull(),
   change_value: integer("change_value"),

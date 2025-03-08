@@ -234,8 +234,9 @@ export const OrderDetails = ({
           </p>
           <p className="text-sm text-gray-500">
             <span className="font-semibold">Endereço:</span>{" "}
-            {data.customer.street}, {data.customer.neighborhood},{" "}
-            {data.customer.city} - {data.customer.state}
+            {data.customer.street}, nº{data.customer.street_number},{" "}
+            {data.customer.neighborhood}, {data.customer.city} -{" "}
+            {data.customer.state}, {data.customer.postalCode}
           </p>
         </div>
       </Card>

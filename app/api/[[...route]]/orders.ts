@@ -29,6 +29,7 @@ import { verifyAuth } from "@hono/auth-js";
 import { alias } from "drizzle-orm/pg-core";
 import { insertOrderSchema } from "@/db/schemas";
 import { createPayment, generatePixQrCode, simulatePayment } from "@/lib/asaas";
+import { formatAddress, getGeoCode } from "@/lib/google-geocode";
 
 type Products = {
   id: number;
@@ -199,6 +200,8 @@ const app = new Hono()
             name: users.name,
             email: users.email,
             street: customers.street,
+            street_number: customers.street_number,
+            postalCode: customers.postalCode,
             phone: users.phone,
             city: customers.city,
             state: customers.state,
@@ -239,7 +242,9 @@ const app = new Hono()
           customers.street,
           customers.city,
           customers.state,
-          customers.neighborhood
+          customers.neighborhood,
+          customers.street_number,
+          customers.postalCode
         );
 
       if (!data) {
@@ -408,6 +413,57 @@ const app = new Hono()
       return c.json({ error: "Missing data" }, 400);
     }
 
+    const [userCostumer] = await db
+      .select({ id: customers.id })
+      .from(customers)
+      .where(eq(customers.userId, customer_id));
+
+    const [customer, user] = await Promise.all([
+      db
+        .select({
+          city: customers.city,
+          state: customers.state,
+          neighborhood: customers.neighborhood,
+          street: customers.street,
+          street_number: customers.street_number,
+          postalCode: customers.postalCode,
+        })
+        .from(customers)
+        .where(eq(customers.id, userCostumer.id))
+        .then(([result]) => result), // Extracting first element
+
+      db
+        .select({ googleApiKey: users.googleApiKey })
+        .from(users)
+        .where(eq(users.id, auth.token.sub))
+        .then(([result]) => result), // Extracting first element
+    ]);
+
+    console.log("customer", customer);
+    console.log("user", user);
+
+    if (!customer || !user || !user.googleApiKey) {
+      return c.json({ error: "Failed find order data" }, 500);
+    }
+
+    const formattedAddress = formatAddress({
+      city: customer.city,
+      state: customer.state,
+      neighborhood: customer.neighborhood,
+      street: customer.street,
+      street_number: customer.street_number,
+      postalCode: customer.postalCode,
+    });
+
+    const { success, latitude, longitude, message, placeId } = await getGeoCode(
+      formattedAddress,
+      user.googleApiKey
+    );
+
+    if (!success) {
+      return c.json({ error: message }, 500);
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -439,6 +495,9 @@ const app = new Hono()
         customer_id,
         total_price,
         delivery_deadline,
+        latitude,
+        longitude,
+        placeId,
         pickup_deadline,
         type,
         status,
@@ -509,6 +568,47 @@ const app = new Hono()
         return c.json({ error: "Missing data" }, 400);
       }
 
+      const [customer, user] = await Promise.all([
+        db
+          .select({
+            city: customers.city,
+            state: customers.state,
+            neighborhood: customers.neighborhood,
+            street: customers.street,
+            street_number: customers.street_number,
+            postalCode: customers.postalCode,
+          })
+          .from(customers)
+          .where(eq(customers.id, values.customerId))
+          .then(([result]) => result), // Extracting first element
+
+        db
+          .select({ googleApiKey: users.googleApiKey })
+          .from(users)
+          .where(eq(users.id, values.restaurantOwnerId))
+          .then(([result]) => result), // Extracting first element
+      ]);
+
+      if (!customer || !user || !user.googleApiKey) {
+        return c.json({ error: "Failed to create order" }, 500);
+      }
+
+      const formattedAddress = formatAddress({
+        city: customer.city,
+        state: customer.state,
+        neighborhood: customer.neighborhood,
+        street: customer.street,
+        street_number: customer.street_number,
+        postalCode: customer.postalCode,
+      });
+
+      const { success, latitude, longitude, message, placeId } =
+        await getGeoCode(formattedAddress, user.googleApiKey);
+
+      if (!success) {
+        return c.json({ error: message }, 500);
+      }
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
@@ -537,6 +637,9 @@ const app = new Hono()
           need_change: values.needChange,
           change_value: values.changeValue,
           obs: values.obs,
+          latitude,
+          longitude,
+          placeId,
           daily_number: nextDailyNumber,
           delivery_deadline: values.deliveryDeadline,
           total_price: values.totalPrice,
@@ -629,18 +732,65 @@ const app = new Hono()
         return c.json({ error: "Missing data" }, 400);
       }
 
-      const [admin] = await db
-        .select({ id: users.id, walletId: users.walletId })
-        .from(users)
-        .where(eq(users.id, "e53959ca-df8c-4a67-a755-54da4aaca736"));
+      const [customer, user, admin] = await Promise.all([
+        db
+          .select({
+            city: customers.city,
+            state: customers.state,
+            neighborhood: customers.neighborhood,
+            street: customers.street,
+            street_number: customers.street_number,
+            postalCode: customers.postalCode,
+          })
+          .from(customers)
+          .where(eq(customers.id, values.customerId))
+          .then(([result]) => result),
+
+        db
+          .select({ googleApiKey: users.googleApiKey })
+          .from(users)
+          .where(eq(users.id, values.restaurantOwnerId))
+          .then(([result]) => result),
+
+        db
+          .select({ id: users.id, walletId: users.walletId })
+          .from(users)
+          .where(eq(users.id, "e53959ca-df8c-4a67-a755-54da4aaca736"))
+          .then(([result]) => result),
+      ]);
+
+      if (
+        !customer ||
+        !user ||
+        !user.googleApiKey ||
+        !admin ||
+        !admin.walletId
+      ) {
+        return c.json({ error: "Failed to find order data" }, 500);
+      }
+
+      const formattedAddress = formatAddress({
+        city: customer.city,
+        state: customer.state,
+        neighborhood: customer.neighborhood,
+        street: customer.street,
+        street_number: customer.street_number,
+        postalCode: customer.postalCode,
+      });
+
+      const geoCode = await getGeoCode(formattedAddress, user.googleApiKey);
+
+      if (!geoCode.success) {
+        return c.json({ error: geoCode.message }, 500);
+      }
 
       const [comission] = await db
         .select({ percentage: commissions.percentage })
         .from(commissions)
         .where(eq(commissions.adminId, admin.id));
 
-      if (!admin || !admin.walletId || !comission) {
-        return c.json({ error: "Failed to find admin or commission" }, 500);
+      if (!comission) {
+        return c.json({ error: "Failed to find commission" }, 500);
       }
 
       const today = new Date();
@@ -671,6 +821,9 @@ const app = new Hono()
           daily_number: nextDailyNumber,
           total_price: values.totalPrice,
           delivery_deadline: values.deliveryDeadline,
+          latitude: geoCode.latitude,
+          longitude: geoCode.longitude,
+          placeId: geoCode.placeId,
           status: "PREPARING",
           payment_status: "PENDING",
           payment_type: values.paymentMethod,

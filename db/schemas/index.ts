@@ -35,6 +35,7 @@ export const insertCustomerByUserSchema = z.object({
   neighborhood: z.string(),
   street: z.string(),
   street_number: z.string(),
+  postalCode: z.string(),
   complement: z.string().optional(),
 });
 
@@ -46,6 +47,7 @@ export const insertLocalCustomerSchema = z.object({
   state: z.string(),
   neighborhood: z.string(),
   street: z.string(),
+  postalCode: z.string(),
   street_number: z.string(),
   complement: z.string().optional(),
 });

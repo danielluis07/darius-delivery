@@ -1,12 +1,13 @@
 "use server";
 
 import { z } from "zod";
-import { gte, lt, and, desc } from "drizzle-orm"; // Replace "some-library" with the actual library name
+import { gte, lt, and, desc, eq } from "drizzle-orm"; // Replace "some-library" with the actual library name
 import { db } from "@/db/drizzle";
-import { orders, orderItems, receipts } from "@/db/schema";
+import { orders, orderItems, receipts, customers, users } from "@/db/schema";
 import { insertOrderSchema } from "@/db/schemas";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { formatAddress, getGeoCode } from "@/lib/google-geocode";
 
 export const createOrder = async (
   values: z.infer<typeof insertOrderSchema>
@@ -36,6 +37,49 @@ export const createOrder = async (
       !items.length
     ) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
+    }
+
+    const [customer, user] = await Promise.all([
+      db
+        .select({
+          city: customers.city,
+          state: customers.state,
+          neighborhood: customers.neighborhood,
+          street: customers.street,
+          street_number: customers.street_number,
+          postalCode: customers.postalCode,
+        })
+        .from(customers)
+        .where(eq(customers.id, customer_id))
+        .then(([result]) => result), // Extracting first element
+
+      db
+        .select({ googleApiKey: users.googleApiKey })
+        .from(users)
+        .where(eq(users.id, session.user.id))
+        .then(([result]) => result), // Extracting first element
+    ]);
+
+    if (!customer || !user || !user.googleApiKey) {
+      return { success: false, message: "Cliente ou usuário não encontrado" };
+    }
+
+    const formattedAddress = formatAddress({
+      city: customer.city,
+      state: customer.state,
+      neighborhood: customer.neighborhood,
+      street: customer.street,
+      street_number: customer.street_number,
+      postalCode: customer.postalCode,
+    });
+
+    const { success, latitude, longitude, message, placeId } = await getGeoCode(
+      formattedAddress,
+      user.googleApiKey
+    );
+
+    if (!success) {
+      return { success: false, message };
     }
 
     const today = new Date();
@@ -68,6 +112,9 @@ export const createOrder = async (
         daily_number: nextDailyNumber,
         customer_id,
         total_price,
+        latitude,
+        longitude,
+        placeId,
         type,
         status,
         payment_status,

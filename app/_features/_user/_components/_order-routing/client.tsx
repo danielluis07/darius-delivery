@@ -130,17 +130,13 @@ export const OrderRoutingClient = ({
               setLongitude(e.latLng.lng());
             }
           }}>
-          {orders.map((order, index) => {
-            const totalOrders = orders.length;
-            const angle = (index / totalOrders) * 2 * Math.PI; // Evenly distribute in a circle
-            const radius = 0.0001; // Adjust this to control the circle size
-
+          {orders.map((order, i) => {
             return (
               <Marker
-                key={order.id}
+                key={i}
                 position={{
-                  lat: markerPosition.lat + radius * Math.sin(angle), // Circle calculation
-                  lng: markerPosition.lng + radius * Math.cos(angle),
+                  lat: order.latitude || latitude,
+                  lng: order.longitude || longitude,
                 }}
                 label={{
                   text: order.number.toString(),

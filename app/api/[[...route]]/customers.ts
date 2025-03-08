@@ -64,6 +64,7 @@ const app = new Hono()
           id: users.id,
           name: users.name,
           email: users.email,
+          customerId: customers.id,
           phone: users.phone,
           street: customers.street,
           street_number: customers.street_number,
@@ -97,6 +98,7 @@ const app = new Hono()
         street,
         street_number,
         complement,
+        postalCode,
         neighborhood,
         city,
         state,
@@ -112,6 +114,7 @@ const app = new Hono()
         !phone ||
         !street ||
         !street_number ||
+        !postalCode ||
         !neighborhood ||
         !city ||
         !state
@@ -140,6 +143,7 @@ const app = new Hono()
         street_number,
         complement,
         neighborhood,
+        postalCode,
         city,
         state,
       });

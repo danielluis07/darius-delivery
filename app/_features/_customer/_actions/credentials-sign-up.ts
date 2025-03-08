@@ -119,6 +119,7 @@ export const credentialsSignUp = async (
       restaurantOwnerId,
       asaasCustomerId: customerId,
       city,
+      postalCode,
       neighborhood,
       state,
     });

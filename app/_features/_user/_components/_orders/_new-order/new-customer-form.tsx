@@ -22,7 +22,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
+import {
+  formatPhoneNumber,
+  formatPostalCode,
+  removeFormatting,
+} from "@/lib/utils";
 import { insertCustomerByUserSchema, state } from "@/db/schemas";
 import { Plus } from "lucide-react";
 import {
@@ -204,14 +208,21 @@ export const NewCustomerForm = () => {
               />
               <FormField
                 control={form.control}
-                name="complement"
+                name="postalCode"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
                       <Input
                         {...field}
+                        value={field.value ?? ""}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          const formattedValue = formatPostalCode(value);
+                          field.onChange(formattedValue);
+                        }}
                         disabled={isPending}
-                        placeholder="Complemento (opcional)"
+                        placeholder="CEP"
+                        required
                       />
                     </FormControl>
                     <FormMessage />
