@@ -532,7 +532,6 @@ const app = new Hono()
   })
   .post(
     "/payment/ondelivery",
-    verifyAuth(),
     zValidator(
       "json",
       z.object({
@@ -683,7 +682,6 @@ const app = new Hono()
   )
   .post(
     "/payment/website",
-    verifyAuth(),
     zValidator(
       "json",
       z.object({
