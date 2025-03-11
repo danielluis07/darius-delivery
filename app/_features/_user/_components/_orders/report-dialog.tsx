@@ -28,7 +28,7 @@ export const ReportDialog = () => {
           </DialogHeader>
           <div className="space-y-2">
             <p>
-              <strong>Total de Vendas:</strong> R${" "}
+              <strong>Total de Vendas:</strong>{" "}
               {formatCurrencyFromCents(data.totalRevenue)}
             </p>
             <p>

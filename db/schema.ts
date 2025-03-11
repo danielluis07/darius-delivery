@@ -370,6 +370,7 @@ export const orders = pgTable("orders", {
   longitude: real("longitude"),
   placeId: text("place_id"),
   payment_status: paymentStatus("payment_status").notNull(),
+  is_closed: boolean().default(false).notNull(),
   need_change: boolean("need_change").default(false).notNull(),
   change_value: integer("change_value"),
   payment_type: orderPaymentType("payment_type").notNull(),

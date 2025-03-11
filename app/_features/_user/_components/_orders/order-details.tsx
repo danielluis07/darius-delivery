@@ -179,6 +179,19 @@ export const OrderDetails = ({
             <span className="font-semibold">Total:</span>{" "}
             {formatCurrencyFromCents(data.order.totalPrice)}
           </p>
+          {data.order.change_value && (
+            <p className="text-sm text-gray-500">
+              {" "}
+              <span className="font-semibold">Precisa de Troco para:</span>{" "}
+              {formatCurrencyFromCents(data.order.change_value)}
+            </p>
+          )}
+          {data.order.obs && (
+            <p className="text-sm text-gray-500">
+              <span className="font-semibold">Observações:</span>{" "}
+              {data.order.obs}
+            </p>
+          )}
         </div>
 
         <div>

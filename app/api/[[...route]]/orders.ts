@@ -11,6 +11,7 @@ import {
   deliverers,
   receipts,
   commissions,
+  transactions,
 } from "@/db/schema";
 import {
   asc,
@@ -121,7 +122,7 @@ const app = new Hono()
         .leftJoin(customersUser, eq(customers.userId, customersUser.id)) // Alias for customer users
         .leftJoin(orderItems, eq(orders.id, orderItems.order_id))
         .leftJoin(products, eq(orderItems.product_id, products.id))
-        .where(eq(orders.user_id, userId))
+        .where(and(eq(orders.user_id, userId), eq(orders.is_closed, false)))
         .groupBy(
           orders.id,
           receipts.id,
@@ -194,6 +195,9 @@ const app = new Hono()
             type: orders.type,
             delivery_deadline: orders.delivery_deadline,
             pickup_deadline: orders.pickup_deadline,
+            need_change: orders.need_change,
+            change_value: orders.change_value,
+            obs: orders.obs,
           },
           customer: {
             id: customers.userId,
@@ -336,9 +340,11 @@ const app = new Hono()
   .post("/cash-register/close", async (c) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
 
+    const endOfDay = new Date(today);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Buscar pedidos do dia atual que ainda não foram fechados
     const dailyOrders = await db
       .select({
         id: orders.id,
@@ -349,22 +355,23 @@ const app = new Hono()
       })
       .from(orders)
       .where(
-        and(gte(orders.createdAt, today), lte(orders.createdAt, tomorrow))
+        and(
+          gte(orders.createdAt, today),
+          lte(orders.createdAt, endOfDay),
+          eq(orders.is_closed, false) // Apenas pedidos ainda não fechados
+        )
       );
 
     if (!dailyOrders || dailyOrders.length === 0) {
       return c.json(
-        { error: "Nenhum pedido encontrado para o dia atual" },
+        { error: "Nenhum pedido encontrado para fechar o caixa" },
         404
       );
     }
 
     const totalRevenue = dailyOrders
-      .filter(
-        (order) =>
-          order.status === "FINISHED" && order.payment_status === "PAID"
-      )
-      .reduce((sum, order) => sum + order.total_price, 0);
+      .filter((order) => order.payment_status.trim().toUpperCase() === "PAID") // Agora pega qualquer pedido pago
+      .reduce((sum, order) => sum + (order.total_price || 0), 0);
 
     const report = {
       date: today.toISOString().split("T")[0],
@@ -375,13 +382,22 @@ const app = new Hono()
       pendingOrders: dailyOrders.filter((o) => o.status === "PREPARING").length,
     };
 
-    return c.json(
-      {
-        message: "Caixa fechado com sucesso",
-        report,
-      },
-      200
-    );
+    // Atualizar os pedidos para marcar como fechados
+    await db
+      .update(orders)
+      .set({ is_closed: true })
+      .where(
+        and(
+          gte(orders.createdAt, today),
+          lte(orders.createdAt, endOfDay),
+          eq(orders.is_closed, false)
+        )
+      );
+
+    return c.json({
+      message: "Caixa fechado com sucesso",
+      report,
+    });
   })
   .post("/", verifyAuth(), zValidator("json", insertOrderSchema), async (c) => {
     const auth = c.get("authUser");
@@ -519,6 +535,34 @@ const app = new Hono()
       }))
     );
 
+    let transactionPaymentStatus = "PENDING" as
+      | "PENDING"
+      | "FAILED"
+      | "COMPLETED";
+
+    if (payment_status === "CANCELLED") {
+      transactionPaymentStatus = "FAILED";
+    } else if (payment_status === "PAID") {
+      transactionPaymentStatus = "COMPLETED";
+    }
+
+    const [transaction] = await db
+      .insert(transactions)
+      .values({
+        amount: total_price,
+        status: transactionPaymentStatus,
+        order_id: order.id,
+        user_id: auth.token.sub,
+        type: "PAYMENT",
+      })
+      .returning({
+        id: transactions.id,
+      });
+
+    if (!transaction) {
+      return c.json({ error: "Erro ao registrar a transação" }, 500);
+    }
+
     const receipt = await db.insert(receipts).values({
       order_id: order.id,
       user_id: auth.token.sub,
@@ -567,6 +611,11 @@ const app = new Hono()
         return c.json({ error: "Missing data" }, 400);
       }
 
+      const [userCostumer] = await db
+        .select({ id: customers.id })
+        .from(customers)
+        .where(eq(customers.userId, values.customerId));
+
       const [customer, user] = await Promise.all([
         db
           .select({
@@ -578,7 +627,7 @@ const app = new Hono()
             postalCode: customers.postalCode,
           })
           .from(customers)
-          .where(eq(customers.id, values.customerId))
+          .where(eq(customers.id, userCostumer.id))
           .then(([result]) => result), // Extracting first element
 
         db
@@ -762,10 +811,6 @@ const app = new Hono()
           .then(([result]) => result),
       ]);
 
-      console.log("customer", customer);
-      console.log("user", user);
-      console.log("admin", admin);
-
       if (
         !customer ||
         !user ||
@@ -884,6 +929,8 @@ const app = new Hono()
       );
 
       if (!success) {
+        await db.delete(orders).where(eq(orders.id, order.id));
+
         return c.json({ error: message }, 500);
       }
 
@@ -994,7 +1041,7 @@ const app = new Hono()
         return c.json({ error: "Missing data or orderId" }, 400);
       }
 
-      const data = await db
+      const [data] = await db
         .update(orders)
         .set({
           delivererId,
@@ -1005,10 +1052,25 @@ const app = new Hono()
           pickup_deadline,
           updatedAt: new Date(),
         })
-        .where(eq(orders.id, orderId));
+        .where(eq(orders.id, orderId))
+        .returning({ totalPrice: orders.total_price });
 
       if (!data) {
         return c.json({ error: "Failed to update order" }, 500);
+      }
+
+      if (payment_status === "PAID") {
+        const transaction = await db.insert(transactions).values({
+          amount: data.totalPrice,
+          status: "COMPLETED",
+          order_id: orderId,
+          user_id: auth.token.sub,
+          type: "PAYMENT",
+        });
+
+        if (!transaction) {
+          return c.json({ error: "Failed to create transaction" }, 500);
+        }
       }
 
       return c.json({ data });

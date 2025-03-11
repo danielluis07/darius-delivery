@@ -1,0 +1,1 @@
+ALTER TABLE "orders" ADD COLUMN "is_closed" boolean DEFAULT false NOT NULL;

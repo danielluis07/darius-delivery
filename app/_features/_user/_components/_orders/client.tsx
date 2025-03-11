@@ -126,7 +126,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
 
   if (!data) {
     return (
-      <Card className="h-[500px] w-full">
+      <Card className="h-[500px] w-full mt-5">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">Pedidos</h1>
           <Link href="/dashboard/orders/new">
@@ -161,7 +161,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                 Roteirização <Route />
               </Button>
             </Link>
-            <CloseCashRegister />
+            <CloseCashRegister userId={userId} />
           </div>
         </div>
         <div className="grid md:grid-cols-3 gap-4 mt-10">

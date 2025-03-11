@@ -176,6 +176,13 @@
       "when": 1741642466972,
       "tag": "0024_superb_hobgoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1741724450780,
+      "tag": "0025_stiff_ultron",
+      "breakpoints": true
     }
   ]
 }
