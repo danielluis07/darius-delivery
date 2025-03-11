@@ -730,6 +730,11 @@ const app = new Hono()
         return c.json({ error: "Missing data" }, 400);
       }
 
+      const [userCostumer] = await db
+        .select({ id: customers.id })
+        .from(customers)
+        .where(eq(customers.userId, values.customerId));
+
       const [customer, user, admin] = await Promise.all([
         db
           .select({
@@ -741,7 +746,7 @@ const app = new Hono()
             postalCode: customers.postalCode,
           })
           .from(customers)
-          .where(eq(customers.id, values.customerId))
+          .where(eq(customers.id, userCostumer.id))
           .then(([result]) => result),
 
         db
@@ -756,6 +761,10 @@ const app = new Hono()
           .where(eq(users.id, "e53959ca-df8c-4a67-a755-54da4aaca736"))
           .then(([result]) => result),
       ]);
+
+      console.log("customer", customer);
+      console.log("user", user);
+      console.log("admin", admin);
 
       if (
         !customer ||
