@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/form";
 import { PixModal } from "@/components/pix-modal";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 
 enum STEPS {
   FIRST = 0,
@@ -208,6 +209,10 @@ export const Cart = () => {
   };
 
   const onSubmit = (values: OrderData) => {
+    if (!session?.user) {
+      toast.error("Você precisa estar logado para finalizar o pedido");
+      return;
+    }
     const cleanedCreditCard =
       values.paymentMethod === "CREDIT_CARD" && values.creditCard
         ? {

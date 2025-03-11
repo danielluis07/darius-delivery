@@ -12,6 +12,8 @@ export default async function DomainLayout({
 
   const data = await getCustomizationByDomain(domain);
 
+  console.log("customization data", data);
+
   return (
     <main
       className={cn(

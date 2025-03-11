@@ -30,7 +30,7 @@ export const MainClient = () => {
   return (
     <div className="flex h-screen items-center justify-center relative">
       <div
-        className="relative h-[600px] w-[450px] overflow-hidden rounded-[40px] border-[12px] border-gray-800 bg-white shadow-2xl p-6 bg-cover"
+        className="relative h-full sm:h-[600px] w-[450px] overflow-hidden rounded-[40px] border-[12px] border-gray-800 bg-white shadow-2xl p-6 bg-cover"
         style={{
           backgroundImage: `url(${data?.customization.banner})`,
         }}>
@@ -134,7 +134,7 @@ export const MainClient = () => {
                   </Card>
                 </div>
               ) : (
-                <div className="flex items-center justify-center gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <Card
                     style={{
                       backgroundColor:
@@ -167,6 +167,17 @@ export const MainClient = () => {
                     onClick={() => onOpen("menu")}>
                     <UtensilsCrossed />
                     Menu
+                  </Card>
+                  <Card
+                    style={{
+                      backgroundColor:
+                        data?.customization.background_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
+                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    onClick={() => onOpen("cart")}>
+                    <ShoppingCart />
+                    Meu carrinho
                   </Card>
                 </div>
               )}

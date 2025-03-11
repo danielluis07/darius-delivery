@@ -10,6 +10,8 @@ import { Product } from "@/types";
 import { MoveLeft } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
+import { useCartStore } from "@/hooks/use-cart-store";
+import { toast } from "sonner";
 
 export const MenuProducts = ({
   categoryId,
@@ -17,6 +19,7 @@ export const MenuProducts = ({
   categoryId: string | null | undefined;
 }) => {
   const { data } = useStore();
+  const addToCart = useCartStore((state) => state.addToCart);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data: products, isLoading: isProductsLoading } = useGetProducts(
@@ -54,20 +57,15 @@ export const MenuProducts = ({
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
           transition={{ duration: 0.5 }}
-          className="absolute inset-0 p-6 z-10">
-          <div className="pb-10">
+          className="absolute inset-0 bg-white p-6 z-10">
+          <div className="pb-5">
             <div className="flex justify-end mb-4">
               <div
                 onClick={handleBack}
                 className="cursor-pointer text-gray-600">
                 <MoveLeft />
               </div>
-            </div>
-            <h2 className="text-2xl font-bold mb-4">{selectedProduct.name}</h2>
-            <p className="text-gray-600 mb-4">{selectedProduct.description}</p>
-            <p className="text-lg font-semibold mb-4">
-              {formatCurrencyFromCents(selectedProduct.price)}
-            </p>
+            </div>{" "}
             <div className="relative w-full h-64">
               <Image
                 src={selectedProduct.image || placeholder}
@@ -77,6 +75,29 @@ export const MenuProducts = ({
                 className="object-cover"
               />
             </div>
+            <h2 className="text-2xl font-bold mt-2">{selectedProduct.name}</h2>
+            <p className="text-gray-600 mb-4 text-xs">
+              {selectedProduct.description}
+            </p>
+            <p className="text-lg font-semibold mb-4">
+              {formatCurrencyFromCents(selectedProduct.price)}
+            </p>
+            <button
+              style={{
+                backgroundColor: data?.customization.button_color || "white",
+                color: data?.customization.font_color || "black",
+              }}
+              className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md mt-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+              onClick={() => {
+                const wasAdded = addToCart(selectedProduct);
+                if (wasAdded) {
+                  toast.success("Produto adicionado ao carrinho");
+                } else {
+                  toast.error("Esse Produto já está no carrinho");
+                }
+              }}>
+              Adicionar ao carrinho
+            </button>
           </div>
         </motion.div>
       ) : (
