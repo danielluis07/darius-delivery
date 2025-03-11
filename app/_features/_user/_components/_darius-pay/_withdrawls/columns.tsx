@@ -46,7 +46,7 @@ export type ResponseType = {
   };
 };
 
-export const columns: ColumnDef<ResponseType>[] = [
+export const withdrawlColumns: ColumnDef<ResponseType>[] = [
   {
     accessorKey: "value",
     header: "Valor",

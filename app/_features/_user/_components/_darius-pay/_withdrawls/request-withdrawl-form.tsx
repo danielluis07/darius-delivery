@@ -79,7 +79,7 @@ export const RequestWithDrawlForm = ({
   };
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Solicitar Saque</CardTitle>
       </CardHeader>

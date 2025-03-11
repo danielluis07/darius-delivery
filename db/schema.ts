@@ -413,6 +413,7 @@ export const transactions = pgTable("transactions", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
+  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   order_id: text("order_id")
     .notNull()
     .references(() => orders.id, { onDelete: "cascade" }),
