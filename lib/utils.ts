@@ -72,3 +72,87 @@ export const formatPostalCode = (value: string): string => {
   const digits = value.replace(/\D/g, "").slice(0, 8);
   return digits.replace(/(\d{5})(\d{1,3})/, "$1-$2");
 };
+
+export const haversineDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) => {
+  const toRad = (x: number) => (x * Math.PI) / 180;
+
+  const R = 6371; // Raio da Terra em km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // Distância em km
+};
+
+// Verifica se o pedido está dentro de alguma área de entrega cadastrada
+export const isWithinDeliveryArea = (
+  orderLat: number,
+  orderLng: number,
+  deliveryAreas: {
+    areaId: string;
+    latitude: number | null;
+    longitude: number | null;
+    distance: number | null;
+    price: number | null;
+  }[]
+): boolean => {
+  return deliveryAreas.some((area) => {
+    if (!area.latitude || !area.longitude || !area.distance) return false;
+
+    const distanceToOrder = haversineDistance(
+      orderLat,
+      orderLng,
+      area.latitude,
+      area.longitude
+    );
+
+    return distanceToOrder <= area.distance;
+  });
+};
+
+export const getDeliveryFee = (
+  orderLat: number,
+  orderLng: number,
+  deliveryAreas: {
+    areaId: string;
+    latitude: number | null;
+    longitude: number | null;
+    distance: number | null;
+    price: number | null;
+  }[]
+): number | null => {
+  let selectedFee = null;
+
+  for (const area of deliveryAreas) {
+    if (!area.latitude || !area.longitude || !area.distance || !area.price) {
+      continue;
+    }
+
+    const distanceToOrder = haversineDistance(
+      orderLat,
+      orderLng,
+      area.latitude,
+      area.longitude
+    );
+
+    if (distanceToOrder <= area.distance) {
+      selectedFee = area.price; // Pegamos a menor taxa que cobre o pedido
+      break; // Encontramos a taxa mais próxima, então saímos do loop
+    }
+  }
+
+  return selectedFee;
+};

@@ -424,6 +424,50 @@ export const requestAsaastWithDrawl = async ({
   }
 };
 
+export const requestAsaastAnticipation = async (
+  apiKey: string,
+  paymentId: string
+) => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/anticipations`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: apiKey,
+      },
+      body: JSON.stringify({ payment: paymentId }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to ask for anticipation:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao requisitar antecipação.",
+      };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error requesting anticipation", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
 export const getTransferRequests = async (apiKey: string) => {
   try {
     const res = await fetch(`${process.env.ASAAS_API_URL}/transfers`, {
@@ -506,17 +550,14 @@ export const getAccountBalance = async (apiKey: string) => {
 
 export const getPayments = async (apiKey: string) => {
   try {
-    const res = await fetch(
-      `${process.env.ASAAS_API_URL}/payments?customer=cus_000006553975`,
-      {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          "Content-Type": "application/json",
-          access_token: apiKey,
-        },
-      }
-    );
+    const res = await fetch(`${process.env.ASAAS_API_URL}/payments`, {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: apiKey,
+      },
+    });
 
     const data = await res.json();
 

@@ -7,6 +7,7 @@ export type CustomizationWithTemplate = {
   orderSettings: typeof orderSettings.$inferSelect;
   templateName: string;
   apiKey: string;
+  googleApiKey: string;
   userId: string;
   walletId: string;
 };

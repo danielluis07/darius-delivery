@@ -599,6 +599,7 @@ const app = new Hono()
         deliveryDeadline: z.number().optional(),
         needChange: z.preprocess((val) => val === "true", z.boolean()),
         changeValue: z.number().optional(),
+        fee: z.number().optional(),
         obs: z.string().optional(),
         restaurantOwnerId: z.string(),
         paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
@@ -657,6 +658,10 @@ const app = new Hono()
         return c.json({ error: message }, 500);
       }
 
+      const fee = values.fee || 0;
+
+      // Busca o último pedido do dia atual
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
@@ -690,7 +695,7 @@ const app = new Hono()
           placeId,
           daily_number: nextDailyNumber,
           delivery_deadline: values.deliveryDeadline,
-          total_price: values.totalPrice,
+          total_price: values.totalPrice + fee,
           status: "PREPARING",
           payment_status: "PENDING",
           payment_type: values.paymentMethod,
@@ -755,6 +760,7 @@ const app = new Hono()
         paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
         asaasCustomerId: z.string().optional(),
         walletId: z.string().optional(),
+        fee: z.number().optional(),
         apiKey: z.string().optional(),
         creditCard: z
           .object({
@@ -865,13 +871,15 @@ const app = new Hono()
 
       const nextDailyNumber = lastOrder[0] ? lastOrder[0].daily_number + 1 : 1;
 
+      const fee = values.fee || 0;
+
       const [order] = await db
         .insert(orders)
         .values({
           user_id: values.restaurantOwnerId,
           customer_id: values.customerId,
           daily_number: nextDailyNumber,
-          total_price: values.totalPrice,
+          total_price: values.totalPrice + fee,
           delivery_deadline: values.deliveryDeadline,
           latitude: geoCode.latitude,
           longitude: geoCode.longitude,

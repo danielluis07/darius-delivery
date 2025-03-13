@@ -18,6 +18,7 @@ export const getCustomizationByDomain = async (
         apiKey: users.asaasApiKey,
         userId: users.id,
         walletId: users.walletId,
+        googleApiKey: users.googleApiKey,
       })
       .from(users)
       .innerJoin(customizations, eq(users.id, customizations.user_id))

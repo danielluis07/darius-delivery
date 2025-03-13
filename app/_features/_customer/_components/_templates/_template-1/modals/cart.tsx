@@ -5,7 +5,7 @@ import { InputMask } from "@react-input/mask";
 import Image from "next/image";
 import { FaPix, FaCreditCard, FaMoneyBill1Wave } from "react-icons/fa6";
 import { useCartStore } from "@/hooks/use-cart-store";
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { formatCurrency, formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
 import {
@@ -28,6 +28,11 @@ import {
 import { PixModal } from "@/components/pix-modal";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
+import { checkDeliveryArea } from "@/app/_features/_customer/_actions/check-delivery-area";
+import { useCheckDeliveryAreaDialog } from "@/hooks/use-check-delivery-area";
+import { CheckDeliveryAreaDialog } from "@/app/_features/_customer/_components/_templates/_template-1/delivery-area-dialog";
+import { useDeliveryFeeAlert } from "@/hooks/use-delivery-areas-fee-alert";
+import { FeeAlertDialog } from "@/app/_features/_customer/_components/_templates/_template-1/fee-alert-dialog";
 
 enum STEPS {
   FIRST = 0,
@@ -58,8 +63,10 @@ const orderSchema = z
     restaurantOwnerId: z.string(),
     paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
     deliveryDeadline: z.number().optional(),
+    fee: z.number().optional(),
     pickupDeadline: z.number().optional(),
     apiKey: z.string(),
+    googleApiKey: z.string().optional(),
     walletId: z.string().optional(),
     asaasCustomerId: z.string().optional(),
     creditCard: z
@@ -127,11 +134,13 @@ const orderSchema = z
     // No issues added for other payment methods, so validation passes
   });
 
-type OrderData = z.infer<typeof orderSchema>;
+export type OrderData = z.infer<typeof orderSchema>;
 
 export const Cart = () => {
   const params = useParams<{ domain: string }>();
   const { cart, removeFromCart, updateQuantity } = useCartStore();
+  const { onOpen } = useCheckDeliveryAreaDialog();
+  const { onOpenAlert } = useDeliveryFeeAlert();
   const [step, setStep] = useState<STEPS>(STEPS.FIRST);
   const { data, session } = useStore();
 
@@ -149,6 +158,7 @@ export const Cart = () => {
       paymentMethod: undefined,
       needChange: false,
       apiKey: data?.apiKey,
+      googleApiKey: data?.googleApiKey,
       walletId: data?.walletId,
       changeValue: undefined,
       obs: "",
@@ -208,11 +218,12 @@ export const Cart = () => {
     console.log(errors);
   };
 
-  const onSubmit = (values: OrderData) => {
+  const onSubmit = async (values: OrderData) => {
     if (!session?.user) {
       toast.error("Você precisa estar logado para finalizar o pedido");
       return;
     }
+
     const cleanedCreditCard =
       values.paymentMethod === "CREDIT_CARD" && values.creditCard
         ? {
@@ -220,6 +231,18 @@ export const Cart = () => {
             number: values.creditCard.number.replace(/\s/g, ""), // Remove all spaces
           }
         : undefined;
+
+    const { success, message, fee } = await checkDeliveryArea(
+      values.customerId,
+      values.restaurantOwnerId,
+      values.googleApiKey || ""
+    );
+
+    if (!success) {
+      onOpen();
+      return;
+    }
+
     const orderData: OrderData = {
       items: cart,
       totalPrice: cart.reduce(
@@ -234,12 +257,20 @@ export const Cart = () => {
       deliveryDeadline: data?.orderSettings.delivery_deadline || undefined,
       restaurantOwnerId: data?.userId || "",
       walletId: values.walletId,
+      fee,
       paymentMethod: values.paymentMethod,
       asaasCustomerId: values.asaasCustomerId,
       creditCard: cleanedCreditCard,
     };
 
-    if (values.paymentMethod === "CASH" || values.paymentMethod === "CARD") {
+    if (success && fee) {
+      onOpenAlert(orderData, message, params.domain);
+    }
+
+    if (
+      orderData?.paymentMethod === "CASH" ||
+      orderData?.paymentMethod === "CARD"
+    ) {
       mutateCashOnDelivery(orderData);
     } else {
       mutateCashOnWebsite(orderData);
@@ -249,6 +280,8 @@ export const Cart = () => {
   return (
     <>
       <PixModal />
+      <CheckDeliveryAreaDialog />
+      <FeeAlertDialog />
       <div
         style={{
           backgroundColor: data?.customization.background_color || "white",
@@ -613,9 +646,6 @@ export const Cart = () => {
                     <button
                       type="button"
                       onClick={handlePreviousStep}
-                      disabled={
-                        isPendingCashOnWebsite || isPendingCashOnDelivery
-                      }
                       style={{
                         backgroundColor:
                           data?.customization.button_color || "white",
@@ -626,23 +656,13 @@ export const Cart = () => {
                     </button>
                     <button
                       type="submit"
-                      disabled={
-                        isPendingCashOnWebsite || isPendingCashOnDelivery
-                      }
                       style={{
                         backgroundColor:
                           data?.customization.button_color || "white",
                         color: data?.customization.font_color || "black",
                       }}
                       className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-40 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
-                      {isPendingCashOnWebsite || isPendingCashOnDelivery ? (
-                        <div className="flex items-center justify-center gap-2 w-44">
-                          <Loader2 className="animate-spin" />
-                          Finalizando
-                        </div>
-                      ) : (
-                        <span>Finalizar Pedido</span>
-                      )}
+                      Finalizar Pedido
                     </button>
                   </div>
                 </form>

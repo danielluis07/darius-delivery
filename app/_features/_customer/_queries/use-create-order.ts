@@ -4,6 +4,7 @@ import { client } from "@/lib/hono";
 import { toast } from "sonner";
 import { usePixModal } from "@/hooks/use-pix-dialog";
 import { useRouter } from "next/navigation";
+import { useDeliveryFeeAlert } from "@/hooks/use-delivery-areas-fee-alert";
 
 type RequestTypeCashWebsite = InferRequestType<
   typeof client.api.orders.payment.website.$post
@@ -70,6 +71,7 @@ type SuccessResponseCashWebsite = {
 export const useCreateCashWebsiteOrder = (domain: string) => {
   const router = useRouter();
   const { openModal } = usePixModal();
+  const { onClose } = useDeliveryFeeAlert();
   const mutation = useMutation<
     SuccessResponseCashWebsite,
     Error,
@@ -86,6 +88,7 @@ export const useCreateCashWebsiteOrder = (domain: string) => {
       return data as SuccessResponseCashWebsite;
     },
     onSuccess: (data) => {
+      onClose();
       toast.success("Pedido feito com sucesso!");
 
       const orderData = data;

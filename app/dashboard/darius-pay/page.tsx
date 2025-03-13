@@ -4,16 +4,22 @@ import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
 import { RequestWithDrawlForm } from "@/app/_features/_user/_components/_darius-pay/_withdrawls/request-withdrawl-form";
 import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
-import { getAccountBalance, getTransferRequests } from "@/lib/asaas";
+import {
+  getAccountBalance,
+  getPayments,
+  getTransferRequests,
+} from "@/lib/asaas";
 import { TransfersDataTable } from "@/app/_features/_user/_components/_darius-pay/_withdrawls/data-table";
 import { withdrawlColumns } from "@/app/_features/_user/_components/_darius-pay/_withdrawls/columns";
 import { getTransactions } from "@/app/_features/_user/_queries/_transactions/get-transactions";
 import { TransactionsDataTable } from "@/app/_features/_user/_components/_darius-pay/_transactions/data-table";
 import { transactionsColumns } from "@/app/_features/_user/_components/_darius-pay/_transactions/columns";
+import { paymentsColumns } from "@/app/_features/_user/_components/_darius-pay/_payments/columns";
 import { ComparisonTable } from "@/app/_features/_user/_components/_darius-pay/comparison-table";
 import { AccountBalance } from "@/app/_features/_user/_components/_darius-pay/account-balance";
 import { getTotalRevenue } from "@/app/_features/_user/_queries/_finances/get-total-revenue";
 import { TotalBalance } from "@/app/_features/_user/_components/_darius-pay/total-balance";
+import { PaymentsDataTable } from "@/app/_features/_user/_components/_darius-pay/_payments/data-table";
 
 const DariusPayPage = async () => {
   const session = await auth();
@@ -33,16 +39,21 @@ const DariusPayPage = async () => {
     );
   }
 
-  const [data, transfers, transactions, accountBalance, totalBalance] =
-    await Promise.all([
-      getUserData(session.user.id),
-      getTransferRequests(user.apiKey),
-      getTransactions(session.user.id),
-      getAccountBalance(user.apiKey),
-      getTotalRevenue(session.user.id),
-    ]);
-
-  console.log(totalBalance);
+  const [
+    data,
+    transfers,
+    transactions,
+    accountBalance,
+    totalBalance,
+    payments,
+  ] = await Promise.all([
+    getUserData(session.user.id),
+    getTransferRequests(user.apiKey),
+    getTransactions(session.user.id),
+    getAccountBalance(user.apiKey),
+    getTotalRevenue(session.user.id),
+    getPayments(user.apiKey),
+  ]);
 
   return (
     <div>
@@ -73,6 +84,11 @@ const DariusPayPage = async () => {
         columns={transactionsColumns}
         data={transactions || []}
         searchKey="buyerName"
+      />
+      <PaymentsDataTable
+        columns={paymentsColumns}
+        data={payments.data.data || []}
+        searchKey="value"
       />
     </div>
   );
