@@ -25,6 +25,13 @@ export const createVercelDomain = async (domain: string) => {
         errorDetails,
       });
 
+      if (res.statusText === "Conflict") {
+        return {
+          failed: true,
+          failedMessage: "Esse domínio já está em uso",
+        };
+      }
+
       return {
         failed: true,
         failedMessage: "Falha ao criar o domínio",

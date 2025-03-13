@@ -139,23 +139,13 @@ export const ReceiptsClient = ({ userId }: { userId: string }) => {
 };
 
 const styles = StyleSheet.create({
-  page: { padding: 20, fontSize: 10, fontFamily: "Courier" },
-  section: { marginBottom: 10 },
-  header: { textAlign: "center", fontSize: 16, fontWeight: "bold" },
-  subheader: { textAlign: "center", fontSize: 10 },
-  dashedLine: { borderBottom: "1px dashed black", marginVertical: 5 },
+  page: { padding: 5, fontSize: 10, fontFamily: "Courier" }, // Menos padding para otimizar espaço
+  section: { textAlign: "center", marginBottom: 5 },
+  header: { fontSize: 14, fontWeight: "bold" },
+  subheader: { fontSize: 10 },
+  dashedLine: { borderBottom: "1px dashed black", marginVertical: 3 },
   boldText: { fontWeight: "bold" },
-  flexRow: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  productRow: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 2,
-  },
+  productRow: { marginBottom: 3 }, // Removido flex para evitar desalinhamento
 });
 
 const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
@@ -171,68 +161,66 @@ const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
     PENDING: "Aguardando",
     PAID: "Pago",
   };
+
   return (
     <Document>
-      <Page size="A6" style={styles.page}>
+      <Page size={{ width: 80, height: "auto" }} style={styles.page}>
+        {/* Nome da Loja */}
         <View style={styles.section}>
           <Text style={styles.header}>Nome da Loja</Text>
           <Text style={styles.subheader}>(11) 0000-0000</Text>
         </View>
 
-        <View style={styles.flexRow}>
-          <Text style={[styles.boldText, { fontSize: 12 }]}>Pedido</Text>
-          <Text style={[styles.boldText, { fontSize: 12 }]}>
-            nº {receipt.number}
-          </Text>
-        </View>
+        {/* Informações do Pedido */}
+        <Text style={styles.boldText}>Pedido nº {receipt.number}</Text>
         <Text>Origem: Online</Text>
         <View style={styles.dashedLine}></View>
 
+        {/* Informações do Cliente */}
         <Text>Cliente: {receipt.customerName}</Text>
         <Text>Tel: {receipt.customerPhone}</Text>
         <Text>
-          Endereço: {receipt.customerStreet} - {receipt.customerNeighborhood} -{" "}
-          {receipt.customerCity} - {receipt.customerState}
+          Rua: {receipt?.customerStreet || "N/A"} - Nº{" "}
+          {receipt?.customerStreetNumber},{" "}
+          {receipt?.customerComplement
+            ? `Comp: ${receipt?.customerComplement}, `
+            : ""}
+          {receipt?.customerNeighborhood || "N/A"} -{" "}
+          {receipt?.customerCity || "N/A"} - {receipt?.customerState || "N/A"}
         </Text>
-
         <View style={styles.dashedLine}></View>
+
+        {/* Produtos */}
         <Text style={styles.boldText}>Produtos</Text>
         <View style={styles.dashedLine}></View>
         {receipt.orderItems.map((item, index) => (
           <View key={index} style={styles.productRow}>
-            <View>
-              <Text style={styles.boldText}>{item.productName}</Text>
-              <Text>
-                {item.quantity}x {formatCurrencyFromCents(item.price)}
-              </Text>
-            </View>
-            <Text style={styles.boldText}>
-              {formatCurrencyFromCents(item.quantity * item.price)}
+            <Text style={styles.boldText}>{item.productName}</Text>
+            <Text>
+              {item.quantity}x {formatCurrencyFromCents(item.price)}
+            </Text>
+            <Text>
+              Total: {formatCurrencyFromCents(item.quantity * item.price)}
             </Text>
           </View>
         ))}
 
         <View style={styles.dashedLine}></View>
-        <View style={styles.flexRow}>
-          <Text style={[styles.boldText, { fontSize: 12 }]}>Total</Text>
-          <Text style={[styles.boldText, { fontSize: 12 }]}>
-            {formatCurrencyFromCents(totalPrice)}
-          </Text>
-        </View>
-        <View style={styles.flexRow}>
-          <Text>Forma de Pagamento</Text>
-          <Text>
-            {paymentTypeTranslation[receipt.orderPaymentType ?? ""] ||
-              "Não informado"}
-          </Text>
-        </View>
-        <View style={styles.flexRow}>
-          <Text>Status do Pagamento</Text>
-          <Text>
-            {paymentStatusTranslations[receipt.orderPaymentStatus ?? ""] ||
-              "Não informado"}
-          </Text>
-        </View>
+
+        {/* Total e Pagamento */}
+        <Text style={styles.boldText}>
+          Total: {formatCurrencyFromCents(totalPrice)}
+        </Text>
+        <Text>
+          Pagamento:{" "}
+          {paymentTypeTranslation[receipt.orderPaymentType ?? ""] ||
+            "Não informado"}
+        </Text>
+        <Text>
+          Status:{" "}
+          {paymentStatusTranslations[receipt.orderPaymentStatus ?? ""] ||
+            "Não informado"}
+        </Text>
       </Page>
     </Document>
   );
