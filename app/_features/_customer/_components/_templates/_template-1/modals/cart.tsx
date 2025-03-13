@@ -656,6 +656,9 @@ export const Cart = () => {
                     </button>
                     <button
                       type="submit"
+                      disabled={
+                        isPendingCashOnWebsite || isPendingCashOnDelivery
+                      }
                       style={{
                         backgroundColor:
                           data?.customization.button_color || "white",

@@ -22,7 +22,7 @@ type ResponseType = {
   interestValue: number | null;
   description: string | null;
   billingType: "PIX" | "BOLETO" | "CREDIT_CARD" | string;
-  pixTransaction: any | null;
+  pixTransaction: string | null;
   status: "PENDING" | "PAID" | "OVERDUE" | "CANCELED" | string;
   dueDate: string;
   originalDueDate: string;
@@ -42,13 +42,13 @@ type ResponseType = {
   bankSlipUrl: string | null;
   lastInvoiceViewedDate: string | null;
   lastBankSlipViewedDate: string | null;
-  discount: Record<string, any> | null;
-  fine: Record<string, any> | null;
-  interest: Record<string, any> | null;
+  discount: string | null;
+  fine: string | null;
+  interest: string | null;
   postalService: boolean;
-  custody: any | null;
-  escrow: any | null;
-  refunds: any | null;
+  custody: string | null;
+  escrow: string | null;
+  refunds: string | null;
 };
 
 export const paymentsColumns: ColumnDef<ResponseType>[] = [
