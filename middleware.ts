@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import authConfig from "@/auth.config";
+import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import { apiAuthPrefix } from "@/routes";
 
@@ -8,6 +9,15 @@ const { auth } = NextAuth(authConfig);
 export default auth(async (req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+
+  const secret = process.env.AUTH_SECRET!;
+  const token = await getToken({
+    req,
+    secret,
+    secureCookie: false,
+  });
+
+  const isSubscribed = token?.isSubscribed as boolean;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isWebhookRoute = nextUrl.pathname === "/api/webhook/asaas";
@@ -44,6 +54,11 @@ export default auth(async (req) => {
         new URL(`/auth/sign-in?callbackUrl=${encodedCallbackUrl}`, nextUrl)
       );
     }
+
+    if (!isSubscribed) {
+      return NextResponse.redirect(new URL("/subscription", nextUrl));
+    }
+
     return NextResponse.next();
   }
 

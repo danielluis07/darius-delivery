@@ -96,6 +96,7 @@ export const users = pgTable("user", {
   companyType: text("company_type"),
   walletId: text("wallet_id"),
   asaasApiKey: text("asaas_api_key"),
+  userCustomerId: text("user_customer_id"),
   // asaas bank account
   bankCode: varchar("bank_code", { length: 10 }),
   ownerName: varchar("owner_name", { length: 255 }),
@@ -104,10 +105,21 @@ export const users = pgTable("user", {
   bankAccountDigit: varchar("bank_account_digit", { length: 2 }),
   bankAccountType: text("bank_account_type"),
   pixAddressKey: varchar("pix_address_key", { length: 255 }),
+  // asaas credit card
+  creditCardholderName: text("credit_card_holder_name"),
+  creditCardnumber: text("credit_card_number"),
+  creditCardexpiryMonth: text("credit_card_expiry_month"),
+  creditCardexpiryYear: text("credit_card_expiry_year"),
+  creditCardccv: text("credit_card_ccv"),
   //
+  comissionPercentage: decimal("comission_percentage", {
+    precision: 5,
+    scale: 2,
+  }),
   googleApiKey: varchar("google_api_key", { length: 255 }),
   domain: varchar("domain", { length: 255 }).unique(),
-  isTrial: boolean("is_trial").default(false),
+  isSubscribed: boolean("is_subscribed").default(false),
+  isTrial: boolean("is_trial").default(true),
   isActive: boolean("is_active").default(true),
   trialEndsAt: timestamp("trial_ends_at", { mode: "date" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -333,13 +345,15 @@ export const customizations = pgTable("customizations", {
 });
 
 export const subscriptions = pgTable("subscriptions", {
-  id: text("id"),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  asaas_sub_id: text("asaas_sub_id"),
   user_id: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }), // Relacionamento com usuários
   plan: subscriptionType("subscription_type"), // Planos de assinatura (ajustável conforme necessidade)
   status: text("status").notNull(), // Status da assinatura
-  start_date: timestamp("start_date", { withTimezone: true }),
   end_date: timestamp("end_date", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -497,17 +511,6 @@ export const pixels = pgTable("pixels", {
   pixel_tiktok: varchar("pixel_tiktok", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const freeTests = pgTable("free_tests", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  expiration_date: timestamp("expiration_date").notNull(),
-  status: freeTestStatus("status").notNull(),
-  isActive: boolean("is_active").default(true).notNull(),
 });
 
 export const commissions = pgTable("commissions", {

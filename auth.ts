@@ -60,6 +60,10 @@ export const {
         session.user.isOAuth = token.isOAuth as boolean;
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
 
+        if (!token.asaasCustomerId) {
+          session.user.isSubscribed = token.isSubscribed as boolean;
+        }
+
         // Apenas adiciona o asaasCustomerId se existir no token
         if (token.asaasCustomerId) {
           session.user.asaasCustomerId = token.asaasCustomerId as string;
@@ -84,6 +88,7 @@ export const {
         .where(eq(account.userId, token.sub));
 
       token.role = existingUser.role || null;
+      token.isSubscribed = existingUser.isSubscribed;
       token.isOAuth = !!existingAccount;
       token.name = existingUser.name;
       token.email = existingUser.email;

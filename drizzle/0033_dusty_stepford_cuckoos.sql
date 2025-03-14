@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "comission_percentage" numeric(5, 2);

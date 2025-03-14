@@ -5,6 +5,7 @@ type ExtendedUser = DefaultSession["user"] & {
   isOAuth: boolean;
   role: "ADMIN" | "USER" | "CUSTOMER";
   asaasCustomerId?: string;
+  isSubscribed: boolean;
 };
 
 declare module "next-auth" {

@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { creditCardSchema } from "@/app/_features/_user/_components/_subscription/confirmation-card";
 import { AsaasPayment, PaymentBody } from "@/types";
 
 // asaas functions
@@ -78,6 +80,75 @@ export const createUserAccount = async ({
     return {
       success: false,
       message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const createAdminCustomer = async ({
+  name,
+  email,
+  cpfCnpj,
+  phone,
+  postalCode,
+  street,
+  street_number,
+  neighborhood,
+}: {
+  name: string;
+  email: string;
+  cpfCnpj: string;
+  phone: string;
+  postalCode: string;
+  street: string;
+  street_number: string;
+  neighborhood: string;
+}) => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/customers`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: process.env.ASAAS_API_KEY!,
+      },
+      body: JSON.stringify({
+        name: name,
+        cpfCnpj: cpfCnpj,
+        email: email,
+        phone: phone,
+        mobilePhone: phone,
+        address: street,
+        addressNumber: street_number,
+        province: neighborhood,
+        postalCode: postalCode,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create customer:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { successful: false, messageText: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        successful: false,
+        messageText: "Erro desconhecido ao criar a conta.",
+      };
+    }
+
+    return { successful: true, customerId: data.id };
+  } catch (error) {
+    console.error("Error creating user account:", error);
+    return {
+      successful: false,
+      messageText: "Erro interno ao conectar com a API do Asaas.",
     };
   }
 };
@@ -621,6 +692,67 @@ export const getAccountStatus = async (apiKey: string) => {
     return { success: true, data };
   } catch (error) {
     console.error("Error getting transfer requests", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const createAsaasSubscription = async (
+  values: z.infer<typeof creditCardSchema>,
+  subscriptionPrice: number,
+  subscriptionType: string,
+  customerId: string,
+  nextDueDate: string
+) => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/subscriptions`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: process.env.ASAAS_API_KEY!,
+      },
+      body: JSON.stringify({
+        billingType: "CREDIT_CARD",
+        cycle: "MONTHLY",
+        customer: customerId,
+        value: subscriptionPrice,
+        description: subscriptionType,
+        nextDueDate: nextDueDate,
+        creditCard: {
+          holderName: values.holderName,
+          number: values.number,
+          expiryMonth: values.expiryMonth,
+          expiryYear: values.expiryYear,
+          ccv: values.ccv,
+        },
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create subscription:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao criar a assinatura.",
+      };
+    }
+
+    return { success: true, id: data.id, status: data.status };
+  } catch (error) {
+    console.error("Error creating user account:", error);
     return {
       success: false,
       message: "Erro interno ao conectar com a API do Asaas.",

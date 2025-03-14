@@ -1,6 +1,7 @@
 import { BankAccountForm } from "@/app/_features/_user/_components/_settings/bank-account-form";
 import { DomainForm } from "@/app/_features/_user/_components/_settings/domain-form";
 import { GoogleApiKeyForm } from "@/app/_features/_user/_components/_settings/google-api-key-form";
+import { TrialCountdown } from "@/app/_features/_user/_components/_settings/trial-countdown";
 import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
 import { auth } from "@/auth";
 
@@ -13,8 +14,13 @@ const SettingsPage = async () => {
 
   const data = await getUserData(session.user.id);
 
+  if (!data || !data.trialEndsAt) {
+    return <div>Erro ao carregar os dados</div>;
+  }
+
   return (
     <div className="space-y-4">
+      <TrialCountdown trialEndsAt={data?.trialEndsAt} />
       <GoogleApiKeyForm userApiKey={data?.googleApiKey} />
       <DomainForm domain={data?.domain} />
       <BankAccountForm

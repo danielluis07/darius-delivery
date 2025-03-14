@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
 import { credentialsSignUpSchema } from "@/db/schemas";
 import { signIn } from "@/auth";
-import { createUserAccount } from "@/lib/asaas";
+import { createAdminCustomer, createUserAccount } from "@/lib/asaas";
 import { createVercelDomain } from "@/lib/vercel";
 
 // Helper function to hash a password using SHA-256
@@ -108,6 +108,24 @@ export const credentialsSignUp = async (
       };
     }
 
+    const { successful, messageText, customerId } = await createAdminCustomer({
+      name,
+      email,
+      cpfCnpj,
+      phone,
+      postalCode,
+      street: address,
+      street_number: addressNumber,
+      neighborhood: province,
+    });
+
+    if (!successful) {
+      return {
+        success: false,
+        message: messageText,
+      };
+    }
+
     // Hash the password using SHA-256
     const hashedPassword = await hashPassword(password);
 
@@ -121,6 +139,7 @@ export const credentialsSignUp = async (
         password: hashedPassword,
         walletId,
         address,
+        userCustomerId: customerId,
         asaasApiKey: apiKey,
         addressNumber,
         companyType,

@@ -183,6 +183,62 @@
       "when": 1741724450780,
       "tag": "0025_stiff_ultron",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1741949670147,
+      "tag": "0026_blushing_spitfire",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1741951401438,
+      "tag": "0027_white_skin",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1741953881692,
+      "tag": "0028_medical_vision",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1741960713775,
+      "tag": "0029_regular_starjammers",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1741960818183,
+      "tag": "0030_chilly_betty_ross",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1741972205664,
+      "tag": "0031_chief_sentinel",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1741972284920,
+      "tag": "0032_absent_johnny_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1741983258891,
+      "tag": "0033_dusty_stepford_cuckoos",
+      "breakpoints": true
     }
   ]
 }
