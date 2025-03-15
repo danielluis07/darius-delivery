@@ -805,7 +805,10 @@ const app = new Hono()
           .then(([result]) => result),
 
         db
-          .select({ googleApiKey: users.googleApiKey })
+          .select({
+            googleApiKey: users.googleApiKey,
+            comission: users.comissionPercentage,
+          })
           .from(users)
           .where(eq(users.id, values.restaurantOwnerId))
           .then(([result]) => result),
@@ -922,6 +925,8 @@ const app = new Hono()
         return c.json({ error: "Failed to simulate payment" }, 500);
       }
 
+      const comissionValue = user.comission || comission.percentage;
+
       const { success, data, message, paymentId } = await createPayment(
         {
           customer: values.asaasCustomerId,
@@ -931,7 +936,7 @@ const app = new Hono()
           creditCard: values.creditCard,
         },
         values.apiKey,
-        comission.percentage,
+        comissionValue,
         admin.walletId,
         netValue
       );

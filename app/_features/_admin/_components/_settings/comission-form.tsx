@@ -26,7 +26,6 @@ export const ComissionForm = ({
 }: {
   percentage: string | undefined;
 }) => {
-  console.log(percentage);
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
     resolver: zodResolver(insertAdminCommissionSchema),

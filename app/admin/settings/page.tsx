@@ -1,9 +1,10 @@
+import { auth } from "@/auth";
 import { ComissionForm } from "@/app/_features/_admin/_components/_settings/comission-form";
 import { ProfileForm } from "@/app/_features/_admin/_components/_settings/profile-form";
 import { UpdatePasswordForm } from "@/app/_features/_admin/_components/_settings/update-password-form";
 import { getCommission } from "@/app/_features/_admin/_queries/get-commission";
 import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
-import { auth } from "@/auth";
+import { ComissionPerUserClient } from "@/app/_features/_admin/_components/_settings/_comission-per-user/client";
 
 const SettingsPage = async () => {
   const session = await auth();
@@ -17,11 +18,13 @@ const SettingsPage = async () => {
     getCommission(session.user.id),
   ]);
 
-  if (!data || !commission?.percentage) {
+  if (!data) {
     return <div>Erro ao carregar informações do usuário</div>;
   }
 
-  const formattedValue = parseFloat(commission?.percentage).toString(); // "10"
+  const commissionValue = commission?.percentage || "0.00";
+
+  const formattedValue = parseFloat(commissionValue).toString();
 
   return (
     <div className="space-y-4">
@@ -31,6 +34,7 @@ const SettingsPage = async () => {
         <UpdatePasswordForm />
         <ComissionForm percentage={formattedValue} />
       </div>
+      <ComissionPerUserClient />
     </div>
   );
 };
