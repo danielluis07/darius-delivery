@@ -31,6 +31,7 @@ import {
   Globe,
   Sandwich,
   Settings,
+  UserRoundCog,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -126,6 +127,11 @@ const items = [
     url: "/dashboard/darius-pay",
     icon: TbCircleLetterD,
     label: "Darius Pay",
+  },
+  {
+    url: "/dashboard/employees",
+    icon: UserRoundCog,
+    label: "Funcionários",
   },
 ];
 

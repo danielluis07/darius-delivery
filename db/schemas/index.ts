@@ -25,6 +25,14 @@ export const insertApiKeySchema = z.object({
 
 export const insertDeliverersSchema = createInsertSchema(deliverers);
 
+export const createEmployeeSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  phone: z.string(),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+  permissions: z.array(z.string()).optional(),
+});
+
 export const insertCustomerByUserSchema = z.object({
   name: z.string(),
   email: z.string().email(),

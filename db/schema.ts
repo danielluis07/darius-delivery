@@ -15,7 +15,7 @@ import {
 import type { AdapterAccountType } from "next-auth/adapters";
 import { createId } from "@paralleldrive/cuid2";
 
-export const role = pgEnum("role", ["ADMIN", "USER", "CUSTOMER"]);
+export const role = pgEnum("role", ["ADMIN", "USER", "CUSTOMER", "EMPLOYEE"]);
 
 export const templateName = pgEnum("template_name", [
   "TEMPLATE_1",
@@ -294,6 +294,19 @@ export const customers = pgTable("customers", {
   street_number: text("street_number").notNull(),
   postalCode: text("postal_code").notNull(),
   complement: text("complement"),
+});
+
+export const employees = pgTable("employee", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
+    .references(() => users.id, { onDelete: "cascade" })
+    .unique(),
+  restaurantOwnerId: text("restaurantOwnerId").references(() => users.id, {
+    onDelete: "cascade",
+  }),
+  permissions: text("permissions").array().default([]),
 });
 
 export const deliverers = pgTable("deliverers", {
