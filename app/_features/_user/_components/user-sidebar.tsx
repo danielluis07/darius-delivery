@@ -27,6 +27,7 @@ import {
   CircleDollarSign,
   MapPin,
   Printer,
+  Lock,
   ChartPie,
   Globe,
   Sandwich,
@@ -49,95 +50,142 @@ import {
 } from "@/components/ui/collapsible";
 import { RiMotorbikeFill } from "react-icons/ri";
 import { TbCircleLetterD } from "react-icons/tb";
-import { ExtendedUser } from "@/next-auth";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-const items = [
-  {
-    url: "/dashboard",
-    icon: House,
-    label: "Início",
-  },
-  {
-    url: "/dashboard/categories",
-    icon: FolderClosed,
-    label: "Categorias",
-  },
-  {
-    url: "/dashboard/products",
-    icon: Sandwich,
-    label: "Produtos",
-  },
-  {
-    url: "/dashboard/domain-configuration",
-    icon: Globe,
-    label: "Configuração de Domínio",
-  },
-  {
-    url: "/dashboard/customization",
-    icon: Paintbrush,
-    label: "Personalização",
-  },
-  {
-    url: "/dashboard/deliverers",
-    icon: RiMotorbikeFill,
-    label: "Entregadores",
-  },
-  {
-    url: "/dashboard/orders",
-    icon: NotebookText,
-    label: "Pedidos",
-  },
-  {
-    url: "/dashboard/order-routing",
-    icon: Route,
-    label: "Roteirização de Pedidos",
-  },
-  {
-    url: "/dashboard/combos",
-    icon: ShoppingBasket,
-    label: "Combos",
-  },
-  {
-    url: "/dashboard/customers",
-    icon: Users,
-    label: "Clientes",
-  },
-  {
-    url: "/dashboard/finances",
-    icon: CircleDollarSign,
-    label: "Financeiro",
-  },
-  {
-    url: "/dashboard/delivery-areas",
-    icon: MapPin,
-    label: "Áreas de Entrega",
-  },
-  {
-    url: "/dashboard/receipts",
-    icon: Printer,
-    label: "Impressão de Comandas",
-  },
-  {
-    url: "/dashboard/pixels",
-    icon: ChartPie,
-    label: "Pixels",
-  },
-  {
-    url: "/dashboard/darius-pay",
-    icon: TbCircleLetterD,
-    label: "Darius Pay",
-  },
-  {
-    url: "/dashboard/employees",
-    icon: UserRoundCog,
-    label: "Funcionários",
-  },
-];
+type User = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  role: "ADMIN" | "USER" | "CUSTOMER" | "EMPLOYEE" | null;
+  subscription: {
+    id: string;
+    asaas_sub_id: string | null;
+    user_id: string;
+    plan: "BASIC" | "PREMIUM" | null;
+    status: string;
+    end_date: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
+  employee: {
+    id: string;
+    userId: string | null;
+    restaurantOwnerId: string | null;
+    permissions: string[] | null;
+  } | null;
+};
 
-export function UserSidebar({ user }: { user: ExtendedUser }) {
+export function UserSidebar({ user }: { user: User }) {
   const { open } = useSidebar();
   const router = useRouter();
+
+  const items = [
+    {
+      url: "/dashboard",
+      icon: House,
+      label: "Início",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/categories",
+      icon: FolderClosed,
+      label: "Categorias",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/products",
+      icon: Sandwich,
+      label: "Produtos",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/domain-configuration",
+      icon: Globe,
+      label: "Configuração de Domínio",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/customization",
+      icon: Paintbrush,
+      label: "Personalização",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/deliverers",
+      icon: RiMotorbikeFill,
+      label: "Entregadores",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/orders",
+      icon: NotebookText,
+      label: "Pedidos",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/order-routing",
+      icon: user.subscription?.plan === "PREMIUM" ? Route : Lock,
+      label: "Roteirização de Pedidos",
+      allowed: user.subscription?.plan === "PREMIUM",
+    },
+    {
+      url: "/dashboard/combos",
+      icon: ShoppingBasket,
+      label: "Combos",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/customers",
+      icon: Users,
+      label: "Clientes",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/finances",
+      icon: CircleDollarSign,
+      label: "Financeiro",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/delivery-areas",
+      icon: MapPin,
+      label: "Áreas de Entrega",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/receipts",
+      icon: Printer,
+      label: "Impressão de Comandas",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/pixels",
+      icon: ChartPie,
+      label: "Pixels",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/darius-pay",
+      icon: TbCircleLetterD,
+      label: "Darius Pay",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/employees",
+      icon: UserRoundCog,
+      label: "Funcionários",
+      allowed: true,
+    },
+  ];
+
+  const accessibleItems =
+    user.role === "EMPLOYEE" && user.employee?.permissions
+      ? items.filter(
+          (item) => user.employee?.permissions?.includes(item.label) ?? false
+        )
+      : items;
 
   return (
     <Sidebar collapsible="icon">
@@ -172,7 +220,7 @@ export function UserSidebar({ user }: { user: ExtendedUser }) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => {
+              {accessibleItems.map((item) => {
                 if (item.label === "Áreas de Entrega") {
                   return (
                     <Collapsible
@@ -209,7 +257,12 @@ export function UserSidebar({ user }: { user: ExtendedUser }) {
                   );
                 }
                 return (
-                  <SidebarMenuItem key={item.label}>
+                  <SidebarMenuItem
+                    className={cn(
+                      !item.allowed &&
+                        "cursor-not-allowed pointer-events-none text-error"
+                    )}
+                    key={item.label}>
                     <SidebarMenuButton asChild>
                       <a href={item.url}>
                         <item.icon />

@@ -17,6 +17,8 @@ export default auth(async (req) => {
     secureCookie: false,
   });
 
+  const role = token?.role as string;
+
   const isSubscribed = token?.isSubscribed as boolean;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
@@ -55,7 +57,7 @@ export default auth(async (req) => {
       );
     }
 
-    if (!isSubscribed) {
+    if (!isSubscribed && role !== "EMPLOYEE") {
       return NextResponse.redirect(new URL("/subscription", nextUrl));
     }
 
