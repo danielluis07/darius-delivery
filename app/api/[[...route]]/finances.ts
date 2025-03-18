@@ -3,7 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
 import { orders, transactions } from "@/db/schema";
-import { eq, sum, and, gte, lt, sql } from "drizzle-orm";
+import { eq, sum, and, sql } from "drizzle-orm";
 
 const app = new Hono()
   .get(

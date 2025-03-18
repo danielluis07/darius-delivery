@@ -8,7 +8,6 @@ import {
   getCategoriesCount,
   getProductsCount,
 } from "@/app/_features/_user/_queries/_main/get-data-count";
-import { Card } from "@/components/ui/card";
 import { RevenuePerMonthChart } from "@/app/_features/_user/_components/_main/_charts/revenue-per-month";
 
 const DashboardPage = async () => {
