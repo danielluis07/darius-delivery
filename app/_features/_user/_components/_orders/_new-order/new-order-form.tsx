@@ -87,10 +87,12 @@ export const NewOrderForm = ({
   products,
   orderSettings,
   userId,
+  apiKey,
 }: {
   products: Products;
   userId: string;
   orderSettings: OrderSettings | null;
+  apiKey: string | null | undefined;
 }) => {
   const { data, isLoading } = useGetCustomers(userId);
   const { mutate, isPending } = useCreateOrder(userId);
@@ -138,6 +140,12 @@ export const NewOrderForm = ({
       );
       return;
     }
+
+    if (!apiKey) {
+      toast.error("Você precisa definir a chave da API do Google Maps");
+      return;
+    }
+
     mutate(
       {
         ...values,

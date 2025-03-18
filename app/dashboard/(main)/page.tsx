@@ -9,6 +9,7 @@ import {
   getProductsCount,
 } from "@/app/_features/_user/_queries/_main/get-data-count";
 import { Card } from "@/components/ui/card";
+import { RevenuePerMonthChart } from "@/app/_features/_user/_components/_main/_charts/revenue-per-month";
 
 const DashboardPage = async () => {
   const session = await auth();
@@ -32,9 +33,7 @@ const DashboardPage = async () => {
       </div>
       <div className="mt-10">
         <OrdersPerDayChart userId={session.user.id} />
-        <Card className="flex justify-center items-center w-full h-[500px] mt-10">
-          Em breve mais um gráfico
-        </Card>
+        <RevenuePerMonthChart userId={session.user.id} />
       </div>
     </div>
   );

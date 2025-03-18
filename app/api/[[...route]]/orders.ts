@@ -455,10 +455,11 @@ const app = new Hono()
         .then(([result]) => result), // Extracting first element
     ]);
 
-    console.log("customer", customer);
-    console.log("user", user);
+    if (!user.googleApiKey) {
+      return c.json({ error: "Failed to create order" }, 500);
+    }
 
-    if (!customer || !user || !user.googleApiKey) {
+    if (!customer || !user) {
       return c.json({ error: "Failed find order data" }, 500);
     }
 
