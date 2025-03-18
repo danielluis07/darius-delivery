@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
 import {
   Form,
@@ -13,19 +13,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { InputMask } from "@react-input/mask";
-import { createSubscription } from "../../_actions/create-subscription";
+import { createCreditCardSubscription } from "../../_actions/create-credit-subscription";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronsUpDown } from "lucide-react";
 
 export const creditCardSchema = z.object({
   holderName: z
@@ -69,7 +69,7 @@ export const creditCardSchema = z.object({
 
 type FormData = z.infer<typeof creditCardSchema>;
 
-export const ConfirmationCard = ({
+export const CreditCard = ({
   value,
   price,
 }: {
@@ -77,6 +77,7 @@ export const ConfirmationCard = ({
   price: string;
 }) => {
   const [isPending, startTransition] = useTransition();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const form = useForm<FormData>({
     resolver: zodResolver(creditCardSchema),
     defaultValues: {
@@ -96,7 +97,7 @@ export const ConfirmationCard = ({
 
   const handleSubmit = (values: FormData) => {
     startTransition(() => {
-      createSubscription(
+      createCreditCardSubscription(
         { ...values, number: values.number.replace(/\s/g, "") },
         priceToNumber,
         value
@@ -113,14 +114,17 @@ export const ConfirmationCard = ({
     });
   };
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Confirme sua Assinatura</CardTitle>
-        <CardDescription>
-          Insira as informações do seu cartão abaixo
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-2">
+      <div className="flex items-center justify-between space-x-4 px-4 py-3 border rounded-md">
+        <h4 className="text-sm font-semibold">Cartão de Crédito</h4>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <ChevronsUpDown className="h-4 w-4" />
+            <span className="sr-only">Toggle</span>
+          </Button>
+        </CollapsibleTrigger>
+      </div>
+      <CollapsibleContent className="space-y-2 px-1 border rounded-md py-2">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit, onInvalid)}>
             <div className="space-y-4">
@@ -244,7 +248,7 @@ export const ConfirmationCard = ({
             </Button>
           </form>
         </Form>
-      </CardContent>
-    </Card>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };

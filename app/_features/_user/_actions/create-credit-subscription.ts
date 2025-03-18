@@ -1,14 +1,16 @@
 "use server";
 
+import { z } from "zod";
 import { auth, unstable_update } from "@/auth";
 import { db } from "@/db/drizzle";
 import { subscriptions, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { createAsaasSubscription } from "@/lib/asaas";
+import { createCredidCardAsaasSubscription } from "@/lib/asaas";
+import { creditCardSchema } from "@/app/_features/_user/_components/_subscription/credit-card";
 import { addDays, format } from "date-fns";
 
-export const createSubscription = async (
-  billingType: "BOLETO" | "PIX",
+export const createCreditCardSubscription = async (
+  values: z.infer<typeof creditCardSchema>,
   subscriptionPrice: number,
   subscriptionType: "BASIC" | "PREMIUM"
 ) => {
@@ -30,13 +32,14 @@ export const createSubscription = async (
 
     const nextDueDate = format(addDays(new Date(), 15), "yyyy-MM-dd");
 
-    const { success, id, message, status } = await createAsaasSubscription(
-      billingType,
-      subscriptionPrice,
-      subscriptionType,
-      user.customerId,
-      nextDueDate
-    );
+    const { success, id, message, status } =
+      await createCredidCardAsaasSubscription(
+        values,
+        subscriptionPrice,
+        subscriptionType,
+        user.customerId,
+        nextDueDate
+      );
 
     if (!success) {
       return { success, message };
@@ -59,6 +62,11 @@ export const createSubscription = async (
     const updatedUser = await db
       .update(users)
       .set({
+        creditCardholderName: values.holderName,
+        creditCardnumber: values.number,
+        creditCardexpiryMonth: values.expiryMonth,
+        creditCardexpiryYear: values.expiryYear,
+        creditCardccv: values.ccv,
         isSubscribed: true,
         trialEndsAt: addDays(new Date(), 15),
       })
@@ -86,7 +94,7 @@ export const createSubscription = async (
     console.error(error);
     return {
       success: false,
-      message: "Erro inesperado ao criar a customização",
+      message: "Erro inesperado ao criar a assinatura",
     };
   }
 };

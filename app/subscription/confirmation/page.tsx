@@ -1,14 +1,9 @@
-import { ConfirmationCard } from "@/app/_features/_user/_components/_subscription/confirmation-card";
+import { PaymentCard } from "@/app/_features/_user/_components/_subscription/payment-card";
 
-const ConfirmationPage = async ({
-  searchParams,
-}: {
-  searchParams: Promise<{ value: "BASIC" | "PREMIUM"; price: string }>;
-}) => {
-  const { value, price } = await searchParams;
+const ConfirmationPage = async () => {
   return (
     <div className="flex items-center justify-center h-full">
-      <ConfirmationCard value={value} price={price} />
+      <PaymentCard />
     </div>
   );
 };

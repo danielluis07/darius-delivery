@@ -22,7 +22,7 @@ export default auth(async (req) => {
   const isSubscribed = token?.isSubscribed as boolean;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isWebhookRoute = nextUrl.pathname === "/api/webhook/asaas";
+  const isWebhookRoute = nextUrl.pathname.includes("/api/webhook/asaas");
 
   // Get domain from request
   const hostname = req.headers.get("host");

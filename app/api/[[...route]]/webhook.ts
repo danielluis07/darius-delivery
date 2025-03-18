@@ -52,91 +52,142 @@ type Body = {
   };
 };
 
-const app = new Hono().post("/asaas", async (c) => {
-  const body: Body = await c.req.json();
+type SubscriptionBody = {
+  id: string;
+  event:
+    | "SUBSCRIPTION_CREATED"
+    | "SUBSCRIPTION_UPDATED"
+    | "SUBSCRIPTION_INACTIVATED"
+    | "SUBSCRIPTION_DELETED"
+    | "SUBSCRIPTION_SPLIT_DIVERGENCE_BLOCK"
+    | "SUBSCRIPTION_SPLIT_DIVERGENCE_BLOCK_FINISHED";
+  dateCreated: string;
+  subscription: {
+    object: string;
+    id: string;
+    dateCreated: string;
+    customer: string;
+    paymentLink: string | null;
+    value: 197;
+    nextDueDate: string;
+    cycle: string;
+    description: string | null;
+    billingType: string;
+    deleted: boolean;
+    status: string;
+    externalReference: string;
+    sendPaymentByPostalService: boolean;
+    fine: { value: number; type: string };
+    interest: { value: number; type: string };
+    split: {
+      fixedFee: number;
+      mdr: number;
+      fee: number;
+      recipient: string;
+    } | null;
+  };
+};
 
-  const { payment } = body;
+const app = new Hono()
+  .post("/asaas/payment", async (c) => {
+    const body: Body = await c.req.json();
 
-  // Verifica se há um externalReference (ID do pedido)
-  if (!payment.externalReference) {
-    return c.json({ error: "Pagamento sem referência externa" }, 400);
-  }
+    const { payment } = body;
 
-  try {
-    let paymentStatus: "PENDING" | "PAID" | "CANCELLED" = "PENDING";
-    let transactionStatus: "PENDING" | "COMPLETED" | "FAILED" = "PENDING";
-
-    // Mapeia os eventos do ASAAS para os status do banco
-    switch (payment.status) {
-      case "CONFIRMED":
-        paymentStatus = "PAID";
-        transactionStatus = "COMPLETED";
-        break;
-      case "CANCELED":
-        paymentStatus = "CANCELLED";
-        transactionStatus = "FAILED";
-        break;
-      default:
-        return c.json({ message: "Evento ignorado" });
+    // Verifica se há um externalReference (ID do pedido)
+    if (!payment.externalReference) {
+      return c.json({ error: "Pagamento sem referência externa" }, 400);
     }
 
-    const [order] = await db
-      .update(orders)
-      .set({
-        payment_status: paymentStatus,
-      })
-      .where(eq(orders.id, payment.externalReference))
-      .returning({
-        orderId: orders.id,
-        payment_status: orders.payment_status,
-      });
+    try {
+      let paymentStatus: "PENDING" | "PAID" | "CANCELLED" = "PENDING";
+      let transactionStatus: "PENDING" | "COMPLETED" | "FAILED" = "PENDING";
 
-    if (!order) {
-      return c.json({ error: "Erro ao atualizar o pedido" }, 404);
-    }
+      // Mapeia os eventos do ASAAS para os status do banco
+      switch (payment.status) {
+        case "CONFIRMED":
+          paymentStatus = "PAID";
+          transactionStatus = "COMPLETED";
+          break;
+        case "CANCELED":
+          paymentStatus = "CANCELLED";
+          transactionStatus = "FAILED";
+          break;
+        default:
+          return c.json({ message: "Evento ignorado" });
+      }
 
-    const existingTransaction = await db
-      .select()
-      .from(transactions)
-      .where(eq(transactions.order_id, order.orderId))
-      .limit(1);
+      const [order] = await db
+        .update(orders)
+        .set({
+          payment_status: paymentStatus,
+        })
+        .where(eq(orders.id, payment.externalReference))
+        .returning({
+          orderId: orders.id,
+          payment_status: orders.payment_status,
+        });
 
-    if (existingTransaction.length > 0) {
+      if (!order) {
+        return c.json({ error: "Erro ao atualizar o pedido" }, 404);
+      }
+
+      const existingTransaction = await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.order_id, order.orderId))
+        .limit(1);
+
+      if (existingTransaction.length > 0) {
+        return c.json({
+          message: "Transaction already exists, skipping duplicate entry",
+          transactionId: existingTransaction[0].id,
+          orderId: order.orderId,
+        });
+      }
+
+      const [transaction] = await db
+        .insert(transactions)
+        .values({
+          amount: Math.round(payment.netValue * 100),
+          status: transactionStatus,
+          order_id: order.orderId,
+          type: "PAYMENT",
+        })
+        .returning({
+          id: transactions.id,
+        });
+
+      if (!transaction) {
+        return c.json({ error: "Erro ao registrar a transação" }, 500);
+      }
+
       return c.json({
-        message: "Transaction already exists, skipping duplicate entry",
-        transactionId: existingTransaction[0].id,
+        message: "Webhook processado com sucesso",
+        paymentType: payment.billingType,
+        orderStatus: order.payment_status,
+        transactionStatus: transactionStatus,
+        transactionId: transaction.id,
         orderId: order.orderId,
       });
+    } catch (error) {
+      console.error("Erro ao processar webhook:", error);
+      return c.json({ error: "Erro interno ao processar webhook" }, 500);
     }
+  })
+  .post("/asaas/subscription", async (c) => {
+    const body: SubscriptionBody = await c.req.json();
 
-    const [transaction] = await db
-      .insert(transactions)
-      .values({
-        amount: Math.round(payment.netValue * 100),
-        status: transactionStatus,
-        order_id: order.orderId,
-        type: "PAYMENT",
-      })
-      .returning({
-        id: transactions.id,
+    console.log("body", body);
+
+    try {
+      return c.json({
+        message: "Webhook processado com sucesso",
       });
-
-    if (!transaction) {
-      return c.json({ error: "Erro ao registrar a transação" }, 500);
+    } catch (error) {
+      console.error("Erro ao processar webhook:", error);
+      return c.json({ error: "Erro interno ao processar webhook" }, 500);
     }
-
-    return c.json({
-      message: "Webhook processado com sucesso",
-      paymentType: payment.billingType,
-      orderStatus: order.payment_status,
-      transactionStatus: transactionStatus,
-      transactionId: transaction.id,
-      orderId: order.orderId,
-    });
-  } catch (error) {
-    console.error("Erro ao processar webhook:", error);
-    return c.json({ error: "Erro interno ao processar webhook" }, 500);
-  }
-});
+  });
 
 export default app;

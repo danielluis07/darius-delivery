@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { creditCardSchema } from "@/app/_features/_user/_components/_subscription/confirmation-card";
+import { creditCardSchema } from "@/app/_features/_user/_components/_subscription/credit-card";
 import { AsaasPayment, PaymentBody } from "@/types";
 
 // asaas functions
@@ -699,7 +699,7 @@ export const getAccountStatus = async (apiKey: string) => {
   }
 };
 
-export const createAsaasSubscription = async (
+export const createCredidCardAsaasSubscription = async (
   values: z.infer<typeof creditCardSchema>,
   subscriptionPrice: number,
   subscriptionType: string,
@@ -753,6 +753,104 @@ export const createAsaasSubscription = async (
     return { success: true, id: data.id, status: data.status };
   } catch (error) {
     console.error("Error creating user account:", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const createAsaasSubscription = async (
+  billingType: string,
+  subscriptionPrice: number,
+  subscriptionType: string,
+  customerId: string,
+  nextDueDate: string
+) => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/subscriptions`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: process.env.ASAAS_API_KEY!,
+      },
+      body: JSON.stringify({
+        billingType: billingType,
+        cycle: "MONTHLY",
+        customer: customerId,
+        value: subscriptionPrice,
+        description: subscriptionType,
+        nextDueDate: nextDueDate,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create subscription:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao criar a assinatura.",
+      };
+    }
+
+    return { success: true, id: data.id, status: data.status };
+  } catch (error) {
+    console.error("Error creating user account:", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const getSubscriptionPaymentLink = async (subscriptionId: string) => {
+  try {
+    const res = await fetch(
+      `${process.env.ASAAS_API_URL}/subscriptions/${subscriptionId}/payments`,
+      {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          "Content-Type": "application/json",
+          access_token: process.env.ASAAS_API_KEY!,
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create get payment link:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message:
+          "Erro desconhecido ao requisitar as o link de pagamento da assinatura",
+      };
+    }
+
+    return { success: true, url: data.data[0].invoiceUrl };
+  } catch (error) {
+    console.error("Error getting subscription payment link", error);
     return {
       success: false,
       message: "Erro interno ao conectar com a API do Asaas.",
