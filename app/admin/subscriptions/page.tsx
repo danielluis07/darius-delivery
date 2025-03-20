@@ -3,7 +3,7 @@ import { getSubscriptions } from "@/app/_features/_admin/_queries/get-subscripti
 
 const SubscriptionPage = async () => {
   const data = await getSubscriptions();
-  return <SubscriptionsClient data={data} />;
+  return <SubscriptionsClient data={data || []} />;
 };
 
 export default SubscriptionPage;
