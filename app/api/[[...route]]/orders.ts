@@ -304,6 +304,50 @@ const app = new Hono()
     }
   )
   .get(
+    "/orderscomparison/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
+    async (c) => {
+      const { userId } = c.req.valid("param");
+
+      if (!userId) {
+        return c.json({ error: "Missing user ID" }, 400);
+      }
+
+      const THIRTY_DAYS_AGO = new Date();
+      THIRTY_DAYS_AGO.setDate(THIRTY_DAYS_AGO.getDate() - 30);
+
+      // Buscar pedidos do usuário específico
+      const data = await db
+        .select({
+          customerId: orders.customer_id,
+          createdAt: orders.createdAt,
+        })
+        .from(orders)
+        .where(eq(orders.user_id, userId)); // Filtro pelo userId
+
+      const ordersByCategory = data.reduce(
+        (acc, order) => {
+          if (new Date(order.createdAt) >= THIRTY_DAYS_AGO) {
+            acc.newCustomers += 1;
+          } else {
+            acc.oldCustomers += 1;
+          }
+          return acc;
+        },
+        { newCustomers: 0, oldCustomers: 0 }
+      );
+
+      // Formato esperado pelo Recharts
+      const chartData = [
+        { name: "Novos Clientes", value: ordersByCategory.newCustomers },
+        { name: "Clientes Antigos", value: ordersByCategory.oldCustomers },
+      ];
+
+      return c.json({ data: chartData });
+    }
+  )
+
+  .get(
     "/count/:userId",
     zValidator("param", z.object({ userId: z.string() })),
     async (c) => {
@@ -724,6 +768,14 @@ const app = new Hono()
         }))
       );
 
+      await fetch(
+        `/api/restaurant-data/purchased/user/${values.restaurantOwnerId}`,
+        { method: "POST" }
+      )
+        .then((res) => res.json())
+        .then((data) => console.log("Pedido realizado:", data))
+        .catch((err) => console.error("Erro ao registrar no backend:", err));
+
       return c.json({
         data: {
           dailyNumber: order.daily_number,
@@ -968,6 +1020,14 @@ const app = new Hono()
           qrCode: { encodedImage, expirationDate, payload },
         });
       }
+
+      await fetch(
+        `/api/restaurant-data/purchased/user/${values.restaurantOwnerId}`,
+        { method: "POST" }
+      )
+        .then((res) => res.json())
+        .then((data) => console.log("Pedido realizado:", data))
+        .catch((err) => console.error("Erro ao registrar no backend:", err));
 
       return c.json({
         dailyNumber: order.daily_number,

@@ -21,11 +21,37 @@ import { useStore } from "@/context/store-context";
 import { MenuProducts } from "@/app/_features/_customer/_components/_templates/_template-1/modals/menu-products";
 import { Cart } from "@/app/_features/_customer/_components/_templates/_template-1/modals/cart";
 import { Categories } from "@/app/_features/_customer/_components/_templates/_template-1/modals/categories";
+import { useEffect } from "react";
+
+const registerMenuView = async (userId: string | undefined) => {
+  const lastView = localStorage.getItem(`menuView-${userId}`);
+  const now = Date.now(); // Obtém o timestamp atual como número
+
+  // Se `lastView` for null, `parseInt(lastView, 10)` retorna NaN, então tratamos isso
+  const lastViewTime = lastView ? parseInt(lastView, 10) : 0;
+
+  // Se a última visualização foi há menos de 10 minutos, não incrementa
+  if (now - lastViewTime < 10 * 60 * 1000) {
+    return;
+  }
+
+  // Salvar nova visualização e enviar para o backend
+  localStorage.setItem(`menuView-${userId}`, now.toString()); // Convertendo `now` para string
+  await fetch(`/api/restaurant-data/menu-views/user/${userId}`, {
+    method: "POST",
+  });
+};
 
 export const MainClient = () => {
   const { modalStack, onOpen, onClose } = useModalStore();
   const currentModal = modalStack[modalStack.length - 1] || null;
   const { data, session } = useStore();
+
+  const userId = data?.userId;
+
+  useEffect(() => {
+    registerMenuView(userId);
+  }, [userId]);
 
   return (
     <div className="flex h-screen items-center justify-center relative">

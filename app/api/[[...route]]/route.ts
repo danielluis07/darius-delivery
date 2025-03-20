@@ -20,6 +20,7 @@ import webhook from "@/app/api/[[...route]]/webhook";
 import finances from "@/app/api/[[...route]]/finances";
 import commissions from "@/app/api/[[...route]]/commissions";
 import transactions from "@/app/api/[[...route]]/transactions";
+import restaurantData from "@/app/api/[[...route]]/restaurant-data";
 
 export const runtime = "nodejs";
 
@@ -53,7 +54,8 @@ const routes = app
   .route("/webhook", webhook)
   .route("/finances", finances)
   .route("/commissions", commissions)
-  .route("/transactions", transactions);
+  .route("/transactions", transactions)
+  .route("/restaurant-data", restaurantData);
 
 export const GET = handle(app);
 export const POST = handle(app);

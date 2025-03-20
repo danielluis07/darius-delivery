@@ -534,3 +534,14 @@ export const commissions = pgTable("commissions", {
   percentage: decimal("percentage", { precision: 5, scale: 2 }).notNull(), // Ex: 10.00 para 10%
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export const restaurantData = pgTable("restaurant_data", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  menuViews: integer("menu_views").default(0),
+  itemsAddedToCart: integer("items_added_to_cart").default(0),
+  itemsPurchased: integer("items_purchased").default(0),
+  withdrawals: integer("withdrawals").default(0),
+});

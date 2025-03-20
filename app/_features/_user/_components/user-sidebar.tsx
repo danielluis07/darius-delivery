@@ -154,12 +154,12 @@ export function UserSidebar({ user }: { user: User }) {
       label: "Áreas de Entrega",
       allowed: true,
     },
-    {
+    /*     {
       url: "/dashboard/receipts",
       icon: Printer,
       label: "Impressão de Comandas",
       allowed: true,
-    },
+    }, */
     {
       url: "/dashboard/pixels",
       icon: ChartPie,

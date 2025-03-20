@@ -335,7 +335,9 @@ export const Cart = () => {
                     </div>
                     <div
                       className="text-error cursor-pointer"
-                      onClick={() => removeFromCart(item.id)}>
+                      onClick={() =>
+                        removeFromCart(item.id, data?.userId || "")
+                      }>
                       <X />
                     </div>
                   </div>

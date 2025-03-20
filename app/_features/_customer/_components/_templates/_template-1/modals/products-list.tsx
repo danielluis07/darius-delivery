@@ -89,7 +89,7 @@ export const ProductsList = ({
               }}
               className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md mt-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
               onClick={() => {
-                const wasAdded = addToCart(selectedProduct);
+                const wasAdded = addToCart(selectedProduct, data?.userId || "");
                 if (wasAdded) {
                   toast.success("Produto adicionado ao carrinho");
                 } else {

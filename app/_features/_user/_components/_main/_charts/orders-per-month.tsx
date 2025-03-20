@@ -10,8 +10,7 @@ import {
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
-import { useGetMonthlyRevenueByYear } from "../../../_queries/_main/use-get-revenue-per-month";
-import { formatCurrencyFromCents } from "@/lib/utils";
+import { useGetMonthlyOrdersByYear } from "../../../_queries/_main/use-get-orders-per-month";
 
 const chartConfig = {
   desktop: {
@@ -20,10 +19,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export const RevenuePerMonthChart = ({ userId }: { userId: string }) => {
+export const OrdersPerMonthChart = ({ userId }: { userId: string }) => {
   const [year, setYear] = useState(new Date().getFullYear().toString()); // Estado para armazenar o ano selecionado
 
-  const { data, isLoading } = useGetMonthlyRevenueByYear(userId, year);
+  const { data, isLoading } = useGetMonthlyOrdersByYear(userId, year);
 
   const months = [
     "Jan",
@@ -44,30 +43,28 @@ export const RevenuePerMonthChart = ({ userId }: { userId: string }) => {
   const chartData =
     data?.map((item, index) => ({
       month: months[index], // Exibir nomes dos meses no gráfico
-      total: item.total / 100, // Convertendo de centavos para reais
+      totalOrders: item.totalOrders, // Número de pedidos
     })) || [];
 
   return (
-    <Card className="w-full p-4 mt-10">
+    <Card className="w-full p-4">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg font-semibold">Receita por mês</h1>
+        <h1 className="text-lg font-semibold">Pedidos por mês</h1>
 
-        <div className="flex items-center">
-          <span className="mr-2">Ano:</span>
-          <select
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            className="border p-2 rounded">
-            {[...Array(5)].map((_, i) => {
-              const optionYear = (new Date().getFullYear() - i).toString();
-              return (
-                <option key={optionYear} value={optionYear}>
-                  {optionYear}
-                </option>
-              );
-            })}
-          </select>
-        </div>
+        {/* Dropdown para selecionar o ano */}
+        <select
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          className="border p-2 rounded">
+          {[...Array(5)].map((_, i) => {
+            const optionYear = (new Date().getFullYear() - i).toString();
+            return (
+              <option key={optionYear} value={optionYear}>
+                {optionYear}
+              </option>
+            );
+          })}
+        </select>
       </div>
 
       {isLoading ? (
@@ -82,13 +79,12 @@ export const RevenuePerMonthChart = ({ userId }: { userId: string }) => {
               tickMargin={10}
               axisLine={false}
             />
-            <YAxis
-              tickFormatter={(value) => formatCurrencyFromCents(value * 100)}
-            />
+            <YAxis />
             <ChartTooltip
               content={<ChartTooltipContent hideIndicator hideLabel />}
             />
-            <Bar dataKey="total" fill="#2563eb" radius={4} />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Bar dataKey="totalOrders" fill="#2563eb" radius={4} />
           </BarChart>
         </ChartContainer>
       )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { DateRangePicker } from "@/components/date-range-picker";
-import { Card } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
@@ -38,21 +38,18 @@ export const OrdersPerDayChart = ({ userId }: { userId: string }) => {
   return (
     <Card className="w-full">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold py-5 pl-5">
-          Nº de pedidos (por dia)
-        </h1>
+        <CardTitle>Nº de pedidos (por dia)</CardTitle>
         <DateRangePicker value={dateRange} onChange={setDateRange} />
       </div>
       {isLoading ? (
-        <Skeleton className="w-full h-[500px] mt-10" />
+        <Skeleton className="w-full h-[300px] mt-10" />
       ) : (
-        <ChartContainer config={chartConfig} className="h-[500px] mt-10">
-          <LineChart accessibilityLayer data={orders}>
+        <ChartContainer config={chartConfig}>
+          <LineChart accessibilityLayer data={orders} className="mt-14">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis allowDecimals={false} />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <ChartLegend content={<ChartLegendContent />} />
             <Line
               type="monotone"
               dataKey="count"
