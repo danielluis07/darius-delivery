@@ -26,7 +26,6 @@ import {
   Users,
   CircleDollarSign,
   MapPin,
-  Printer,
   Lock,
   ChartPie,
   Globe,
