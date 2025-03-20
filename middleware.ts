@@ -14,7 +14,7 @@ export default auth(async (req) => {
   const token = await getToken({
     req,
     secret,
-    secureCookie: false,
+    secureCookie: true,
   });
 
   const role = token?.role as string;

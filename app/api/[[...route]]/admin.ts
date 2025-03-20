@@ -3,7 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
 import { users, subscriptions } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql, count } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 
 const app = new Hono()
@@ -35,17 +35,51 @@ const app = new Hono()
     return c.json({ data });
   })
   .get("/subscriptions", async (c) => {
-    const [data] = await db
-      .select()
+    const data = await db
+      .select({
+        id: subscriptions.id,
+        userId: subscriptions.user_id,
+        name: users.name,
+        email: users.email,
+        status: subscriptions.status,
+        plan: subscriptions.plan,
+        isTrial: users.isTrial,
+        createdAt: subscriptions.createdAt,
+      })
       .from(subscriptions)
       .leftJoin(users, eq(subscriptions.user_id, users.id));
 
-    if (!data) {
+    if (!data || data.length === 0) {
       return c.json({ error: "No subscriptions found" }, 404);
     }
 
     return c.json({ data });
   })
+  .get(
+    "/monthlysubs/:year",
+    zValidator(
+      "param",
+      z.object({
+        year: z.string().regex(/^\d{4}$/), // Apenas 4 dígitos (ano)
+      })
+    ),
+    async (c) => {
+      const { year } = c.req.valid("param");
+
+      // Contar o número de pedidos por mês no ano especificado
+      const subsPerMonth = await db
+        .select({
+          month: sql`TO_CHAR(${subscriptions.createdAt}, 'MM')`.as("month"),
+          totalsubs: count(),
+        })
+        .from(subscriptions)
+        .where(sql`TO_CHAR(${subscriptions.createdAt}, 'YYYY') = ${year}`)
+        .groupBy(sql`TO_CHAR(${subscriptions.createdAt}, 'MM')`)
+        .orderBy(sql`TO_CHAR(${subscriptions.createdAt}, 'MM')`);
+
+      return c.json({ data: subsPerMonth });
+    }
+  )
   .patch(
     "/userstatus/:userId",
     verifyAuth(),

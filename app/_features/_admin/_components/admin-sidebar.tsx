@@ -19,6 +19,7 @@ import {
   LayoutTemplate,
   Settings,
   Users,
+  CreditCard,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -47,6 +48,11 @@ const items = [
     url: "/admin/templates",
     icon: LayoutTemplate,
     label: "Templates",
+  },
+  {
+    url: "/admin/subscriptions",
+    icon: CreditCard,
+    label: "Assinaturas",
   },
 ];
 

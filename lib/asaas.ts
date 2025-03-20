@@ -4,6 +4,39 @@ import { AsaasPayment, PaymentBody } from "@/types";
 
 // asaas functions
 
+export const getAdminBalance = async () => {
+  try {
+    const res = await fetch(`${process.env.ASAAS_API_URL}/finance/balance`, {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        access_token: process.env.ASAAS_API_KEY!,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to create user account:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return { success: false, message: "Erro desconhecido ao criar a conta." };
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error creating user account:", error);
+  }
+};
+
 export const createUserAccount = async ({
   name,
   email,
