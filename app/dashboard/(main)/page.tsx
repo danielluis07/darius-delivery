@@ -28,6 +28,8 @@ import { TotalRevenue } from "@/app/_features/_user/_components/_finances/total-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAverageTicket } from "@/app/_features/_user/_queries/_main/get-average-ticket";
 import { AverageTicket } from "@/app/_features/_user/_components/_main/average-ticket";
+import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
+import { TrialCountdown } from "@/app/_features/_user/_components/_settings/trial-countdown";
 
 const DashboardPage = async () => {
   const session = await auth();
@@ -46,6 +48,7 @@ const DashboardPage = async () => {
     apiKey,
     totalRevenue,
     averageTicket,
+    userData,
   ] = await Promise.all([
     getOrdersCount(session.user.id),
     getCategoriesCount(session.user.id),
@@ -56,11 +59,13 @@ const DashboardPage = async () => {
     getGoogleApiKey(session.user.id),
     getTotalRevenue(session.user.id),
     getAverageTicket(session.user.id),
+    getUserData(session.user.id),
   ]);
 
   return (
     <div className="w-full">
-      <div className="flex justify-between gap-4">
+      <TrialCountdown trialEndsAt={userData?.trialEndsAt} />
+      <div className="flex justify-between gap-4 mt-10">
         <TotalOrders totalOrders={ordersCount} />
         <TotalCategories totalCategories={categoriesCount} />
         <TotalProducts totalProducts={productsCount} />

@@ -7,7 +7,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const TrialCountdown = ({ trialEndsAt }: { trialEndsAt: string }) => {
+export const TrialCountdown = ({
+  trialEndsAt,
+}: {
+  trialEndsAt: string | null | undefined;
+}) => {
   const [remainingTime, setRemainingTime] = useState<string>("");
 
   useEffect(() => {
@@ -24,7 +28,7 @@ export const TrialCountdown = ({ trialEndsAt }: { trialEndsAt: string }) => {
   }, [trialEndsAt]);
 
   return (
-    <Alert variant="destructive">
+    <Alert className="bg-error text-white [&>svg]:text-white">
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Atenção!</AlertTitle>
       {remainingTime ? (
