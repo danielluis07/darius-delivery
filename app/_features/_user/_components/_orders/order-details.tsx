@@ -13,13 +13,7 @@ import {
 import { useForm, FieldErrors } from "react-hook-form";
 import { cn, formatCurrencyFromCents, formatPhoneNumber } from "@/lib/utils";
 import { format } from "date-fns";
-import {
-  Check,
-  CheckCircle,
-  ChevronsUpDown,
-  Clock,
-  Pencil,
-} from "lucide-react";
+import { Check, CheckCircle, ChevronsUpDown, Clock } from "lucide-react";
 import { updateOrderSchema } from "@/db/schemas";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -55,7 +49,6 @@ import { useUpdateOrder } from "@/app/_features/_user/_queries/_orders/use-updat
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import Link from "next/link";
 
 type FormData = z.infer<typeof updateOrderSchema>;
 
