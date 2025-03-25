@@ -813,6 +813,7 @@ const app = new Hono()
         paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
         asaasCustomerId: z.string().optional(),
         walletId: z.string().optional(),
+        obs: z.string().optional(),
         fee: z.number().optional(),
         apiKey: z.string().optional(),
         creditCard: z
@@ -939,6 +940,7 @@ const app = new Hono()
           delivery_deadline: values.deliveryDeadline,
           latitude: geoCode.latitude,
           longitude: geoCode.longitude,
+          obs: values.obs,
           placeId: geoCode.placeId,
           status: "PREPARING",
           payment_status: "PENDING",
@@ -1093,6 +1095,13 @@ const app = new Hono()
         payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]),
         delivery_deadline: z.number().optional(),
         pickup_deadline: z.number().optional(),
+        obs: z.string().optional(),
+        street: z.string().optional(),
+        street_number: z.string().optional(),
+        neighborhood: z.string().optional(),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        postalCode: z.string().optional(),
       })
     ),
     async (c) => {

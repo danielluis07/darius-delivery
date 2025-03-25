@@ -142,6 +142,13 @@ export const updateOrderSchema = z.object({
   payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]),
   delivery_deadline: z.number().optional(),
   pickup_deadline: z.number().optional(),
+  obs: z.string().optional(),
+  street: z.string().optional(),
+  street_number: z.string().optional(),
+  neighborhood: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  postalCode: z.string().optional(),
 });
 
 export const insertUserDomainSchema = z.object({

@@ -13,7 +13,13 @@ import {
 import { useForm, FieldErrors } from "react-hook-form";
 import { cn, formatCurrencyFromCents, formatPhoneNumber } from "@/lib/utils";
 import { format } from "date-fns";
-import { Check, CheckCircle, ChevronsUpDown, Clock } from "lucide-react";
+import {
+  Check,
+  CheckCircle,
+  ChevronsUpDown,
+  Clock,
+  Pencil,
+} from "lucide-react";
 import { updateOrderSchema } from "@/db/schemas";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -48,6 +54,8 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { useUpdateOrder } from "@/app/_features/_user/_queries/_orders/use-update-order";
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link";
 
 type FormData = z.infer<typeof updateOrderSchema>;
 
@@ -71,6 +79,7 @@ export const OrderDetails = ({
       type: undefined,
       delivery_deadline: 0,
       pickup_deadline: 0,
+      obs: undefined,
     },
   });
 
@@ -87,6 +96,7 @@ export const OrderDetails = ({
         type: data.order.type,
         delivery_deadline: data.order.delivery_deadline || 0,
         pickup_deadline: data.order.pickup_deadline || 0,
+        obs: data.order.obs || "",
       });
     }
   }, [data, reset]);
@@ -148,114 +158,135 @@ export const OrderDetails = ({
 
   return (
     <div className="w-full">
-      <Card className="p-6 space-y-6">
-        <div>
-          <h3 className="text-lg font-semibold">Detalhes do Pedido</h3>
-          <Separator className="my-2" />
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">
-              Pedido #{data.order.dailyNumber}
-            </span>
-            <div className="flex flex-col gap-y-2">
-              <Badge
-                className={cn(
-                  paymentStatusColors[data.order.payment_status],
-                  "px-2"
-                )}>
-                {paymentStatusIcons[data.order.payment_status]}{" "}
-                {paymentStatusTranslations[data.order.payment_status]}
-              </Badge>
-              <Badge className={cn(statusColors[data.order.status], "px-2")}>
-                {statusIcons[data.order.status]}{" "}
-                {statusTranslations[data.order.status]}
-              </Badge>
-            </div>
-          </div>
-          <p className="text-sm text-gray-500">
-            <span className="font-semibold">Data:</span>{" "}
-            {format(new Date(data.order.createdAt), "dd/MM/yyyy")}
-          </p>
-          <p className="text-sm text-gray-500">
-            <span className="font-semibold">Total:</span>{" "}
-            {formatCurrencyFromCents(data.order.totalPrice)}
-          </p>
-          {data.order.change_value && (
-            <p className="text-sm text-gray-500">
-              {" "}
-              <span className="font-semibold">Precisa de Troco para:</span>{" "}
-              {formatCurrencyFromCents(data.order.change_value)}
-            </p>
-          )}
-          {data.order.obs && (
-            <p className="text-sm text-gray-500">
-              <span className="font-semibold">Observações:</span>{" "}
-              {data.order.obs}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <h3 className="text-lg font-semibold">Produtos</h3>
-          <Separator className="my-2" />
-          <div className="space-y-4">
-            {data.products.length > 0 ? (
-              data.products.map((product, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <div className="relative w-28 h-20 rounded-lg overflow-hidden">
-                    <Image
-                      src={product.image || placeholder}
-                      alt={product.name || "Product Image"}
-                      fill
-                      sizes="(max-width: 640px) 50px, (max-width: 1024px) 80px, 100px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <p className="font-semibold">{product.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {product.description || "Sem descrição"}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      <span className="font-semibold">Quantidade:</span>{" "}
-                      {product.quantity || 1}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      <span className="font-semibold">Preço:</span>{" "}
-                      {formatCurrencyFromCents(product.price)}
-                    </p>
-                  </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+          <Card className="p-6 space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold">Detalhes do Pedido</h3>
+              <Separator className="my-2" />
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">
+                  Pedido #{data.order.dailyNumber}
+                </span>
+                <div className="flex flex-col gap-y-2">
+                  <Badge
+                    className={cn(
+                      paymentStatusColors[data.order.payment_status],
+                      "px-2"
+                    )}>
+                    {paymentStatusIcons[data.order.payment_status]}{" "}
+                    {paymentStatusTranslations[data.order.payment_status]}
+                  </Badge>
+                  <Badge
+                    className={cn(statusColors[data.order.status], "px-2")}>
+                    {statusIcons[data.order.status]}{" "}
+                    {statusTranslations[data.order.status]}
+                  </Badge>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500">Nenhum produto encontrado.</p>
-            )}
-          </div>
-        </div>
+              </div>
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold">Data:</span>{" "}
+                {format(new Date(data.order.createdAt), "dd/MM/yyyy")}
+              </p>
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold">Total:</span>{" "}
+                {formatCurrencyFromCents(data.order.totalPrice)}
+              </p>
+              {data.order.change_value && (
+                <p className="text-sm text-gray-500">
+                  {" "}
+                  <span className="font-semibold">
+                    Precisa de Troco para:
+                  </span>{" "}
+                  {formatCurrencyFromCents(data.order.change_value)}
+                </p>
+              )}
+              {data.order.obs && (
+                <FormField
+                  control={form.control}
+                  name="obs"
+                  render={({ field }) => (
+                    <FormItem>
+                      <p className="text-sm text-gray-500 font-semibold">
+                        Observação:
+                      </p>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Fale sobre os produtos desse combo"
+                          className="resize-none"
+                          rows={5}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
 
-        <div>
-          <h3 className="text-lg font-semibold">Informações do Cliente</h3>
-          <Separator className="my-2" />
-          <p className="text-sm text-gray-500">
-            <span className="font-semibold">Nome:</span> {data.customer.name}
-          </p>
-          <p className="text-sm text-gray-500">
-            <span className="font-semibold">Email:</span> {data.customer.email}
-          </p>
-          <p className="text-sm text-gray-500">
-            <span className="font-semibold">Telefone:</span>{" "}
-            {formatPhoneNumber(data.customer.phone || "")}
-          </p>
-          <p className="text-sm text-gray-500">
-            <span className="font-semibold">Endereço:</span>{" "}
-            {data.customer.street}, nº{data.customer.street_number},{" "}
-            {data.customer.neighborhood}, {data.customer.city} -{" "}
-            {data.customer.state}, {data.customer.postalCode}
-          </p>
-        </div>
-      </Card>
-      <Card className="p-6 mt-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+            <div>
+              <h3 className="text-lg font-semibold">Produtos</h3>
+              <Separator className="my-2" />
+              <div className="space-y-4">
+                {data.products.length > 0 ? (
+                  data.products.map((product, index) => (
+                    <div key={index} className="flex items-center gap-4">
+                      <div className="relative w-28 h-20 rounded-lg overflow-hidden">
+                        <Image
+                          src={product.image || placeholder}
+                          alt={product.name || "Product Image"}
+                          fill
+                          sizes="(max-width: 640px) 50px, (max-width: 1024px) 80px, 100px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-semibold">{product.name}</p>
+                        <p className="text-sm text-gray-500">
+                          {product.description || "Sem descrição"}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          <span className="font-semibold">Quantidade:</span>{" "}
+                          {product.quantity || 1}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          <span className="font-semibold">Preço:</span>{" "}
+                          {formatCurrencyFromCents(product.price)}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">Nenhum produto encontrado.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="w-full">
+              <h3 className="text-lg font-semibold">Informações do Cliente</h3>
+              <Separator className="my-2" />
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold">Nome:</span>{" "}
+                {data.customer.name}
+              </p>
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold">Email:</span>{" "}
+                {data.customer.email}
+              </p>
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold">Telefone:</span>{" "}
+                {formatPhoneNumber(data.customer.phone || "")}
+              </p>
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold">Endereço:</span>{" "}
+                {data.customer.street}, nº{data.customer.street_number},{" "}
+                {data.customer.neighborhood}, {data.customer.city} -{" "}
+                {data.customer.state}, {data.customer.postalCode}
+              </p>
+            </div>
+          </Card>
+          <Card className="p-6 mt-6">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <FormField
@@ -463,9 +494,9 @@ export const OrderDetails = ({
               disabled={isPending}
               isPending={isPending}
             />
-          </form>
-        </Form>
-      </Card>
+          </Card>
+        </form>
+      </Form>
     </div>
   );
 };

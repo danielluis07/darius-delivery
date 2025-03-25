@@ -77,7 +77,7 @@ type User = {
 };
 
 export function UserSidebar({ user }: { user: User }) {
-  const { open } = useSidebar();
+  const { open, setOpen } = useSidebar();
   const router = useRouter();
 
   const items = [
@@ -187,7 +187,10 @@ export function UserSidebar({ user }: { user: User }) {
       : items;
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar
+      collapsible="icon"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}>
       <SidebarHeader>
         {open ? (
           <div className="relative w-5/6 h-16 mx-auto">
