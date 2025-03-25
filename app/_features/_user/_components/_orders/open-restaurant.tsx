@@ -76,6 +76,7 @@ export const OpenRestaurant = ({ isOpen }: { isOpen: boolean | undefined }) => {
                       field.onChange(checked);
                       form.handleSubmit(onSubmit, onInvalid)();
                     }}
+                    disabled={isPending}
                   />
                 </FormControl>
               </FormItem>
