@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -48,7 +47,6 @@ import { createCustomization } from "@/app/_features/_user/_actions/create-custo
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 
 type TemplatesResponseType = InferResponseType<
@@ -118,7 +116,6 @@ export const CustomizationForm = ({
       street: customization?.street ?? "",
       street_number: customization?.street_number ?? "",
       neighborhood: customization?.neighborhood ?? "",
-      isOpen: customization?.isOpen ?? false,
       template_id: customization?.template_id ?? "",
       payment_methods: customization?.payment_methods ?? [],
       opening_hours: customization?.opening_hours ?? [
@@ -208,29 +205,6 @@ export const CustomizationForm = ({
                     />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="isOpen"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm h-[130px] mt-8">
-                  <div className="space-y-0.5">
-                    <FormLabel>Loja está aberta?</FormLabel>
-                    <FormDescription>
-                      Escolha se a loja está aberta ou fechada para os clientes
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
                 </FormItem>
               )}
             />

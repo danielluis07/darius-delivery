@@ -52,5 +52,30 @@ const app = new Hono()
 
       return c.json({ data });
     }
+  )
+  .get(
+    "/isOpen/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
+    async (c) => {
+      const { userId } = c.req.valid("param");
+
+      if (!userId) {
+        return c.json({ error: "Missing user id" }, 400);
+      }
+
+      const [data] = await db
+        .select({
+          isOpen: customizations.isOpen,
+        })
+        .from(customizations)
+        .where(eq(customizations.user_id, userId));
+
+      if (!data) {
+        return c.json({ error: "No templates found" }, 404);
+      }
+
+      return c.json({ data });
+    }
   );
+
 export default app;
