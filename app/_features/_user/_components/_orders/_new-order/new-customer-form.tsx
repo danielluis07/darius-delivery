@@ -42,7 +42,11 @@ import { useCreateCustomerDialog } from "@/hooks/use-customer-dialog";
 
 type FormData = z.infer<typeof insertCustomerByUserSchema>;
 
-export const NewCustomerForm = () => {
+export const NewCustomerForm = ({
+  isOrderPending,
+}: {
+  isOrderPending: boolean;
+}) => {
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomerByUserSchema),
     defaultValues: {
@@ -79,7 +83,9 @@ export const NewCustomerForm = () => {
     <Drawer
       open={isOpen}
       onOpenChange={(open) => (open ? onOpen() : onClose())}>
-      <DrawerTrigger className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-white shadow hover:bg-secondary hover:text-primary">
+      <DrawerTrigger
+        disabled={isOrderPending}
+        className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-white shadow hover:bg-secondary hover:text-primary">
         Registrar Cliente <Plus />
       </DrawerTrigger>
       <DrawerContent className="h-[380px] p-5">

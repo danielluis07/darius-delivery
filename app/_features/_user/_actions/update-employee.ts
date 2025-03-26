@@ -5,7 +5,7 @@ import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { employees, users } from "@/db/schema";
-import { createEmployeeSchema } from "@/db/schemas";
+import { updateEmployeeSchema } from "@/db/schemas";
 
 // Helper function to hash a password using SHA-256
 async function hashPassword(password: string): Promise<string> {
@@ -17,7 +17,7 @@ async function hashPassword(password: string): Promise<string> {
 
 export const updateEmployee = async (
   userId: string,
-  values: z.infer<typeof createEmployeeSchema>
+  values: z.infer<typeof updateEmployeeSchema>
 ) => {
   try {
     const session = await auth();
@@ -26,7 +26,7 @@ export const updateEmployee = async (
       return { success: false, message: "Usuário não autenticado" };
     }
 
-    const validatedValues = createEmployeeSchema.safeParse(values);
+    const validatedValues = updateEmployeeSchema.safeParse(values);
 
     if (!validatedValues.success) {
       return { success: false, message: "Campos inválidos" };
@@ -34,32 +34,32 @@ export const updateEmployee = async (
 
     const { name, email, phone, password, permissions } = validatedValues.data;
 
-    if (!userId || !name || !email || !phone || !password) {
+    if (!userId || !name || !email || !phone) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
 
-    // Hash the password using SHA-256
-    const hashedPassword = await hashPassword(password);
+    // Prepare update object
+    const updateData: any = { name, phone, email };
 
+    // Hash and update password only if a new one is provided
+    if (password) {
+      updateData.password = await hashPassword(password);
+    }
+
+    // Update user information
     const updatedUser = await db
       .update(users)
-      .set({
-        name,
-        phone,
-        email,
-        password: hashedPassword,
-      })
+      .set(updateData)
       .where(eq(users.id, userId));
 
     if (!updatedUser) {
       return { success: false, message: "Erro ao atualizar funcionário" };
     }
 
+    // Update employee permissions
     const updatedEmployee = await db
       .update(employees)
-      .set({
-        permissions,
-      })
+      .set({ permissions })
       .where(eq(employees.userId, userId));
 
     if (!updatedEmployee) {

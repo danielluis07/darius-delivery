@@ -174,7 +174,7 @@ export const NewOrderForm = ({
       <div className="flex gap-8">
         <Card className="w-full relative">
           <div className="absolute top-2 right-2">
-            <NewCustomerForm />
+            <NewCustomerForm isOrderPending={isPending} />
           </div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
@@ -385,7 +385,9 @@ export const NewOrderForm = ({
                     onClick={() =>
                       append({ productId: "", quantity: 1, price: 0, name: "" })
                     }
-                    disabled={selectedProductIds.length >= products.length}
+                    disabled={
+                      selectedProductIds.length >= products.length || isPending
+                    }
                     variant="secondary">
                     Adicionar Produto
                   </Button>

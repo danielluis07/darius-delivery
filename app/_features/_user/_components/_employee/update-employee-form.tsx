@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
-import { createEmployeeSchema } from "@/db/schemas";
+import { createEmployeeSchema, updateEmployeeSchema } from "@/db/schemas";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
 import {
@@ -31,9 +31,10 @@ import { updateEmployee } from "@/app/_features/_user/_actions/update-employee";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 
-type FormData = z.infer<typeof createEmployeeSchema>;
+type FormData = z.infer<typeof updateEmployeeSchema>;
 
 const permissions = [
+  "Início",
   "Categorias",
   "Produtos",
   "Configuração de Domínio",
@@ -64,12 +65,12 @@ export const UpdateEmployeeForm = ({
 }) => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
-    resolver: zodResolver(createEmployeeSchema),
+    resolver: zodResolver(updateEmployeeSchema),
     defaultValues: {
       name: data.name || "",
       email: data.email || "",
       phone: data.phone || "",
-      password: data.password || "",
+      password: "",
       permissions: data.permissions || [],
     },
   });
@@ -186,7 +187,6 @@ export const UpdateEmployeeForm = ({
                         type="password"
                         placeholder="Senha"
                         disabled={isPending}
-                        required
                       />
                     </FormControl>
                     <FormMessage />

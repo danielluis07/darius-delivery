@@ -30,7 +30,8 @@ import { getAverageTicket } from "@/app/_features/_user/_queries/_main/get-avera
 import { AverageTicket } from "@/app/_features/_user/_components/_main/average-ticket";
 import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
 import { TrialCountdown } from "@/app/_features/_user/_components/_settings/trial-countdown";
-import Image from "next/image";
+import { getUser } from "@/lib/get-user";
+import { redirect } from "next/navigation";
 
 const DashboardPage = async () => {
   const session = await auth();
@@ -39,12 +40,20 @@ const DashboardPage = async () => {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  if (session.user.role === "EMPLOYEE") {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Image src="/darius.png" alt="logo" width={150} height={150} />
-      </div>
-    );
+  const user = await getUser(session.user.id);
+
+  const id =
+    session.user.role === "EMPLOYEE"
+      ? session.user.restaurantOwnerId
+      : session.user.id;
+
+  if (!id || !user.data) {
+    return <div>Usuário não encontrado</div>;
+  }
+  const userPermissions = user.data.employee?.permissions;
+
+  if (user.data.role === "EMPLOYEE" && !userPermissions?.includes("Início")) {
+    redirect("/dashboard/categories");
   }
 
   const [
@@ -59,16 +68,16 @@ const DashboardPage = async () => {
     averageTicket,
     userData,
   ] = await Promise.all([
-    getOrdersCount(session.user.id),
-    getCategoriesCount(session.user.id),
-    getProductsCount(session.user.id),
-    getOrdersComparison(session.user.id),
-    getRestaurantStats(session.user.id),
-    getOrders(session.user.id),
-    getGoogleApiKey(session.user.id),
-    getTotalRevenue(session.user.id),
-    getAverageTicket(session.user.id),
-    getUserData(session.user.id),
+    getOrdersCount(id),
+    getCategoriesCount(id),
+    getProductsCount(id),
+    getOrdersComparison(id),
+    getRestaurantStats(id),
+    getOrders(id),
+    getGoogleApiKey(id),
+    getTotalRevenue(id),
+    getAverageTicket(id),
+    getUserData(id),
   ]);
 
   return (
@@ -82,8 +91,8 @@ const DashboardPage = async () => {
         <AverageTicket averageTicket={averageTicket} />
       </div>
       <div className="flex gap-4 mt-10">
-        <OrdersPerDayChart userId={session.user.id} />
-        <RevenuePerMonthChart userId={session.user.id} />
+        <OrdersPerDayChart userId={id} />
+        <RevenuePerMonthChart userId={id} />
       </div>
       <div className="grid grid-cols-4 gap-3 mt-10">
         <StatsCard
@@ -112,7 +121,7 @@ const DashboardPage = async () => {
         />
       </div>
       <div className="flex items-center mt-10 gap-3">
-        <OrdersPerMonthChart userId={session.user.id} />
+        <OrdersPerMonthChart userId={id} />
         <OrdersComparisonChart data={ordersComparison || []} />
       </div>
       <div className="mt-10">

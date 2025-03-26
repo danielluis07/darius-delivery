@@ -199,18 +199,18 @@ const app = new Hono()
             need_change: orders.need_change,
             change_value: orders.change_value,
             obs: orders.obs,
+            street: orders.street,
+            street_number: orders.street_number,
+            postalCode: orders.postalCode,
+            city: orders.city,
+            state: orders.state,
+            neighborhood: orders.neighborhood,
           },
           customer: {
             id: customers.userId,
             name: users.name,
             email: users.email,
-            street: customers.street,
-            street_number: customers.street_number,
-            postalCode: customers.postalCode,
             phone: users.phone,
-            city: customers.city,
-            state: customers.state,
-            neighborhood: customers.neighborhood,
           },
           deliverer: {
             id: deliverers.id,
@@ -574,6 +574,12 @@ const app = new Hono()
         status,
         payment_status,
         payment_type,
+        city: customer.city,
+        state: customer.state,
+        neighborhood: customer.neighborhood,
+        street: customer.street,
+        street_number: customer.street_number,
+        postalCode: customer.postalCode,
       })
       .returning({ id: orders.id });
 
@@ -748,6 +754,12 @@ const app = new Hono()
           latitude,
           longitude,
           placeId,
+          city: customer.city,
+          state: customer.state,
+          neighborhood: customer.neighborhood,
+          street: customer.street,
+          street_number: customer.street_number,
+          postalCode: customer.postalCode,
           daily_number: nextDailyNumber,
           delivery_deadline: values.deliveryDeadline,
           total_price: values.totalPrice + fee,
@@ -1092,7 +1104,7 @@ const app = new Hono()
     zValidator(
       "json",
       z.object({
-        delivererId: z.string(),
+        delivererId: z.string().optional(),
         status: z.enum([
           "ACCEPTED",
           "PREPARING",
@@ -1124,6 +1136,13 @@ const app = new Hono()
         type,
         delivery_deadline,
         pickup_deadline,
+        city,
+        state,
+        neighborhood,
+        obs,
+        street,
+        street_number,
+        postalCode,
       } = c.req.valid("json");
 
       if (!auth || !auth.token?.sub) {
@@ -1139,9 +1158,47 @@ const app = new Hono()
         return c.json({ error: "Missing user id" }, 400);
       }
 
-      if (!orderId || !delivererId || !status || !payment_status || !type) {
+      if (
+        !orderId ||
+        !status ||
+        !payment_status ||
+        !type ||
+        !city ||
+        !state ||
+        !neighborhood ||
+        !street ||
+        !street_number ||
+        !postalCode
+      ) {
         return c.json({ error: "Missing data or orderId" }, 400);
       }
+
+      const formattedAddress = formatAddress({
+        city: city,
+        state: state,
+        neighborhood: neighborhood,
+        street: street,
+        street_number: street_number,
+        postalCode: postalCode,
+      });
+
+      const [user] = await db
+        .select({ googleApiKey: users.googleApiKey })
+        .from(users)
+        .where(eq(users.id, id));
+
+      if (!user.googleApiKey) {
+        return c.json({ error: "Failed to update order" }, 500);
+      }
+
+      const { success, latitude, longitude, message, placeId } =
+        await getGeoCode(formattedAddress, user.googleApiKey);
+
+      if (!success) {
+        return c.json({ error: message }, 500);
+      }
+
+      console.log("obs", obs);
 
       const [data] = await db
         .update(orders)
@@ -1150,6 +1207,16 @@ const app = new Hono()
           status,
           payment_status,
           type,
+          latitude,
+          longitude,
+          city,
+          state,
+          placeId,
+          obs,
+          neighborhood,
+          street,
+          street_number,
+          postalCode,
           delivery_deadline,
           pickup_deadline,
           updatedAt: new Date(),

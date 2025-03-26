@@ -32,6 +32,7 @@ import { useRouter } from "next/navigation";
 type FormData = z.infer<typeof createEmployeeSchema>;
 
 const permissions = [
+  "Início",
   "Categorias",
   "Produtos",
   "Configuração de Domínio",

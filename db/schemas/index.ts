@@ -33,6 +33,17 @@ export const createEmployeeSchema = z.object({
   permissions: z.array(z.string()).optional(),
 });
 
+export const updateEmployeeSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  phone: z.string(),
+  password: z
+    .string()
+    .min(8, "A senha deve ter pelo menos 8 caracteres")
+    .optional(),
+  permissions: z.array(z.string()).optional(),
+});
+
 export const insertCustomerByUserSchema = z.object({
   name: z.string(),
   email: z.string().email(),
@@ -129,7 +140,7 @@ export const insertCustomerOrderSchema = baseOrderSchema.extend({
 });
 
 export const updateOrderSchema = z.object({
-  delivererId: z.string(),
+  delivererId: z.string().optional(),
   status: z.enum([
     "ACCEPTED",
     "PREPARING",

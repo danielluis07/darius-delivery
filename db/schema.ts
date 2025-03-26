@@ -403,6 +403,13 @@ export const orders = pgTable("orders", {
   payment_type: orderPaymentType("payment_type").notNull(),
   delivery_deadline: integer("delivery_deadline"), // Tempo máximo para entrega (em minutos)
   pickup_deadline: integer("pickup_deadline"), // Tempo máximo para retirada (em minutos)
+  city: text("city"),
+  state: text("state"),
+  neighborhood: text("neighborhood"),
+  street: text("street"),
+  street_number: text("street_number"),
+  postalCode: text("postal_code"),
+  complement: text("complement"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

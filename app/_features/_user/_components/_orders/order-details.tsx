@@ -72,7 +72,13 @@ export const OrderDetails = ({
       type: undefined,
       delivery_deadline: 0,
       pickup_deadline: 0,
-      obs: undefined,
+      obs: "",
+      city: "",
+      state: "",
+      neighborhood: "",
+      street: "",
+      street_number: "",
+      postalCode: "",
     },
   });
 
@@ -90,6 +96,12 @@ export const OrderDetails = ({
         delivery_deadline: data.order.delivery_deadline || 0,
         pickup_deadline: data.order.pickup_deadline || 0,
         obs: data.order.obs || "",
+        city: data.order.city || "",
+        state: data.order.state || "",
+        neighborhood: data.order.neighborhood || "",
+        street: data.order.street || "",
+        street_number: data.order.street_number || "",
+        postalCode: data.order.postalCode || "",
       });
     }
   }, [data, reset]);
@@ -194,28 +206,26 @@ export const OrderDetails = ({
                   {formatCurrencyFromCents(data.order.change_value)}
                 </p>
               )}
-              {data.order.obs && (
-                <FormField
-                  control={form.control}
-                  name="obs"
-                  render={({ field }) => (
-                    <FormItem>
-                      <p className="text-sm text-gray-500 font-semibold">
-                        Observação:
-                      </p>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Fale sobre os produtos desse combo"
-                          className="resize-none"
-                          rows={5}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+              <FormField
+                control={form.control}
+                name="obs"
+                render={({ field }) => (
+                  <FormItem>
+                    <p className="text-sm text-gray-500 font-semibold">
+                      Observação:
+                    </p>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Adicione alguma informação sobre esse pedido"
+                        className="resize-none"
+                        rows={5}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <div>
@@ -271,12 +281,91 @@ export const OrderDetails = ({
                 <span className="font-semibold">Telefone:</span>{" "}
                 {formatPhoneNumber(data.customer.phone || "")}
               </p>
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold">Endereço:</span>{" "}
-                {data.customer.street}, nº{data.customer.street_number},{" "}
-                {data.customer.neighborhood}, {data.customer.city} -{" "}
-                {data.customer.state}, {data.customer.postalCode}
-              </p>
+              <div className="grid grid-cols-2 mt-5 gap-3">
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cidade</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="neighborhood"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bairro</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="street"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rua</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="street_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="postalCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CEP</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </Card>
           <Card className="p-6 mt-6">
