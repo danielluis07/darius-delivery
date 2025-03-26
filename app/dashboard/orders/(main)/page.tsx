@@ -11,15 +11,24 @@ const OrdersPage = async () => {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const customizationData = await getIsRestaurantOpen(session.user.id);
+  const id =
+    session.user.role === "EMPLOYEE"
+      ? session.user.restaurantOwnerId
+      : session.user.id;
+
+  if (!id) {
+    return <div>Usuário não encontrado</div>;
+  }
+
+  const customizationData = await getIsRestaurantOpen(id);
 
   return (
     <div className="w-full">
       <div className="flex justify-between items-center">
         <OpenRestaurant isOpen={customizationData?.isOpen} />
-        <OrderSettings userId={session.user.id} />
+        <OrderSettings userId={id} />
       </div>
-      <OrdersClient userId={session.user.id} />
+      <OrdersClient userId={id} />
     </div>
   );
 };

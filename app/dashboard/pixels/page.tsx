@@ -9,7 +9,16 @@ const PixelsPage = async () => {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const data = await getPixel(session.user.id);
+  const id =
+    session.user.role === "EMPLOYEE"
+      ? session.user.restaurantOwnerId
+      : session.user.id;
+
+  if (!id) {
+    return <div>Usuário não encontrado</div>;
+  }
+
+  const data = await getPixel(id);
 
   return <CreatePixelsForm data={data} />;
 };

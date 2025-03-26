@@ -14,7 +14,16 @@ export const createPixels = async (
     const session = await auth();
     const validatedValues = insertPixelsSchema.safeParse(values);
 
-    if (!session || !session.user.id) {
+    if (!session) {
+      return { success: false, message: "Not authenticated" };
+    }
+
+    const id =
+      session.user.role === "EMPLOYEE"
+        ? session.user.restaurantOwnerId
+        : session.user.id;
+
+    if (!id) {
       return { success: false, message: "Not authenticated" };
     }
 
@@ -23,7 +32,6 @@ export const createPixels = async (
     }
 
     const { pixel_facebook, pixel_google, pixel_tiktok } = validatedValues.data;
-    const userId = session.user.id;
 
     if (!pixel_facebook && !pixel_google && !pixel_tiktok) {
       return { success: false, message: "Preencha ao menos um pixel" };
@@ -32,7 +40,7 @@ export const createPixels = async (
     const [existingPixel] = await db
       .select()
       .from(pixels)
-      .where(eq(pixels.userId, userId));
+      .where(eq(pixels.userId, id));
 
     if (existingPixel) {
       const updated = await db
@@ -43,7 +51,7 @@ export const createPixels = async (
           pixel_tiktok: pixel_tiktok || existingPixel.pixel_tiktok,
           updatedAt: new Date(),
         })
-        .where(eq(pixels.userId, userId));
+        .where(eq(pixels.userId, id));
 
       if (updated) {
         return { success: true, message: "Pixels atualizados com sucesso" };
@@ -52,7 +60,7 @@ export const createPixels = async (
       }
     } else {
       const inserted = await db.insert(pixels).values({
-        userId,
+        id,
         pixel_facebook: pixel_facebook || null,
         pixel_google: pixel_google || null,
         pixel_tiktok: pixel_tiktok || null,

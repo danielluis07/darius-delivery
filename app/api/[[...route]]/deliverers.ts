@@ -6,6 +6,7 @@ import { deliverers, orders } from "@/db/schema";
 import { insertDeliverersSchema } from "@/db/schemas";
 import { eq, inArray, sql } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
+import { ExtendedAuthUser } from "@/types";
 
 const app = new Hono()
   .get(
@@ -53,12 +54,17 @@ const app = new Hono()
     verifyAuth(),
     zValidator("json", insertDeliverersSchema),
     async (c) => {
-      const auth = c.get("authUser");
+      const auth = c.get("authUser") as ExtendedAuthUser;
       const values = c.req.valid("json");
 
-      if (!auth || !auth.token?.sub) {
+      if (!auth || !auth.token) {
         return c.json({ error: "Unauthorized" }, 401);
       }
+
+      const id =
+        auth.token.role === "EMPLOYEE"
+          ? auth.token.restaurantOwnerId
+          : auth.token.sub;
 
       if (!values) {
         return c.json({ error: "Missing data" }, 400);
@@ -66,7 +72,7 @@ const app = new Hono()
 
       const data = await db
         .insert(deliverers)
-        .values({ ...values, user_id: auth.token.sub });
+        .values({ ...values, user_id: id });
 
       if (!data) {
         return c.json({ error: "Failed to insert data" }, 500);

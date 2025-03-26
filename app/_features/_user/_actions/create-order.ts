@@ -15,8 +15,17 @@ export const createOrder = async (
   try {
     const session = await auth();
 
-    if (!session || !session.user.id) {
+    if (!session) {
       return { success: false, message: "Usuário não autenticado" };
+    }
+
+    const id =
+      session.user.role === "EMPLOYEE"
+        ? session.user.restaurantOwnerId
+        : session.user.id;
+
+    if (!id) {
+      return { success: false, message: "Not authenticated" };
     }
 
     const validatedValues = insertOrderSchema.safeParse(values);
@@ -56,7 +65,7 @@ export const createOrder = async (
       db
         .select({ googleApiKey: users.googleApiKey })
         .from(users)
-        .where(eq(users.id, session.user.id))
+        .where(eq(users.id, id))
         .then(([result]) => result), // Extracting first element
     ]);
 

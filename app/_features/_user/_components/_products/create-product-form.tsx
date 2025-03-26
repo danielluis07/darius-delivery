@@ -205,7 +205,7 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
                           <Image
                             src={imagePreview}
                             fill
-                            className="object-cover"
+                            className="object-contain"
                             alt="preview"
                           />
                           <div

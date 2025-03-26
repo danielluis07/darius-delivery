@@ -5,14 +5,22 @@ import { auth } from "@/auth";
 
 const CustomizationPage = async () => {
   const session = await auth();
-  const userId = session?.user?.id;
 
-  if (!session || !userId) {
+  if (!session || !session.user.id) {
     return <p>Você precisa estar logado para acessar essa página</p>;
   }
 
+  const id =
+    session.user.role === "EMPLOYEE"
+      ? session.user.restaurantOwnerId
+      : session.user.id;
+
+  if (!id) {
+    return <div>Usuário não encontrado</div>;
+  }
+
   const [customization, templates] = await Promise.all([
-    getCustomization(userId),
+    getCustomization(id),
     getTemplates(),
   ]);
 

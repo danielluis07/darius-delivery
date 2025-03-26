@@ -147,7 +147,7 @@ export const CreateCategoryForm = () => {
                           <Image
                             src={imagePreview}
                             fill
-                            className="object-cover"
+                            className="object-contain"
                             alt="preview"
                           />
                           <div

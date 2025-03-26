@@ -24,8 +24,6 @@ export default async function UserDashboardLayout({
     return <div>Usuário não encontrado</div>;
   }
 
-  console.log(user.data.employee?.permissions);
-
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <UserSidebar user={user.data} />

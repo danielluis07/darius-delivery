@@ -13,7 +13,16 @@ const CategoriesPage = async () => {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const data = await getCategories(session.user.id);
+  const id =
+    session.user.role === "EMPLOYEE"
+      ? session.user.restaurantOwnerId
+      : session.user.id;
+
+  if (!id) {
+    return <div>Usuário não encontrado</div>;
+  }
+
+  const data = await getCategories(id);
 
   if (!data) {
     return (

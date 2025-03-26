@@ -14,7 +14,16 @@ const OrderDetailsPage = async ({
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  return <OrderDetails userId={session.user.id} orderId={orderId} />;
+  const id =
+    session.user.role === "EMPLOYEE"
+      ? session.user.restaurantOwnerId
+      : session.user.id;
+
+  if (!id) {
+    return <div>Usuário não encontrado</div>;
+  }
+
+  return <OrderDetails userId={id} orderId={orderId} />;
 };
 
 export default OrderDetailsPage;

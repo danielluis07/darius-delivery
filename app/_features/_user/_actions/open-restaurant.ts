@@ -11,12 +11,20 @@ const formSchema = z.object({
 });
 
 export const openRestaurant = async (values: z.infer<typeof formSchema>) => {
-  console.log("values", values);
   try {
     const session = await auth();
     const validatedValues = formSchema.safeParse(values);
 
-    if (!session || !session.user.id) {
+    if (!session) {
+      return { success: false, message: "Not authenticated" };
+    }
+
+    const id =
+      session.user.role === "EMPLOYEE"
+        ? session.user.restaurantOwnerId
+        : session.user.id;
+
+    if (!id) {
       return { success: false, message: "Not authenticated" };
     }
 
@@ -26,14 +34,12 @@ export const openRestaurant = async (values: z.infer<typeof formSchema>) => {
 
     const { isOpen } = validatedValues.data;
 
-    const userId = session.user.id;
-
     const existingCustomization = await db
       .update(customizations)
       .set({
         isOpen,
       })
-      .where(eq(customizations.user_id, userId));
+      .where(eq(customizations.user_id, id));
 
     if (!existingCustomization) {
       return {

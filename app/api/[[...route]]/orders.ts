@@ -31,6 +31,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { insertOrderSchema } from "@/db/schemas";
 import { createPayment, generatePixQrCode, simulatePayment } from "@/lib/asaas";
 import { formatAddress, getGeoCode } from "@/lib/google-geocode";
+import { ExtendedAuthUser } from "@/types";
 
 type Products = {
   id: number;
@@ -444,7 +445,7 @@ const app = new Hono()
     });
   })
   .post("/", verifyAuth(), zValidator("json", insertOrderSchema), async (c) => {
-    const auth = c.get("authUser");
+    const auth = c.get("authUser") as ExtendedAuthUser;
     const {
       customer_id,
       status,
@@ -456,8 +457,17 @@ const app = new Hono()
       pickup_deadline,
     } = c.req.valid("json");
 
-    if (!auth || !auth.token?.sub) {
+    if (!auth || !auth.token) {
       return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const id =
+      auth.token.role === "EMPLOYEE"
+        ? auth.token.restaurantOwnerId
+        : auth.token.sub;
+
+    if (!id) {
+      return c.json({ error: "Missing user id" }, 400);
     }
 
     if (
@@ -495,7 +505,7 @@ const app = new Hono()
       db
         .select({ googleApiKey: users.googleApiKey })
         .from(users)
-        .where(eq(users.id, auth.token.sub))
+        .where(eq(users.id, id))
         .then(([result]) => result), // Extracting first element
     ]);
 
@@ -551,7 +561,7 @@ const app = new Hono()
     const [order] = await db
       .insert(orders)
       .values({
-        user_id: auth.token.sub,
+        user_id: id,
         daily_number: nextDailyNumber,
         customer_id,
         total_price,
@@ -597,7 +607,7 @@ const app = new Hono()
         amount: total_price,
         status: transactionPaymentStatus,
         order_id: order.id,
-        user_id: auth.token.sub,
+        user_id: id,
         type: "PAYMENT",
       })
       .returning({
@@ -610,7 +620,7 @@ const app = new Hono()
 
     const receipt = await db.insert(receipts).values({
       order_id: order.id,
-      user_id: auth.token.sub,
+      user_id: id,
     });
 
     if (!receipt) {
@@ -1105,7 +1115,7 @@ const app = new Hono()
       })
     ),
     async (c) => {
-      const auth = c.get("authUser");
+      const auth = c.get("authUser") as ExtendedAuthUser;
       const { orderId } = c.req.valid("param");
       const {
         delivererId,
@@ -1118,6 +1128,15 @@ const app = new Hono()
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const id =
+        auth.token.role === "EMPLOYEE"
+          ? auth.token.restaurantOwnerId
+          : auth.token.sub;
+
+      if (!id) {
+        return c.json({ error: "Missing user id" }, 400);
       }
 
       if (!orderId || !delivererId || !status || !payment_status || !type) {
@@ -1147,7 +1166,7 @@ const app = new Hono()
           amount: data.totalPrice,
           status: "COMPLETED",
           order_id: orderId,
-          user_id: auth.token.sub,
+          user_id: id,
           type: "PAYMENT",
         });
 

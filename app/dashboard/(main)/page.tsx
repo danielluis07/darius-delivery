@@ -30,12 +30,21 @@ import { getAverageTicket } from "@/app/_features/_user/_queries/_main/get-avera
 import { AverageTicket } from "@/app/_features/_user/_components/_main/average-ticket";
 import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
 import { TrialCountdown } from "@/app/_features/_user/_components/_settings/trial-countdown";
+import Image from "next/image";
 
 const DashboardPage = async () => {
   const session = await auth();
 
   if (!session || !session.user.id) {
     return <div>Você não está autorizado a acessar essa página</div>;
+  }
+
+  if (session.user.role === "EMPLOYEE") {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Image src="/darius.png" alt="logo" width={150} height={150} />
+      </div>
+    );
   }
 
   const [

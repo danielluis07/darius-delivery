@@ -10,9 +10,18 @@ const OrderRoutingPage = async () => {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
+  const id =
+    session.user.role === "EMPLOYEE"
+      ? session.user.restaurantOwnerId
+      : session.user.id;
+
+  if (!id) {
+    return <div>Usuário não encontrado</div>;
+  }
+
   const [apiKey, customization] = await Promise.all([
-    getGoogleApiKey(session.user.id),
-    getCustomization(session.user.id),
+    getGoogleApiKey(id),
+    getCustomization(id),
   ]);
 
   if (!apiKey?.googleApiKey) {
@@ -38,7 +47,7 @@ const OrderRoutingPage = async () => {
   return (
     <OrderRoutingClient
       apiKey={apiKey.googleApiKey}
-      userId={session.user.id}
+      userId={id}
       customizationlatitude={customization.latitude}
       customizationlongitude={customization.longitude}
     />

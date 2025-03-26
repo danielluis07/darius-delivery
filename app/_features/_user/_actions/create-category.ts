@@ -27,7 +27,16 @@ export const createCategory = async (
     const generateFileName = (bytes = 32) =>
       crypto.randomBytes(bytes).toString("hex");
 
-    if (!session || !session.user.id) {
+    if (!session) {
+      return { success: false, message: "Not authenticated" };
+    }
+
+    const id =
+      session.user.role === "EMPLOYEE"
+        ? session.user.restaurantOwnerId
+        : session.user.id;
+
+    if (!id) {
       return { success: false, message: "Not authenticated" };
     }
 
@@ -65,7 +74,7 @@ export const createCategory = async (
       ContentLength: imageFile.size,
       ChecksumSHA256: hashHex,
       Metadata: {
-        userId: session?.user.id,
+        userId: id,
       },
     });
 
@@ -98,7 +107,7 @@ export const createCategory = async (
     const category = await db.insert(categories).values({
       name,
       image: signedURL.split("?")[0],
-      userId: session.user.id,
+      userId: id,
     });
 
     if (!category) {

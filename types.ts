@@ -1,4 +1,13 @@
 import { customizations, orderSettings, products } from "@/db/schema";
+import { AuthUser } from "@hono/auth-js";
+
+export type ExtendedAuthUser = AuthUser & {
+  token?: AuthUser["token"] & {
+    sub: string;
+    role: "ADMIN" | "EMPLOYEE" | "USER";
+    restaurantOwnerId?: string; // Está presente apenas se for EMPLOYEE
+  };
+};
 
 export type CustomizationWithTemplate = {
   customization: typeof customizations.$inferSelect & {

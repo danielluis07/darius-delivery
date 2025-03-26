@@ -6,6 +6,7 @@ import { orderSettings } from "@/db/schema";
 import { insertOrderSettingsSchema } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
+import { ExtendedAuthUser } from "@/types";
 
 const app = new Hono()
   .get(
@@ -39,19 +40,24 @@ const app = new Hono()
     verifyAuth(),
     zValidator("json", insertOrderSettingsSchema),
     async (c) => {
-      const auth = c.get("authUser");
+      const auth = c.get("authUser") as ExtendedAuthUser;
       const { delivery_deadline, pickup_deadline } = c.req.valid("json");
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
+      const id =
+        auth.token.role === "EMPLOYEE"
+          ? auth.token.restaurantOwnerId
+          : auth.token.sub;
+
       if (!delivery_deadline || !pickup_deadline) {
         return c.json({ error: "Missing data" }, 400);
       }
 
       const data = await db.insert(orderSettings).values({
-        user_id: auth.token.sub,
+        user_id: id,
         delivery_deadline,
         pickup_deadline,
       });
@@ -69,7 +75,7 @@ const app = new Hono()
     zValidator("param", z.object({ id: z.string().optional() })),
     zValidator("json", insertOrderSettingsSchema),
     async (c) => {
-      const auth = c.get("authUser");
+      const auth = c.get("authUser") as ExtendedAuthUser;
       const { id } = c.req.valid("param");
       const { delivery_deadline, pickup_deadline } = c.req.valid("json");
 
@@ -77,7 +83,12 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      if (!id) {
+      const userId =
+        auth.token.role === "EMPLOYEE"
+          ? auth.token.restaurantOwnerId
+          : auth.token.sub;
+
+      if (!id || !userId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
@@ -87,7 +98,7 @@ const app = new Hono()
           delivery_deadline,
           pickup_deadline,
         })
-        .where(eq(orderSettings.id, id));
+        .where(eq(orderSettings.id, userId));
 
       if (!data) {
         return c.json({ error: "Failed to update order settings" }, 500);

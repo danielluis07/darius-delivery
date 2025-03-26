@@ -11,16 +11,25 @@ const NewOrderPage = async () => {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
+  const id =
+    session.user.role === "EMPLOYEE"
+      ? session.user.restaurantOwnerId
+      : session.user.id;
+
+  if (!id) {
+    return <div>Usuário não encontrado</div>;
+  }
+
   const [products, orderSettings, apiKey] = await Promise.all([
-    getProducts(session.user.id),
-    getOrderSettings(session.user.id),
-    getGoogleApiKey(session.user.id),
+    getProducts(id),
+    getOrderSettings(id),
+    getGoogleApiKey(id),
   ]);
 
   return (
     <NewOrderForm
       products={products || []}
-      userId={session.user.id}
+      userId={id}
       orderSettings={orderSettings}
       apiKey={apiKey?.googleApiKey}
     />

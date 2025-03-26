@@ -27,7 +27,16 @@ export const createProduct = async (
     const generateFileName = (bytes = 32) =>
       crypto.randomBytes(bytes).toString("hex");
 
-    if (!session || !session.user.id) {
+    if (!session) {
+      return { success: false, message: "Not authenticated" };
+    }
+
+    const id =
+      session.user.role === "EMPLOYEE"
+        ? session.user.restaurantOwnerId
+        : session.user.id;
+
+    if (!id) {
       return { success: false, message: "Not authenticated" };
     }
 
@@ -66,7 +75,7 @@ export const createProduct = async (
       ContentLength: imageFile.size,
       ChecksumSHA256: hashHex,
       Metadata: {
-        userId: session?.user.id,
+        userId: id,
       },
     });
 
@@ -102,7 +111,7 @@ export const createProduct = async (
       price,
       category_id,
       description,
-      userId: session.user.id,
+      userId: id,
     });
 
     if (!product) {
