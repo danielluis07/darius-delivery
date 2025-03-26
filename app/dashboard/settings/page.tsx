@@ -1,5 +1,4 @@
 import { BankAccountForm } from "@/app/_features/_user/_components/_settings/bank-account-form";
-import { DomainForm } from "@/app/_features/_user/_components/_settings/domain-form";
 import { GoogleApiKeyForm } from "@/app/_features/_user/_components/_settings/google-api-key-form";
 import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
 import { auth } from "@/auth";
@@ -20,7 +19,6 @@ const SettingsPage = async () => {
   return (
     <div className="space-y-4">
       <GoogleApiKeyForm userApiKey={data?.googleApiKey} />
-      <DomainForm domain={data?.domain} />
       <BankAccountForm
         bankAccount={data?.bankAccount}
         bankAccountDigit={data?.bankAccountDigit}
