@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
-import { createEmployeeSchema, updateEmployeeSchema } from "@/db/schemas";
+import { updateEmployeeSchema } from "@/db/schemas";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
 import {

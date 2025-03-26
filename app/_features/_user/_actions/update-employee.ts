@@ -38,8 +38,13 @@ export const updateEmployee = async (
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
 
-    // Prepare update object
-    const updateData: any = { name, phone, email };
+    // Prepare update object with specific type
+    const updateData: {
+      name: string;
+      phone: string;
+      email: string;
+      password?: string;
+    } = { name, phone, email };
 
     // Hash and update password only if a new one is provided
     if (password) {
