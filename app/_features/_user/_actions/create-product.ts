@@ -44,7 +44,7 @@ export const createProduct = async (
       return { success: false, message: "Campos inválidos" };
     }
 
-    const { name, image, price, category_id, description } =
+    const { name, image, price, category_id, description, sizes } =
       validatedValues.data;
 
     if (!name || !image || !price || !category_id || !description) {
@@ -109,6 +109,7 @@ export const createProduct = async (
       name,
       image: signedURL.split("?")[0],
       price,
+      sizes: sizes || [],
       category_id,
       description,
       userId: id,

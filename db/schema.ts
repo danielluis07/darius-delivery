@@ -235,6 +235,7 @@ export const products = pgTable("products", {
   description: text("description"),
   price: integer("price").notNull(),
   image: text("image"),
+  sizes: text("sizes").array().default([]),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
@@ -410,6 +411,7 @@ export const orders = pgTable("orders", {
   street_number: text("street_number"),
   postalCode: text("postal_code"),
   complement: text("complement"),
+  size: text("size"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

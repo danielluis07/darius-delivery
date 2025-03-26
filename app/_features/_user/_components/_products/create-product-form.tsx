@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/select";
 import { createProduct } from "@/app/_features/_user/_actions/create-product";
 import Image from "next/image";
+import { TagsInput } from "@/components/ui/tags-input";
 
 type ResponseType = InferResponseType<
   (typeof client.api.categories)[":userId"]["$get"],
@@ -58,6 +59,7 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
       image: [],
       category_id: "",
       description: "",
+      sizes: [],
       price: 0,
     },
   });
@@ -130,6 +132,21 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
                 </SelectContent>
               </Select>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="sizes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tamanhos</FormLabel>
+              <TagsInput
+                className="w-full"
+                value={field.value ?? []}
+                onValueChange={field.onChange}
+                placeholder="Selecione os tamanhos disponíveis (opcional)"
+              />
             </FormItem>
           )}
         />
