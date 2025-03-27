@@ -35,7 +35,6 @@ import {
 
 import { LoadingButton } from "@/components/ui/loading-button";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { ColorPicker } from "@/components/color-picker";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
@@ -96,7 +95,6 @@ export const CustomizationForm = ({
   const [desktopfiles, setDesktopFiles] = useState<File[] | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [desktopPreview, setDesktopPreview] = useState<string | null>(null);
-  const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomizationSchema),
     defaultValues: {
