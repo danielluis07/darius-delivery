@@ -74,7 +74,12 @@ export const MainClient = () => {
               }}
               className="absolute inset-0 z-10 p-6 overflow-y-auto shadow-2xl rounded-lg">
               <div className="flex justify-end mb-4">
-                <div onClick={onClose} className="text-gray-600 cursor-pointer">
+                <div
+                  style={{
+                    color: data?.customization.font_color || "black",
+                  }}
+                  onClick={onClose}
+                  className="cursor-pointer">
                   <X />
                 </div>
               </div>
@@ -100,7 +105,8 @@ export const MainClient = () => {
         {!data?.customization.isOpen && (
           <Card
             style={{
-              backgroundColor: data?.customization.background_color || "white",
+              backgroundColor: data?.customization.button_color || "white",
+              color: data?.customization.font_color || "black",
             }}
             className="text-center mb-10 relative z-0 text-sm">
             A loja está fechada no momento. Volte mais tarde.
@@ -122,8 +128,7 @@ export const MainClient = () => {
             <div className="flex justify-center">
               <Card
                 style={{
-                  backgroundColor:
-                    data?.customization.background_color || "white",
+                  backgroundColor: data?.customization.button_color || "white",
                   color: data?.customization.font_color || "black",
                 }}
                 className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
@@ -139,7 +144,7 @@ export const MainClient = () => {
                   <Card
                     style={{
                       backgroundColor:
-                        data?.customization.background_color || "white",
+                        data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
                     className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
@@ -150,7 +155,7 @@ export const MainClient = () => {
                   <Card
                     style={{
                       backgroundColor:
-                        data?.customization.background_color || "white",
+                        data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
                     className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
@@ -164,7 +169,7 @@ export const MainClient = () => {
                   <Card
                     style={{
                       backgroundColor:
-                        data?.customization.background_color || "white",
+                        data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
                     className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
@@ -175,7 +180,7 @@ export const MainClient = () => {
                   <Card
                     style={{
                       backgroundColor:
-                        data?.customization.background_color || "white",
+                        data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
                     className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
@@ -186,7 +191,7 @@ export const MainClient = () => {
                   <Card
                     style={{
                       backgroundColor:
-                        data?.customization.background_color || "white",
+                        data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
                     className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
@@ -197,7 +202,7 @@ export const MainClient = () => {
                   <Card
                     style={{
                       backgroundColor:
-                        data?.customization.background_color || "white",
+                        data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
                     className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"

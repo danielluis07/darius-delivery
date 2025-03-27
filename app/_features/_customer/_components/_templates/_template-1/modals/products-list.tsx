@@ -76,10 +76,18 @@ export const ProductsList = ({
               />
             </div>
             <h2 className="text-2xl font-bold mt-2">{selectedProduct.name}</h2>
-            <p className="text-gray-600 mb-4 text-xs">
+            <p
+              style={{
+                color: data?.customization.font_color || "black",
+              }}
+              className="mb-4 text-xs">
               {selectedProduct.description}
             </p>
-            <p className="text-lg font-semibold mb-4">
+            <p
+              style={{
+                color: data?.customization.font_color || "black",
+              }}
+              className="text-lg font-semibold mb-4">
               {formatCurrencyFromCents(selectedProduct.price)}
             </p>
             <button
@@ -126,7 +134,11 @@ export const ProductsList = ({
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
                     <h2 className="text-md font-semibold">{product.name}</h2>
-                    <p className="text-sm text-gray-500 max-w-52 line-clamp-2">
+                    <p
+                      style={{
+                        color: data?.customization.font_color || "black",
+                      }}
+                      className="text-sm max-w-52 line-clamp-2">
                       {product.description}
                     </p>
                     <p className="text-sm font-semibold">

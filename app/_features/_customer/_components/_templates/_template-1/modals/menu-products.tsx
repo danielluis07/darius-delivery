@@ -49,7 +49,11 @@ export const MenuProducts = ({
   }
 
   return (
-    <div className="relative">
+    <div
+      style={{
+        backgroundColor: data?.customization.background_color || "white",
+      }}
+      className="relative">
       {selectedProduct ? (
         <motion.div
           key="productDetails"
@@ -57,12 +61,15 @@ export const MenuProducts = ({
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
           transition={{ duration: 0.5 }}
-          className="absolute inset-0 bg-white p-6 z-10">
+          className="absolute inset-0 p-6 z-10">
           <div className="pb-5">
             <div className="flex justify-end mb-4">
               <div
                 onClick={handleBack}
-                className="cursor-pointer text-gray-600">
+                style={{
+                  color: data?.customization.font_color || "black",
+                }}
+                className="cursor-pointer">
                 <MoveLeft />
               </div>
             </div>{" "}
@@ -75,11 +82,25 @@ export const MenuProducts = ({
                 className="object-cover"
               />
             </div>
-            <h2 className="text-2xl font-bold mt-2">{selectedProduct.name}</h2>
-            <p className="text-gray-600 mb-4 text-xs">
+            <h2
+              style={{
+                color: data?.customization.font_color || "black",
+              }}
+              className="text-2xl font-bold mt-2">
+              {selectedProduct.name}
+            </h2>
+            <p
+              style={{
+                color: data?.customization.font_color || "black",
+              }}
+              className="mb-4 text-xs">
               {selectedProduct.description}
             </p>
-            <p className="text-lg font-semibold mb-4">
+            <p
+              style={{
+                color: data?.customization.font_color || "black",
+              }}
+              className="text-lg font-semibold mb-4">
               {formatCurrencyFromCents(selectedProduct.price)}
             </p>
             <button
@@ -111,6 +132,10 @@ export const MenuProducts = ({
             {products.map((product) => (
               <Card
                 key={product.id}
+                style={{
+                  backgroundColor: data?.customization.button_color || "white",
+                  color: data?.customization.font_color || "black",
+                }}
                 onClick={() =>
                   handleProductClick({
                     ...product,
@@ -125,11 +150,25 @@ export const MenuProducts = ({
                 className="cursor-pointer">
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
-                    <h2 className="text-md font-semibold">{product.name}</h2>
-                    <p className="text-sm text-gray-500 max-w-52 line-clamp-2">
+                    <h2
+                      style={{
+                        color: data?.customization.font_color || "black",
+                      }}
+                      className="text-md font-semibold">
+                      {product.name}
+                    </h2>
+                    <p
+                      style={{
+                        color: data?.customization.font_color || "black",
+                      }}
+                      className="text-sm max-w-52 line-clamp-2">
                       {product.description}
                     </p>
-                    <p className="text-sm font-semibold">
+                    <p
+                      style={{
+                        color: data?.customization.font_color || "black",
+                      }}
+                      className="text-sm font-semibold">
                       {formatCurrencyFromCents(product.price)}
                     </p>
                   </div>

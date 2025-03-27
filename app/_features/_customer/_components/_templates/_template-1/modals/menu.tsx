@@ -19,7 +19,11 @@ export const Menu = () => {
       {categories?.map((category, i) => (
         <Card
           key={i}
-          className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+          className="flex flex-col items-center min-w-28 cursor-pointer"
+          style={{
+            backgroundColor: data?.customization.button_color || "white",
+            color: data?.customization.font_color || "black",
+          }}
           onClick={() => onOpen("menuProducts", category.id)}>
           {category.name}
         </Card>

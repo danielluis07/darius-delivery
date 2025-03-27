@@ -155,7 +155,6 @@ export const CustomizationForm = ({
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard");
           }
         })
         .catch((error) => {

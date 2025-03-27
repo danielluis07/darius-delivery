@@ -11,10 +11,13 @@ export default auth(async (req) => {
   const isLoggedIn = !!req.auth;
 
   const secret = process.env.AUTH_SECRET!;
+
+  const isDev = process.env.NODE_ENV === "production";
+
   const token = await getToken({
     req,
     secret,
-    secureCookie: true,
+    secureCookie: isDev,
   });
 
   const role = token?.role as string;

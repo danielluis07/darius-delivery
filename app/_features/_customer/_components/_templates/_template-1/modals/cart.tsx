@@ -277,6 +277,8 @@ export const Cart = () => {
     }
   };
 
+  console.log(cart);
+
   return (
     <>
       <PixModal />
@@ -309,12 +311,20 @@ export const Cart = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold">{item.name}</h3>
-                      <p className="text-gray-600">
+                      <p
+                        style={{
+                          color: data?.customization.font_color || "black",
+                        }}>
                         {formatCurrencyFromCents(item.price * item.quantity)}
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <button
-                          className="px-2 py-1 bg-gray-200 rounded"
+                          style={{
+                            backgroundColor:
+                              data?.customization.button_color || "white",
+                            color: data?.customization.font_color || "black",
+                          }}
+                          className="px-2 py-1 rounded"
                           onClick={() =>
                             updateQuantity(
                               item.id,
@@ -324,17 +334,25 @@ export const Cart = () => {
                           -
                         </button>
                         <span className="px-2">{item.quantity}</span>
-                        <div
+                        <button
+                          style={{
+                            backgroundColor:
+                              data?.customization.button_color || "white",
+                            color: data?.customization.font_color || "black",
+                          }}
                           className="px-2 py-1 bg-gray-200 rounded cursor-pointer"
                           onClick={() =>
                             updateQuantity(item.id, item.quantity + 1)
                           }>
                           +
-                        </div>
+                        </button>
                       </div>
                     </div>
                     <div
                       className="text-error cursor-pointer"
+                      style={{
+                        color: data?.customization.font_color || "black",
+                      }}
                       onClick={() =>
                         removeFromCart(item.id, data?.userId || "")
                       }>
