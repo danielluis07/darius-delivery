@@ -798,7 +798,8 @@ export const createAsaasSubscription = async (
   subscriptionPrice: number,
   subscriptionType: string,
   customerId: string,
-  nextDueDate: string
+  nextDueDate: string,
+  externalReference?: string
 ) => {
   try {
     const res = await fetch(`${process.env.ASAAS_API_URL}/subscriptions`, {
@@ -815,6 +816,7 @@ export const createAsaasSubscription = async (
         value: subscriptionPrice,
         description: subscriptionType,
         nextDueDate: nextDueDate,
+        externalReference: externalReference,
       }),
     });
 
@@ -884,6 +886,91 @@ export const getSubscriptionPaymentLink = async (subscriptionId: string) => {
     return { success: true, url: data.data[0].invoiceUrl };
   } catch (error) {
     console.error("Error getting subscription payment link", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const getSubscriptionCharges = async (subscriptionId: string) => {
+  try {
+    const res = await fetch(
+      `${process.env.ASAAS_API_URL}/subscriptions/${subscriptionId}`,
+      {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          "Content-Type": "application/json",
+          access_token: process.env.ASAAS_API_KEY!,
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to get subscription charges", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao requisitar as cobranças da assinatura",
+      };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error getting subscription charges", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
+
+export const cancelAsaasSubscription = async (subscriptionId: string) => {
+  try {
+    const res = await fetch(
+      `${process.env.ASAAS_API_URL}/subscriptions/${subscriptionId}`,
+      {
+        method: "DELETE",
+        headers: {
+          accept: "application/json",
+          access_token: process.env.ASAAS_API_KEY!,
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to cancel subscription:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao cancelar a assinatura.",
+      };
+    }
+
+    return { success: true, message: "Assinatura cancelada com sucesso." };
+  } catch (error) {
+    console.error("Error canceling subscription:", error);
     return {
       success: false,
       message: "Erro interno ao conectar com a API do Asaas.",

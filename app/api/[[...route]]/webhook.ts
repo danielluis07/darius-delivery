@@ -1,5 +1,5 @@
 import { db } from "@/db/drizzle";
-import { orders, transactions } from "@/db/schema";
+import { orders, subscriptions, transactions, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 
@@ -13,6 +13,7 @@ type Body = {
     dateCreated: string;
     customer: string;
     paymentLink: string | null;
+    subscription: string;
     value: number;
     netValue: number;
     originalValue: number | null;
@@ -92,101 +93,110 @@ const app = new Hono()
   .post("/asaas/payment", async (c) => {
     const body: Body = await c.req.json();
 
-    const { payment } = body;
+    const { event, payment } = body;
 
-    // Verifica se há um externalReference (ID do pedido)
-    if (!payment.externalReference) {
-      return c.json({ error: "Pagamento sem referência externa" }, 400);
-    }
-
-    try {
-      let paymentStatus: "PENDING" | "PAID" | "CANCELLED" = "PENDING";
-      let transactionStatus: "PENDING" | "COMPLETED" | "FAILED" = "PENDING";
-
-      // Mapeia os eventos do ASAAS para os status do banco
-      switch (payment.status) {
-        case "CONFIRMED":
-          paymentStatus = "PAID";
-          transactionStatus = "COMPLETED";
-          break;
-        case "CANCELED":
-          paymentStatus = "CANCELLED";
-          transactionStatus = "FAILED";
-          break;
-        default:
-          return c.json({ message: "Evento ignorado" });
-      }
-
-      const [order] = await db
-        .update(orders)
+    if (event === "PAYMENT_OVERDUE") {
+      const [subscription] = await db
+        .update(subscriptions)
         .set({
-          payment_status: paymentStatus,
+          status: "OVERDUE",
         })
-        .where(eq(orders.id, payment.externalReference))
+        .where(eq(subscriptions.asaas_sub_id, payment.subscription))
         .returning({
-          orderId: orders.id,
-          payment_status: orders.payment_status,
+          id: subscriptions.id,
+          userId: subscriptions.user_id,
         });
 
-      if (!order) {
-        return c.json({ error: "Erro ao atualizar o pedido" }, 404);
-      }
-
-      const existingTransaction = await db
-        .select()
-        .from(transactions)
-        .where(eq(transactions.order_id, order.orderId))
-        .limit(1);
-
-      if (existingTransaction.length > 0) {
-        return c.json({
-          message: "Transaction already exists, skipping duplicate entry",
-          transactionId: existingTransaction[0].id,
-          orderId: order.orderId,
-        });
-      }
-
-      const [transaction] = await db
-        .insert(transactions)
-        .values({
-          amount: Math.round(payment.netValue * 100),
-          status: transactionStatus,
-          order_id: order.orderId,
-          type: "PAYMENT",
+      await db
+        .update(users)
+        .set({
+          isSubscribed: false,
         })
-        .returning({
-          id: transactions.id,
-        });
-
-      if (!transaction) {
-        return c.json({ error: "Erro ao registrar a transação" }, 500);
-      }
+        .where(eq(users.id, subscription.userId));
 
       return c.json({
-        message: "Webhook processado com sucesso",
-        paymentType: payment.billingType,
-        orderStatus: order.payment_status,
-        transactionStatus: transactionStatus,
-        transactionId: transaction.id,
+        message: "Assinatura atualizada para OVERDUE",
+        subscriptionId: subscription.id,
+      });
+    }
+
+    let paymentStatus: "PENDING" | "PAID" | "CANCELLED" = "PENDING";
+    let transactionStatus: "PENDING" | "COMPLETED" | "FAILED" = "PENDING";
+
+    // Mapeia os eventos do ASAAS para os status do banco
+    switch (payment.status) {
+      case "CONFIRMED":
+        paymentStatus = "PAID";
+        transactionStatus = "COMPLETED";
+        break;
+      case "CANCELED":
+        paymentStatus = "CANCELLED";
+        transactionStatus = "FAILED";
+        break;
+      default:
+        return c.json({ message: "Evento ignorado" });
+    }
+
+    const [order] = await db
+      .update(orders)
+      .set({
+        payment_status: paymentStatus,
+      })
+      .where(eq(orders.id, payment.externalReference))
+      .returning({
+        orderId: orders.id,
+        payment_status: orders.payment_status,
+      });
+
+    if (!order) {
+      return c.json({ error: "Erro ao atualizar o pedido" }, 404);
+    }
+
+    const existingTransaction = await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.order_id, order.orderId))
+      .limit(1);
+
+    if (existingTransaction.length > 0) {
+      return c.json({
+        message: "Transaction already exists, skipping duplicate entry",
+        transactionId: existingTransaction[0].id,
         orderId: order.orderId,
       });
-    } catch (error) {
-      console.error("Erro ao processar webhook:", error);
-      return c.json({ error: "Erro interno ao processar webhook" }, 500);
     }
+
+    const [transaction] = await db
+      .insert(transactions)
+      .values({
+        amount: Math.round(payment.netValue * 100),
+        status: transactionStatus,
+        order_id: order.orderId,
+        type: "PAYMENT",
+      })
+      .returning({
+        id: transactions.id,
+      });
+
+    if (!transaction) {
+      return c.json({ error: "Erro ao registrar a transação" }, 500);
+    }
+
+    return c.json({
+      message: "Webhook processado com sucesso",
+      paymentType: payment.billingType,
+      orderStatus: order.payment_status,
+      transactionStatus: transactionStatus,
+      transactionId: transaction.id,
+      orderId: order.orderId,
+    });
   })
   .post("/asaas/subscription", async (c) => {
     const body: SubscriptionBody = await c.req.json();
 
-    console.log("Subscription body:", body);
+    console.log("body", body);
 
     try {
-      const { event } = body;
-
-      console.log("Event:", event);
-
-      //const data = db.select().from(subscriptions);
-
       return c.json({
         message: "Webhook processado com sucesso",
       });

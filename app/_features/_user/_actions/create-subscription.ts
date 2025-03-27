@@ -35,7 +35,8 @@ export const createSubscription = async (
       subscriptionPrice,
       subscriptionType,
       user.customerId,
-      nextDueDate
+      nextDueDate,
+      session.user.id
     );
 
     if (!success) {
