@@ -1,5 +1,5 @@
 import { db } from "@/db/drizzle";
-import { orders, subscriptions, transactions } from "@/db/schema";
+import { orders, transactions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 
@@ -183,7 +183,9 @@ const app = new Hono()
     try {
       const { event } = body;
 
-      const data = db.select().from(subscriptions);
+      console.log("Event:", event);
+
+      //const data = db.select().from(subscriptions);
 
       return c.json({
         message: "Webhook processado com sucesso",
