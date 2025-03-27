@@ -71,15 +71,6 @@ export const credentialsSignUp = async (
       };
     }
 
-    const { failed, failedMessage } = await createVercelDomain(domain);
-
-    if (failed) {
-      return {
-        success: false,
-        message: failedMessage,
-      };
-    }
-
     const { success, walletId, message, apiKey } = await createUserAccount({
       name,
       email,
@@ -123,6 +114,15 @@ export const credentialsSignUp = async (
       return {
         success: false,
         message: messageText,
+      };
+    }
+
+    const { failed, failedMessage } = await createVercelDomain(domain);
+
+    if (failed) {
+      return {
+        success: false,
+        message: failedMessage,
       };
     }
 
