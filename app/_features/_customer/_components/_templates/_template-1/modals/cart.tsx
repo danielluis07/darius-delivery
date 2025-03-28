@@ -265,6 +265,7 @@ export const Cart = () => {
 
     if (success && fee) {
       onOpenAlert(orderData, message, params.domain);
+      return;
     }
 
     if (
@@ -276,8 +277,6 @@ export const Cart = () => {
       mutateCashOnWebsite(orderData);
     }
   };
-
-  console.log(cart);
 
   return (
     <>

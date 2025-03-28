@@ -159,6 +159,8 @@ export const useCreateCashOnDeliveryOrder = (domain: string) => {
       const domainPath = isDev ? `/${domain}` : "";
       const redirectUrl = `${baseUrl}${domainPath}/payment-confirmation?dailyNumber=${dailyNumber}&totalPrice=${totalPrice}&status=${status}&paymentStatus=${paymentStatus}&deliveryDeadline=${deliveryDeadline}`;
 
+      console.log("redirectUrl", redirectUrl);
+
       router.push(redirectUrl);
     },
     onError: () => {

@@ -1187,8 +1187,6 @@ const app = new Hono()
         return c.json({ error: message }, 500);
       }
 
-      console.log("obs", obs);
-
       const [data] = await db
         .update(orders)
         .set({
