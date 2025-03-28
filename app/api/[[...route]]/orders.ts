@@ -29,7 +29,7 @@ import {
 import { verifyAuth } from "@hono/auth-js";
 import { alias } from "drizzle-orm/pg-core";
 import { insertOrderSchema } from "@/db/schemas";
-import { createPayment, generatePixQrCode, simulatePayment } from "@/lib/asaas";
+import { createPayment, generatePixQrCode } from "@/lib/asaas";
 import { formatAddress, getGeoCode } from "@/lib/google-geocode";
 import { ExtendedAuthUser } from "@/types";
 
