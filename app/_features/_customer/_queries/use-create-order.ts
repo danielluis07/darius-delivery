@@ -102,7 +102,7 @@ export const useCreateCashWebsiteOrder = (domain: string) => {
 
       const redirectUrl = isDev
         ? `/${domain}/payment-confirmation?dailyNumber=${orderData.dailyNumber}&totalPrice=${orderData.totalPrice}&status=${orderData.status}&paymentStatus=${orderData.paymentStatus}&deliveryDeadline=${orderData.deliveryDeadline}`
-        : `/payment-confirmation?dailyNumber=${orderData.dailyNumber}&totalPrice=${orderData.totalPrice}&status=${orderData.status}&paymentStatus=${orderData.paymentStatus}&deliveryDeadline=$orderData.{deliveryDeadline}`;
+        : `/payment-confirmation?dailyNumber=${orderData.dailyNumber}&totalPrice=${orderData.totalPrice}&status=${orderData.status}&paymentStatus=${orderData.paymentStatus}&deliveryDeadline=${orderData.deliveryDeadline}`;
 
       router.push(redirectUrl);
     },
