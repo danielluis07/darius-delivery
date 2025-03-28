@@ -99,9 +99,10 @@ export const useCreateCashWebsiteOrder = (domain: string) => {
       }
 
       const isDev = process.env.NODE_ENV === "development";
-      const baseUrl = isDev ? `http://localhost:3000` : "";
-      const domainPath = isDev ? `/${domain}` : "";
-      const redirectUrl = `${baseUrl}${domainPath}/payment-confirmation?dailyNumber=${orderData.dailyNumber}&totalPrice=${orderData.totalPrice}&status=${orderData.status}&paymentStatus=${orderData.paymentStatus}&deliveryDeadline=${orderData.deliveryDeadline}`;
+
+      const redirectUrl = isDev
+        ? `/${domain}/payment-confirmation?dailyNumber=${orderData.dailyNumber}&totalPrice=${orderData.totalPrice}&status=${orderData.status}&paymentStatus=${orderData.paymentStatus}&deliveryDeadline=${orderData.deliveryDeadline}`
+        : `/payment-confirmation?dailyNumber=${orderData.dailyNumber}&totalPrice=${orderData.totalPrice}&status=${orderData.status}&paymentStatus=${orderData.paymentStatus}&deliveryDeadline=$orderData.{deliveryDeadline}`;
 
       router.push(redirectUrl);
     },
