@@ -155,11 +155,10 @@ export const useCreateCashOnDeliveryOrder = (domain: string) => {
       } = data.data;
 
       const isDev = process.env.NODE_ENV === "development";
-      const baseUrl = isDev ? `http://localhost:3000` : "";
-      const domainPath = isDev ? `/${domain}` : "";
-      const redirectUrl = `${baseUrl}${domainPath}/payment-confirmation?dailyNumber=${dailyNumber}&totalPrice=${totalPrice}&status=${status}&paymentStatus=${paymentStatus}&deliveryDeadline=${deliveryDeadline}`;
 
-      console.log("redirectUrl", redirectUrl);
+      const redirectUrl = isDev
+        ? `/${domain}/payment-confirmation?dailyNumber=${dailyNumber}&totalPrice=${totalPrice}&status=${status}&paymentStatus=${paymentStatus}&deliveryDeadline=${deliveryDeadline}`
+        : `/payment-confirmation?dailyNumber=${dailyNumber}&totalPrice=${totalPrice}&status=${status}&paymentStatus=${paymentStatus}&deliveryDeadline=${deliveryDeadline}`;
 
       router.push(redirectUrl);
     },
