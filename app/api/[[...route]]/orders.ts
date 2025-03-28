@@ -993,7 +993,7 @@ const app = new Hono()
       );
 
       const { successful, netValue } = await simulatePayment(
-        order.total_price,
+        order.total_price + fee,
         order.payment_type,
         values.apiKey
       );
