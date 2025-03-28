@@ -470,6 +470,9 @@ export const Cart = () => {
                                 <FormLabel>Nome do Titular</FormLabel>
                                 <FormControl>
                                   <input
+                                    style={{
+                                      color: "black",
+                                    }}
                                     {...field}
                                     placeholder="João Silva"
                                     className="w-full p-2 border rounded-md"
@@ -488,6 +491,9 @@ export const Cart = () => {
                                   <FormLabel>Número do Cartão</FormLabel>
                                   <FormControl>
                                     <InputMask
+                                      style={{
+                                        color: "black",
+                                      }}
                                       mask="____ ____ ____ ____"
                                       replacement={{ _: /\d/ }}
                                       placeholder="1234 5678 9012 3456"
@@ -512,6 +518,9 @@ export const Cart = () => {
                                     <FormLabel>Mês de Validade</FormLabel>
                                     <FormControl>
                                       <input
+                                        style={{
+                                          color: "black",
+                                        }}
                                         {...field}
                                         placeholder="12"
                                         className="w-full p-2 border rounded-md"
@@ -531,6 +540,9 @@ export const Cart = () => {
                                     <FormLabel>Ano de Validade</FormLabel>
                                     <FormControl>
                                       <input
+                                        style={{
+                                          color: "black",
+                                        }}
                                         {...field}
                                         placeholder="2025"
                                         className="w-full p-2 border rounded-md"
@@ -550,6 +562,9 @@ export const Cart = () => {
                                 <FormLabel>CCV</FormLabel>
                                 <FormControl>
                                   <input
+                                    style={{
+                                      color: "black",
+                                    }}
                                     {...field}
                                     placeholder="123"
                                     className="w-full p-2 border rounded-md"
@@ -639,6 +654,9 @@ export const Cart = () => {
                       <FormItem className="mt-5 w-full">
                         <FormControl>
                           <textarea
+                            style={{
+                              color: "black",
+                            }}
                             placeholder="Insira alguma observação ou detalhe (opcional)"
                             className="resize-none text-sm w-full p-2 border rounded-md"
                             rows={3}

@@ -103,7 +103,11 @@ export const SignUpForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+      <form
+        style={{
+          color: "black",
+        }}
+        onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
         {step === STEPS.FIRST && (
           <div className="w-full space-y-4">
             <FormField
@@ -289,7 +293,7 @@ export const SignUpForm = () => {
               control={form.control}
               name="state"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="bg-white">
                   <Select
                     disabled={isPending}
                     onValueChange={field.onChange}

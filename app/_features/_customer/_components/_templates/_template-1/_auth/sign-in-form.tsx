@@ -62,6 +62,9 @@ export const SignInForm = () => {
   return (
     <Form {...form}>
       <form
+        style={{
+          color: "black",
+        }}
         className="space-y-4"
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
         <FormField
