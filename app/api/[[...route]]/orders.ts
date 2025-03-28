@@ -892,7 +892,7 @@ const app = new Hono()
         db
           .select({ id: users.id, walletId: users.walletId })
           .from(users)
-          .where(eq(users.id, "e53959ca-df8c-4a67-a755-54da4aaca736"))
+          .where(eq(users.id, "c46cec32-af9a-4725-af53-117dc343ce1b"))
           .then(([result]) => result),
       ]);
 
