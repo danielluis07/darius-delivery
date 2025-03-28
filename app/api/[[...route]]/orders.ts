@@ -992,30 +992,19 @@ const app = new Hono()
         }))
       );
 
-      const { successful, netValue } = await simulatePayment(
-        order.total_price + fee,
-        order.payment_type,
-        values.apiKey
-      );
-
-      if (!successful) {
-        return c.json({ error: "Failed to simulate payment" }, 500);
-      }
-
       const comissionValue = user.comission || comission.percentage;
 
       const { success, data, message, paymentId } = await createPayment(
         {
           customer: values.asaasCustomerId,
           billingType: values.paymentMethod as "PIX" | "CREDIT_CARD" | "BOLETO",
-          value: values.totalPrice,
+          value: order.total_price,
           externalReference: order.id,
           creditCard: values.creditCard,
         },
         values.apiKey,
         comissionValue,
-        admin.walletId,
-        netValue
+        admin.walletId
       );
 
       if (!success) {

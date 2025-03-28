@@ -75,7 +75,7 @@ export type PaymentBody = {
   externalReference?: string;
   split: Array<
     | { walletId: string; fixedValue: number }
-    | { walletId: string; percentageValue: number }
+    | { walletId: string; percentualValue: number }
   >;
   creditCard?: {
     holderName: string;

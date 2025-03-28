@@ -309,8 +309,7 @@ export const createPayment = async (
   values: AsaasPayment,
   apiKey: string,
   commission: string,
-  adminWalletId: string,
-  netValue: number
+  adminWalletId: string
 ) => {
   try {
     const body: PaymentBody = {
@@ -322,8 +321,7 @@ export const createPayment = async (
       split: [
         {
           walletId: adminWalletId,
-          fixedValue: netValue,
-          percentageValue: 100 - parseFloat(commission),
+          percentualValue: parseFloat(commission),
         },
       ],
     };
