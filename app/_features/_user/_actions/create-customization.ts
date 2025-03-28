@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { customizations, users } from "@/db/schema";
+import { customizations, users, orderSettings } from "@/db/schema";
 import { insertCustomizationSchema } from "@/db/schemas";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -117,6 +117,19 @@ export const createCustomization = async (
         success: false,
         message:
           "Você precisa configurar a chave da API do Google Maps antes de criar uma customização",
+      };
+    }
+
+    const [orderSettingsData] = await db
+      .select()
+      .from(orderSettings)
+      .where(eq(orderSettings.user_id, session.user.id));
+
+    if (!orderSettingsData) {
+      return {
+        success: false,
+        message:
+          "Você precisa configurar os tempos de entrega dos pedidos antes de criar uma customização",
       };
     }
 
