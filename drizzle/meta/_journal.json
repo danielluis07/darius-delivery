@@ -267,6 +267,13 @@
       "when": 1743004958938,
       "tag": "0037_robust_micromax",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1743442989313,
+      "tag": "0038_furry_marvel_boy",
+      "breakpoints": true
     }
   ]
 }

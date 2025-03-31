@@ -59,6 +59,11 @@ export const transactionType = pgEnum("transaction_type", [
   "FEE",
 ]);
 
+export const adminTransactionType = pgEnum("admin_transaction_type", [
+  "COMISSION",
+  "SUBSCRIPTION",
+]);
+
 export const transactionStatus = pgEnum("transaction_status", [
   "PENDING",
   "COMPLETED",
@@ -553,4 +558,17 @@ export const restaurantData = pgTable("restaurant_data", {
   itemsAddedToCart: integer("items_added_to_cart").default(0),
   itemsPurchased: integer("items_purchased").default(0),
   withdrawals: integer("withdrawals").default(0),
+});
+
+export const adminTransactions = pgTable("admin_transactions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  type: adminTransactionType("type"),
+  amount: integer("amount").notNull(),
+  reference_id: text("reference_id"), // ID do pedido ou assinatura correspondente
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });

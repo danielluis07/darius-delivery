@@ -12,6 +12,7 @@ import {
   receipts,
   commissions,
   transactions,
+  adminTransactions,
 } from "@/db/schema";
 import {
   asc,
@@ -1011,6 +1012,20 @@ const app = new Hono()
         await db.delete(orders).where(eq(orders.id, order.id));
 
         return c.json({ error: message }, 500);
+      }
+
+      const commissionAmount =
+        (parseFloat(comissionValue) / 100) * order.total_price;
+
+      const adminTransaction = await db.insert(adminTransactions).values({
+        amount: commissionAmount,
+        user_id: admin.id,
+        reference_id: order.id,
+        type: "COMISSION",
+      });
+
+      if (!adminTransaction) {
+        return c.json({ error: "Failed to create admin transaction" }, 500);
       }
 
       await db

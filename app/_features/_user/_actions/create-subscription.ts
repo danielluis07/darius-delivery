@@ -2,7 +2,7 @@
 
 import { auth, unstable_update } from "@/auth";
 import { db } from "@/db/drizzle";
-import { subscriptions, users } from "@/db/schema";
+import { adminTransactions, subscriptions, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createAsaasSubscription } from "@/lib/asaas";
 import { addDays, format } from "date-fns";
@@ -54,6 +54,19 @@ export const createSubscription = async (
       return {
         success: false,
         message: "Erro inesperado ao criar a assinatura",
+      };
+    }
+
+    const adminTrasnsaction = await db.insert(adminTransactions).values({
+      user_id: "c46cec32-af9a-4725-af53-117dc343ce1b",
+      type: "SUBSCRIPTION",
+      amount: subscriptionPrice,
+    });
+
+    if (!adminTrasnsaction) {
+      return {
+        success: false,
+        message: "Erro inesperado ao criar a transação",
       };
     }
 

@@ -45,10 +45,18 @@ export const columns: ColumnDef<ResponseType>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    cell: ({ row }) => {
+      const status = row.original.status;
+      return <span>{status === "ACTIVE" ? "Ativo" : "Inativo"}</span>;
+    },
   },
   {
     accessorKey: "plan",
     header: "Plano",
+    cell: ({ row }) => {
+      const plan = row.original.plan;
+      return <span>{plan === "BASIC" ? "Básico" : "Premium"}</span>;
+    },
   },
   {
     accessorKey: "isTrial",
