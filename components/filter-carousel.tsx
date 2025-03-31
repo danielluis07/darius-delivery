@@ -2,13 +2,9 @@
 
 import {
   Carousel,
-  CarouselApi,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Badge } from "./ui/badge";
 
 interface FilterCarouselProps {
   //value: string | null;

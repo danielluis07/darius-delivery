@@ -7,8 +7,8 @@ import Image from "next/image";
 import { useGetCategories } from "../../../_queries/use-get-categories";
 
 export const MainClient = () => {
-  const { data, session } = useStore();
-  const { data: categories, isLoading } = useGetCategories(data?.userId);
+  const { data } = useStore();
+  const { data: categories } = useGetCategories(data?.userId);
 
   return (
     <div className="max-w-2xl mx-auto">
