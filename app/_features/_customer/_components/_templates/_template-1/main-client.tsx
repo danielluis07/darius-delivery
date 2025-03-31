@@ -37,9 +37,12 @@ const registerMenuView = async (userId: string | undefined) => {
 
   // Salvar nova visualização e enviar para o backend
   localStorage.setItem(`menuView-${userId}`, now.toString()); // Convertendo `now` para string
-  await fetch(`/api/restaurant-data/menu-views/user/${userId}`, {
-    method: "POST",
-  });
+  await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/restaurant-data/menu-views/user/${userId}`,
+    {
+      method: "POST",
+    }
+  );
 };
 
 export const MainClient = () => {
