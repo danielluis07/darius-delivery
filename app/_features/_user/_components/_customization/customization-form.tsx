@@ -705,11 +705,11 @@ export const CustomizationForm = ({
         />
 
         <CustomizationPreview
-          logo={customization.logo || desktopPreview}
+          logo={customization?.logo || desktopPreview}
           buttonColor={form.watch("button_color")}
           fontColor={form.watch("font_color")}
           backgroundColor={form.watch("background_color")}
-          backgroundImage={customization.banner || bannerPreview}
+          backgroundImage={customization?.banner || bannerPreview}
         />
         <LoadingButton
           label={customization ? "Atualizar" : "Criar"}
