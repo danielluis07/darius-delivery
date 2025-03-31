@@ -1,14 +1,14 @@
 "use client";
 
-import { FilterCarousel } from "@/components/filter-carousel";
+//import { FilterCarousel } from "@/components/filter-carousel";
 import { useStore } from "@/context/store-context";
 import placeholder from "@/public/placeholder-image.jpg";
 import Image from "next/image";
-import { useGetCategories } from "../../../_queries/use-get-categories";
+//import { useGetCategories } from "../../../_queries/use-get-categories";
 
 export const MainClient = () => {
   const { data } = useStore();
-  const { data: categories } = useGetCategories(data?.userId);
+  //  const { data: categories } = useGetCategories(data?.userId);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -22,7 +22,7 @@ export const MainClient = () => {
           className="object-cover"
         />
       </div>
-      <FilterCarousel data={categories} />
+      {/* <FilterCarousel data={categories} /> */}
     </div>
   );
 };

@@ -1,14 +1,12 @@
-"use client";
+/* "use client";
 
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/ui/carousel";
+} from "@/components/ui/carousel"; */
 
-interface FilterCarouselProps {
-  //value: string | null;
-  //onChange: (value: string | null) => void;
+/* interface FilterCarouselProps {
   data:
     | {
         id: string;
@@ -21,8 +19,8 @@ interface FilterCarouselProps {
     | undefined;
 }
 [];
-
-export const FilterCarousel = ({ data }: FilterCarouselProps) => {
+ */
+/* export const FilterCarousel = ({ data }: FilterCarouselProps) => {
   return (
     <div className="relative w-full border h-screen">
       <Carousel
@@ -41,4 +39,4 @@ export const FilterCarousel = ({ data }: FilterCarouselProps) => {
       </Carousel>
     </div>
   );
-};
+}; */
