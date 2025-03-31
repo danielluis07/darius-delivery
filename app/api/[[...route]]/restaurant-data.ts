@@ -30,8 +30,6 @@ const app = new Hono()
     async (c) => {
       const { userId } = c.req.valid("param");
 
-      console.log("userId", userId);
-
       const [existingData] = await db
         .select()
         .from(restaurantData)

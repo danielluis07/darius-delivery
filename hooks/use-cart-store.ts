@@ -35,7 +35,10 @@ export const useCartStore = create<CartState>((set, get) => ({
       );
 
       // Chamada à API para registrar o evento
-      fetch(`/api/restaurant-data/cart/user/${userId}`, { method: "POST" })
+      fetch(
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/restaurant-data/cart/user/${userId}`,
+        { method: "POST" }
+      )
         .then((res) => res.json())
         .then((data) => console.log("Carrinho atualizado:", data))
         .catch((err) => console.error("Erro ao registrar no backend:", err));

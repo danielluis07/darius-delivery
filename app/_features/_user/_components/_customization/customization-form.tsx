@@ -14,7 +14,13 @@ import {
 } from "@/components/ui/form";
 import { useForm, FieldErrors, useFieldArray } from "react-hook-form";
 import { insertCustomizationSchema } from "@/db/schemas";
-import { ClipboardList, CloudUpload, Key } from "lucide-react";
+import {
+  ClipboardList,
+  CloudUpload,
+  Key,
+  UtensilsCrossed,
+  X,
+} from "lucide-react";
 import { FaPix, FaCreditCard, FaMoneyBill1Wave } from "react-icons/fa6";
 import { BsCreditCard2FrontFill } from "react-icons/bs";
 import { useState } from "react";
@@ -47,6 +53,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { AnimatePresence, motion } from "motion/react";
 
 type TemplatesResponseType = InferResponseType<
   typeof client.api.templates.$get,
@@ -698,10 +705,11 @@ export const CustomizationForm = ({
         />
 
         <CustomizationPreview
-          logo={desktopPreview}
+          logo={customization.logo || desktopPreview}
           buttonColor={form.watch("button_color")}
           fontColor={form.watch("font_color")}
-          backgroundImage={bannerPreview}
+          backgroundColor={form.watch("background_color")}
+          backgroundImage={customization.banner || bannerPreview}
         />
         <LoadingButton
           label={customization ? "Atualizar" : "Criar"}
@@ -721,12 +729,15 @@ const CustomizationPreview = ({
   buttonColor,
   fontColor,
   backgroundImage,
+  backgroundColor,
 }: {
   logo: string | null;
   buttonColor: string | null | undefined;
   fontColor: string | null | undefined;
+  backgroundColor: string | null | undefined;
   backgroundImage: string | null;
 }) => {
+  const [open, setOpen] = useState<boolean>(false);
   return (
     <Dialog>
       <DialogTrigger className="w-full bg-secondary h-9 px-4 py-2 text-primary shadow-sm hover:bg-primary hover:text-white inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
@@ -746,6 +757,54 @@ const CustomizationPreview = ({
           style={{
             backgroundImage: `url(${backgroundImage})`,
           }}>
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                style={{
+                  backgroundColor: backgroundColor || "white",
+                  color: fontColor || "black",
+                }}
+                className="absolute inset-0 z-10 p-6 overflow-y-auto shadow-2xl rounded-lg">
+                <div className="flex justify-end mb-4">
+                  <div
+                    onClick={() => setOpen(false)}
+                    className="cursor-pointer">
+                    <X />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Card
+                    style={{
+                      backgroundColor: buttonColor || "white",
+                      color: fontColor || "black",
+                    }}
+                    className="text-center">
+                    Categoria Exemplo 1
+                  </Card>
+                  <Card
+                    style={{
+                      backgroundColor: buttonColor || "white",
+                      color: fontColor || "black",
+                    }}
+                    className="text-center">
+                    Categoria Exemplo 2
+                  </Card>
+                  <Card
+                    style={{
+                      backgroundColor: buttonColor || "white",
+                      color: fontColor || "black",
+                    }}
+                    className="text-center">
+                    Categoria Exemplo 3
+                  </Card>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="relative size-32 mx-auto mb-4">
             <Image
               src={logo || placeholder}
@@ -773,6 +832,16 @@ const CustomizationPreview = ({
               }}>
               <Key />
               Login
+            </Card>
+            <Card
+              onClick={() => setOpen(true)}
+              className="flex flex-col items-center min-w-28 cursor-pointer"
+              style={{
+                backgroundColor: buttonColor || "transparent",
+                color: fontColor || "black",
+              }}>
+              <UtensilsCrossed />
+              Menu
             </Card>
           </div>
         </div>

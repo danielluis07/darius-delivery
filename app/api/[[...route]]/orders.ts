@@ -791,7 +791,7 @@ const app = new Hono()
       );
 
       await fetch(
-        `/api/restaurant-data/purchased/user/${values.restaurantOwnerId}`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/restaurant-data/purchased/user/${values.restaurantOwnerId}`,
         { method: "POST" }
       )
         .then((res) => res.json())
@@ -1035,7 +1035,7 @@ const app = new Hono()
       }
 
       await fetch(
-        `/api/restaurant-data/purchased/user/${values.restaurantOwnerId}`,
+        `${process.env.NEXT_PUBLIC_APP_URL}//api/restaurant-data/purchased/user/${values.restaurantOwnerId}`,
         { method: "POST" }
       )
         .then((res) => res.json())
