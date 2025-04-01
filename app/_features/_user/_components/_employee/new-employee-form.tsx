@@ -82,8 +82,8 @@ export const NewEmployeeForm = () => {
           }
         })
         .catch((error) => {
-          console.error("Error while creating/updating comission:", error);
-          toast.error("Erro ao definir a comissão");
+          console.error("Error while creating employee:", error);
+          toast.error("Erro ao criar a funcionário");
         });
     });
   };

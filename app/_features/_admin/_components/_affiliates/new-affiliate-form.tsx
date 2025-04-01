@@ -1,77 +1,36 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
-import { updateEmployeeSchema } from "@/db/schemas";
+import { createAffiliateSchema } from "@/db/schemas";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
-import {
-  MultiSelector,
-  MultiSelectorContent,
-  MultiSelectorInput,
-  MultiSelectorItem,
-  MultiSelectorList,
-  MultiSelectorTrigger,
-} from "@/components/ui/multi-select-permission";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { updateEmployee } from "@/app/_features/_user/_actions/update-employee";
-import { InferResponseType } from "hono";
-import { client } from "@/lib/hono";
+import { createAffiliate } from "../../_actions/create-affiliate";
 
-type FormData = z.infer<typeof updateEmployeeSchema>;
+type FormData = z.infer<typeof createAffiliateSchema>;
 
-const permissions = [
-  "Início",
-  "Categorias",
-  "Produtos",
-  "Configuração de Domínio",
-  "Personalização",
-  "Entregadores",
-  "Pedidos",
-  "Roteirização de Pedidos",
-  "Combos",
-  "Clientes",
-  "Financeiro",
-  "Áreas de Entrega",
-  "Impressão de Comandas",
-  "Pixels",
-  "Darius Pay",
-];
-
-type Employee = InferResponseType<
-  (typeof client.api.users.employee)[":employeeId"]["$get"],
-  200
->["data"];
-
-export const UpdateEmployeeForm = ({
-  userId,
-  data,
-}: {
-  userId: string;
-  data: Employee;
-}) => {
+export const NewAffiliateForm = () => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
-    resolver: zodResolver(updateEmployeeSchema),
+    resolver: zodResolver(createAffiliateSchema),
     defaultValues: {
-      name: data.name || "",
-      email: data.email || "",
-      phone: data.phone || "",
+      name: "",
+      email: "",
+      phone: "",
       password: "",
-      permissions: data.permissions || [],
     },
   });
 
@@ -83,10 +42,7 @@ export const UpdateEmployeeForm = ({
 
   const onSubmit = async (values: FormData) => {
     startTransition(() => {
-      updateEmployee(userId, {
-        ...values,
-        phone: removeFormatting(values.phone),
-      })
+      createAffiliate({ ...values, phone: removeFormatting(values.phone) })
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -94,12 +50,12 @@ export const UpdateEmployeeForm = ({
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard/employees");
+            router.push("/admin/affiliates");
           }
         })
         .catch((error) => {
-          console.error("Error while updating employee:", error);
-          toast.error("Erro ao atualizar o funcionário");
+          console.error("Error while creating affiliate:", error);
+          toast.error("Erro ao criar afiliado. Tente novamente mais tarde.");
         });
     });
   };
@@ -107,7 +63,7 @@ export const UpdateEmployeeForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Atualizar Funcionário</CardTitle>
+        <CardTitle>Criar Afiliado</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -187,37 +143,8 @@ export const UpdateEmployeeForm = ({
                         type="password"
                         placeholder="Senha"
                         disabled={isPending}
+                        required
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="permissions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Permissões</FormLabel>
-                    <FormControl>
-                      <MultiSelector
-                        values={field.value as string[]}
-                        onValuesChange={field.onChange}
-                        loop>
-                        <MultiSelectorTrigger>
-                          <MultiSelectorInput placeholder="Selecionar" />
-                        </MultiSelectorTrigger>
-                        <MultiSelectorContent>
-                          <MultiSelectorList>
-                            {permissions.map((permission, i) => (
-                              <MultiSelectorItem key={i} value={permission}>
-                                {permission}
-                              </MultiSelectorItem>
-                            ))}
-                          </MultiSelectorList>
-                        </MultiSelectorContent>
-                      </MultiSelector>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -227,10 +154,10 @@ export const UpdateEmployeeForm = ({
 
             <LoadingButton
               type="submit"
-              label="Atualizar Funcionário"
+              label="Criar Afiliado"
               isPending={isPending}
               disabled={isPending}
-              loadingLabel="Atualizando..."
+              loadingLabel="Criando..."
               className="w-full mt-5"
             />
           </form>

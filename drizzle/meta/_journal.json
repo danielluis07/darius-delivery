@@ -274,6 +274,13 @@
       "when": 1743442989313,
       "tag": "0038_furry_marvel_boy",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1743466382948,
+      "tag": "0039_nifty_the_fallen",
+      "breakpoints": true
     }
   ]
 }

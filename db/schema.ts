@@ -572,3 +572,29 @@ export const adminTransactions = pgTable("admin_transactions", {
     .defaultNow()
     .notNull(),
 });
+
+export const affiliates = pgTable("affiliates", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  user_id: text("user_id") // O afiliado é um usuário com role "USER"
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+  referral_code: text("referral_code").unique().notNull(), // Código exclusivo do afiliado
+  created_at: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const referrals = pgTable("referrals", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  affiliate_id: text("affiliate_id").references(() => affiliates.id, {
+    onDelete: "cascade",
+  }),
+  referred_user_id: text("referred_user_id").unique().notNull(), // Usuário cadastrado via link
+  created_at: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});

@@ -20,6 +20,7 @@ import {
   Settings,
   Users,
   CreditCard,
+  ContactRound,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -43,6 +44,11 @@ const items = [
     url: "/admin/users",
     icon: Users,
     label: "Lojistas",
+  },
+  {
+    url: "/admin/affiliates",
+    icon: ContactRound,
+    label: "Afiliados",
   },
   {
     url: "/admin/templates",

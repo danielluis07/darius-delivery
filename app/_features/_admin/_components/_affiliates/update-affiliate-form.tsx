@@ -1,79 +1,65 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
-import { updateEmployeeSchema } from "@/db/schemas";
+import { updateAffiliateSchema } from "@/db/schemas";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
-import {
-  MultiSelector,
-  MultiSelectorContent,
-  MultiSelectorInput,
-  MultiSelectorItem,
-  MultiSelectorList,
-  MultiSelectorTrigger,
-} from "@/components/ui/multi-select-permission";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { updateEmployee } from "@/app/_features/_user/_actions/update-employee";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
+import { Check, Copy } from "lucide-react";
 
-type FormData = z.infer<typeof updateEmployeeSchema>;
+type FormData = z.infer<typeof updateAffiliateSchema>;
 
-const permissions = [
-  "Início",
-  "Categorias",
-  "Produtos",
-  "Configuração de Domínio",
-  "Personalização",
-  "Entregadores",
-  "Pedidos",
-  "Roteirização de Pedidos",
-  "Combos",
-  "Clientes",
-  "Financeiro",
-  "Áreas de Entrega",
-  "Impressão de Comandas",
-  "Pixels",
-  "Darius Pay",
-];
-
-type Employee = InferResponseType<
-  (typeof client.api.users.employee)[":employeeId"]["$get"],
+type Affiliate = InferResponseType<
+  (typeof client.api.admin.affiliates)[":userId"]["$get"],
   200
 >["data"];
 
-export const UpdateEmployeeForm = ({
+export const UpdateAffiliateForm = ({
   userId,
   data,
 }: {
   userId: string;
-  data: Employee;
+  data: Affiliate;
 }) => {
   const [isPending, startTransition] = useTransition();
+  const [copied, setCopied] = useState(false);
+  const textToCopy = `https://dariusdelivery.com.br/${data.referralCode}`;
   const form = useForm<FormData>({
-    resolver: zodResolver(updateEmployeeSchema),
+    resolver: zodResolver(updateAffiliateSchema),
     defaultValues: {
       name: data.name || "",
       email: data.email || "",
       phone: data.phone || "",
       password: "",
-      permissions: data.permissions || [],
     },
   });
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // Reseta após 2s
+    } catch (err) {
+      console.error("Falha ao copiar:", err);
+      toast.error("Falha ao copiar o link de afiliado.");
+    }
+  };
 
   const router = useRouter();
 
@@ -98,8 +84,10 @@ export const UpdateEmployeeForm = ({
           }
         })
         .catch((error) => {
-          console.error("Error while updating employee:", error);
-          toast.error("Erro ao atualizar o funcionário");
+          console.error("Error while updating affiliate:", error);
+          toast.error(
+            "Erro ao atualizar afiliado. Tente novamente mais tarde."
+          );
         });
     });
   };
@@ -107,7 +95,21 @@ export const UpdateEmployeeForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Atualizar Funcionário</CardTitle>
+        <div className="flex justify-between items-center w-full">
+          <CardTitle>Atualizar Afiliado</CardTitle>
+          <div className="relative w-96">
+            <Input type="text" readOnly value={textToCopy} />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 right-1"
+              onClick={handleCopy}>
+              {copied ? (
+                <Check size={15} className="text-green-500" />
+              ) : (
+                <Copy size={15} className="cursor-pointer" />
+              )}
+            </div>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -193,41 +195,11 @@ export const UpdateEmployeeForm = ({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="permissions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Permissões</FormLabel>
-                    <FormControl>
-                      <MultiSelector
-                        values={field.value as string[]}
-                        onValuesChange={field.onChange}
-                        loop>
-                        <MultiSelectorTrigger>
-                          <MultiSelectorInput placeholder="Selecionar" />
-                        </MultiSelectorTrigger>
-                        <MultiSelectorContent>
-                          <MultiSelectorList>
-                            {permissions.map((permission, i) => (
-                              <MultiSelectorItem key={i} value={permission}>
-                                {permission}
-                              </MultiSelectorItem>
-                            ))}
-                          </MultiSelectorList>
-                        </MultiSelectorContent>
-                      </MultiSelector>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <LoadingButton
               type="submit"
-              label="Atualizar Funcionário"
+              label="Atualizar Afiliado"
               isPending={isPending}
               disabled={isPending}
               loadingLabel="Atualizando..."

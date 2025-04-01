@@ -2,7 +2,7 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import { users, subscriptions } from "@/db/schema";
+import { users, subscriptions, affiliates } from "@/db/schema";
 import { eq, and, sql, count } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 
@@ -78,6 +78,56 @@ const app = new Hono()
         .orderBy(sql`TO_CHAR(${subscriptions.createdAt}, 'MM')`);
 
       return c.json({ data: subsPerMonth });
+    }
+  )
+  .get("/affiliates", async (c) => {
+    const data = await db
+      .select({
+        id: users.id,
+        affiliateId: affiliates.id,
+        name: users.name,
+        email: users.email,
+        phone: users.phone,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .innerJoin(affiliates, eq(affiliates.user_id, users.id));
+
+    if (!data || data.length === 0) {
+      return c.json({ error: "No affiliates found" }, 404);
+    }
+
+    return c.json({ data });
+  })
+  .get(
+    "/affiliates/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
+    async (c) => {
+      const { userId } = c.req.valid("param");
+
+      if (!userId) {
+        return c.json({ error: "Affiliate ID is missing" }, 400);
+      }
+
+      const [data] = await db
+        .select({
+          id: users.id,
+          affiliateId: affiliates.id,
+          referralCode: affiliates.referral_code,
+          name: users.name,
+          email: users.email,
+          phone: users.phone,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .innerJoin(affiliates, eq(affiliates.user_id, users.id))
+        .where(eq(users.id, userId));
+
+      if (!data) {
+        return c.json({ error: "No affiliate found" }, 404);
+      }
+
+      return c.json({ data });
     }
   )
   .patch(

@@ -33,6 +33,23 @@ export const createEmployeeSchema = z.object({
   permissions: z.array(z.string()).optional(),
 });
 
+export const createAffiliateSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  phone: z.string(),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+});
+
+export const updateAffiliateSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  phone: z.string(),
+  password: z
+    .string()
+    .min(8, "A senha deve ter pelo menos 8 caracteres")
+    .optional(),
+});
+
 export const updateEmployeeSchema = z.object({
   name: z.string(),
   email: z.string().email(),
