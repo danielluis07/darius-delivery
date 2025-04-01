@@ -32,7 +32,7 @@ export const createAffiliate = async (
       return { success: false, message: "Campos inválidos" };
     }
 
-    const { name, email, phone, password, permissions } = validatedValues.data;
+    const { name, email, phone, password } = validatedValues.data;
 
     if (!name || !email || !phone || !password) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
