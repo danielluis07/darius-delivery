@@ -2,7 +2,7 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.users.employee)[":employeeId"]["$get"],
+  (typeof client.api.admin.affiliates)[":userId"]["$get"],
   200
 >["data"];
 
