@@ -13,6 +13,7 @@ import {
   commissions,
   transactions,
   adminTransactions,
+  combos,
 } from "@/db/schema";
 import {
   asc,
@@ -35,6 +36,15 @@ import { formatAddress, getGeoCode } from "@/lib/google-geocode";
 import { ExtendedAuthUser } from "@/types";
 
 type Products = {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  description: string;
+  image: string;
+};
+
+type Combos = {
   id: number;
   name: string;
   price: number;
@@ -219,25 +229,42 @@ const app = new Hono()
             phone: deliverers.phone,
           },
           products: sql<Products[]>`
-          COALESCE(
-            json_agg(
-              json_build_object(
-                'id', ${products.id},
-                'name', ${products.name},
-                'price', ${products.price},
-                'quantity', ${orderItems.quantity},
-                'description', ${products.description},
-                'image', ${products.image}
-              )
-            ) FILTER (WHERE ${products.id} IS NOT NULL), '[]'
-          )
-        `.as("products"),
+            COALESCE(
+              json_agg(
+                json_build_object(
+                  'id', ${products.id},
+                  'name', ${products.name},
+                  'price', ${products.price},
+                  'quantity', ${orderItems.quantity},
+                  'description', ${products.description},
+                  'image', ${products.image},
+                  'type', 'PRODUCT' -- Definimos explicitamente como produto
+                )
+              ) FILTER (WHERE ${products.id} IS NOT NULL), '[]'
+            )
+          `.as("products"),
+          combos: sql<Combos[]>`
+            COALESCE(
+              json_agg(
+                json_build_object(
+                  'id', ${combos.id},
+                  'name', ${combos.name},
+                  'price', ${combos.price},
+                  'quantity', ${orderItems.quantity},
+                  'description', ${combos.description},
+                  'image', ${combos.image},
+                  'type', 'COMBO' -- Definimos explicitamente como combo
+                )
+              ) FILTER (WHERE ${combos.id} IS NOT NULL), '[]'
+            )
+          `.as("combos"),
         })
         .from(orders)
         .innerJoin(orderItems, eq(orders.id, orderItems.order_id))
         .innerJoin(users, eq(orders.customer_id, users.id))
         .leftJoin(deliverers, eq(orders.delivererId, deliverers.id))
         .leftJoin(products, eq(orderItems.product_id, products.id))
+        .leftJoin(combos, eq(orderItems.combo_id, combos.id))
         .leftJoin(customers, eq(orders.customer_id, customers.userId))
         .where(eq(orders.id, orderId))
         .groupBy(
@@ -651,7 +678,8 @@ const app = new Hono()
             userId: z.string().nullable(),
             price: z.number(),
             description: z.string().nullable(),
-            category_id: z.string().nullable(),
+            category_id: z.string().nullable().optional(),
+            type: z.string(),
             quantity: z.number().optional(),
           })
         ),
@@ -785,7 +813,8 @@ const app = new Hono()
       await db.insert(orderItems).values(
         values.items.map((item) => ({
           order_id: order.id,
-          product_id: item.id,
+          product_id: item.type === "PRODUCT" ? item.id : null,
+          combo_id: item.type === "COMBO" ? item.id : null,
           price: item.price,
           quantity: item.quantity || 1,
         }))
@@ -825,7 +854,8 @@ const app = new Hono()
             userId: z.string().nullable(),
             price: z.number(),
             description: z.string().nullable(),
-            category_id: z.string().nullable(),
+            category_id: z.string().nullable().optional(),
+            type: z.string(),
             quantity: z.number(),
           })
         ),
@@ -987,7 +1017,8 @@ const app = new Hono()
       await db.insert(orderItems).values(
         values.items.map((item) => ({
           order_id: order.id,
-          product_id: item.id,
+          product_id: item.type === "PRODUCT" ? item.id : null,
+          combo_id: item.type === "COMBO" ? item.id : null,
           price: item.price,
           quantity: item.quantity,
         }))

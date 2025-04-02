@@ -51,7 +51,8 @@ const orderSchema = z
         userId: z.string().nullable(),
         price: z.number(),
         description: z.string().nullable(),
-        category_id: z.string().nullable(),
+        category_id: z.string().nullable().optional(),
+        type: z.string(),
         quantity: z.number(),
       })
     ),
@@ -143,6 +144,8 @@ export const Cart = () => {
   const { onOpenAlert } = useDeliveryFeeAlert();
   const [step, setStep] = useState<STEPS>(STEPS.FIRST);
   const { data, session } = useStore();
+
+  console.log("Cart data", cart);
 
   const form = useForm<OrderData>({
     resolver: zodResolver(orderSchema),

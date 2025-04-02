@@ -281,6 +281,20 @@
       "when": 1743466382948,
       "tag": "0039_nifty_the_fallen",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1743530562156,
+      "tag": "0040_smart_wild_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1743593870735,
+      "tag": "0041_pale_cobalt_man",
+      "breakpoints": true
     }
   ]
 }

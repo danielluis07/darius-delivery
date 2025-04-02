@@ -21,7 +21,7 @@ const app = new Hono()
       const data = await db
         .select()
         .from(combos)
-        .where(eq(combos.user_id, userId));
+        .where(eq(combos.userId, userId));
 
       if (!data || data.length === 0) {
         return c.json({ error: "No combos found" }, 404);
@@ -44,7 +44,7 @@ const app = new Hono()
 
     const data = await db
       .insert(combos)
-      .values({ ...values, user_id: auth.token.sub });
+      .values({ ...values, userId: auth.token.sub });
 
     if (!data) {
       return c.json({ error: "Failed to insert data" }, 500);

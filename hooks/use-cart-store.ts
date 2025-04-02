@@ -1,11 +1,11 @@
-import { Product } from "@/types";
+import { Product, Combo } from "@/types";
 import { create } from "zustand";
 
-type CartItem = Product & { quantity: number };
+type CartItem = (Product | Combo) & { quantity: number };
 
 type CartState = {
   cart: CartItem[];
-  addToCart: (product: Product, userId: string) => boolean;
+  addToCart: (product: Product | Combo, userId: string) => boolean;
   removeFromCart: (id: string, userId: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;

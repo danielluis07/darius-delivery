@@ -1,4 +1,4 @@
-import { customizations, orderSettings, products } from "@/db/schema";
+import { customizations, orderSettings } from "@/db/schema";
 import { AuthUser } from "@hono/auth-js";
 
 export type ExtendedAuthUser = AuthUser & {
@@ -31,6 +31,7 @@ export type CartItem = {
   price: number;
   description: string | null;
   category_id: string | null;
+  type: string;
   quantity: number;
 };
 
@@ -86,4 +87,28 @@ export type PaymentBody = {
   };
 };
 
-export type Product = typeof products.$inferSelect;
+export type Product = {
+  id: string;
+  name: string;
+  userId: string | null;
+  image: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  category_id: string | null | undefined;
+  description: string | null;
+  type: string;
+  price: number;
+  sizes: string[] | null;
+};
+
+export type Combo = {
+  id: string;
+  name: string;
+  userId: string | null;
+  description: string;
+  price: number;
+  image: string | null;
+  type: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};

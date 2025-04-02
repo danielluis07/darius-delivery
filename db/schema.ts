@@ -240,6 +240,7 @@ export const products = pgTable("products", {
   description: text("description"),
   price: integer("price").notNull(),
   image: text("image"),
+  type: text("type").notNull().default("PRODUCT"),
   sizes: text("sizes").array().default([]),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -252,7 +253,8 @@ export const combos = pgTable("combos", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   price: integer("price").notNull(),
-  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull().default("COMBO"),
   image: text("image"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -445,6 +447,9 @@ export const orderItems = pgTable("order_items", {
     onDelete: "cascade",
   }),
   product_id: text("product_id").references(() => products.id, {
+    onDelete: "cascade",
+  }),
+  combo_id: text("combo_id").references(() => combos.id, {
     onDelete: "cascade",
   }),
   quantity: integer("quantity").notNull(),

@@ -1,0 +1,2 @@
+ALTER TABLE "order_items" ADD COLUMN "combo_id" text;--> statement-breakpoint
+ALTER TABLE "order_items" ADD CONSTRAINT "order_items_combo_id_combos_id_fk" FOREIGN KEY ("combo_id") REFERENCES "public"."combos"("id") ON DELETE cascade ON UPDATE no action;

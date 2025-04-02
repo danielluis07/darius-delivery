@@ -9,7 +9,8 @@ type ModalType =
   | "menuProducts"
   | "productDetails"
   | "cart"
-  | "checkout";
+  | "checkout"
+  | "combos";
 
 type UseModalStore = {
   modalStack: { type: ModalType; categoryId?: string | null | undefined }[];

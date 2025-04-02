@@ -110,7 +110,7 @@ export const createCombo = async (
       .values({
         name,
         image: signedURL.split("?")[0],
-        user_id: id,
+        userId: id,
         description,
         price,
       })

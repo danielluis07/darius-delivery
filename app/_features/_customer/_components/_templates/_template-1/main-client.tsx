@@ -7,6 +7,7 @@ import {
   ClipboardList,
   Key,
   Sandwich,
+  ShoppingBasket,
   ShoppingCart,
   UtensilsCrossed,
   X,
@@ -22,6 +23,7 @@ import { MenuProducts } from "@/app/_features/_customer/_components/_templates/_
 import { Cart } from "@/app/_features/_customer/_components/_templates/_template-1/modals/cart";
 import { Categories } from "@/app/_features/_customer/_components/_templates/_template-1/modals/categories";
 import { useEffect } from "react";
+import { Combos } from "./modals/combos";
 
 const registerMenuView = async (userId: string | undefined) => {
   const lastView = localStorage.getItem(`menuView-${userId}`);
@@ -161,10 +163,21 @@ export const MainClient = () => {
                         data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
-                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    className="flex flex-col items-center min-w-28 cursor-pointer"
                     onClick={() => onOpen("cart")}>
                     <ShoppingCart />
                     Meu carrinho
+                  </Card>
+                  <Card
+                    style={{
+                      backgroundColor:
+                        data?.customization.button_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
+                    className="flex flex-col items-center min-w-28 cursor-pointer"
+                    onClick={() => onOpen("combos")}>
+                    <ShoppingBasket />
+                    Combos
                   </Card>
                 </div>
               ) : (
@@ -213,6 +226,17 @@ export const MainClient = () => {
                     <ShoppingCart />
                     Meu carrinho
                   </Card>
+                  <Card
+                    style={{
+                      backgroundColor:
+                        data?.customization.button_color || "white",
+                      color: data?.customization.font_color || "black",
+                    }}
+                    className="flex flex-col items-center min-w-28 cursor-pointer"
+                    onClick={() => onOpen("combos")}>
+                    <ShoppingBasket />
+                    Combos
+                  </Card>
                 </div>
               )}
             </div>
@@ -245,6 +269,8 @@ const ModalContent = ({
       return <MenuProducts categoryId={categoryId} />;
     case "cart":
       return <Cart />;
+    case "combos":
+      return <Combos />;
     default:
       return null;
   }
