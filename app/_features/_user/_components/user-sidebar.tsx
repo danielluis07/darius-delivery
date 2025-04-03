@@ -32,6 +32,7 @@ import {
   Sandwich,
   Settings,
   UserRoundCog,
+  Files,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -175,6 +176,12 @@ export function UserSidebar({ user }: { user: User }) {
       url: "/dashboard/employees",
       icon: UserRoundCog,
       label: "Funcionários",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/documents",
+      icon: Files,
+      label: "Documentos",
       allowed: true,
     },
   ];

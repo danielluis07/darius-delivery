@@ -112,3 +112,28 @@ export type Combo = {
   createdAt: Date | null;
   updatedAt: Date | null;
 };
+
+export type PendingDocuments = {
+  rejectReasons: string;
+  data: Array<{
+    id: string;
+    status: "NOT_SENT" | "PENDING" | "APPROVED" | "REJECTED" | "IGNORED";
+    type:
+      | "IDENTIFICATION"
+      | "SOCIAL_CONTRACT"
+      | "ENTREPRENEUR_REQUIREMENT"
+      | "MINUTES_OF_ELECTION"
+      | "CUSTOM";
+    title: string;
+    description: string;
+    responsible: {
+      name: string;
+      type: string;
+    };
+    onboardingUrl: string | null;
+    documents: Array<{
+      id: string;
+      status: "NOT_SENT" | "PENDING" | "APPROVED" | "REJECTED";
+    }>;
+  }>;
+};

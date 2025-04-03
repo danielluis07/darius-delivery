@@ -975,3 +975,45 @@ export const cancelAsaasSubscription = async (subscriptionId: string) => {
     };
   }
 };
+
+export const getPendingDocuments = async (apiKey: string) => {
+  try {
+    const res = await fetch(
+      `${process.env.ASAAS_API_URL}/myAccount/documents`,
+      {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          access_token: apiKey,
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to get pending documents:", data);
+
+      // Se houver erros, retorna um array de descrições
+      if (data.errors) {
+        const errorMessages = data.errors.map(
+          (err: { description: string }) => err.description
+        );
+        return { success: false, message: errorMessages.join(" ") }; // Junta todas as mensagens
+      }
+
+      return {
+        success: false,
+        message: "Erro desconhecido ao requisitar os documentos pendentes.",
+      };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error getting pending documents:", error);
+    return {
+      success: false,
+      message: "Erro interno ao conectar com a API do Asaas.",
+    };
+  }
+};
