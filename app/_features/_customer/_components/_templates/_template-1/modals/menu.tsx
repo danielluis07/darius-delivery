@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { useModalStore } from "@/hooks/use-modal-store";
 import { useGetCategories } from "@/app/_features/_customer/_queries/use-get-categories";
 import { useStore } from "@/context/store-context";
+import placeholder from "@/public/placeholder-image.jpg";
 
 export const Menu = () => {
   const { data } = useStore();
@@ -19,13 +20,19 @@ export const Menu = () => {
       {categories?.map((category, i) => (
         <Card
           key={i}
-          className="flex flex-col items-center min-w-28 cursor-pointer"
+          className="relative flex flex-col items-center justify-center min-w-28 h-28 cursor-pointer font-semibold overflow-hidden"
           style={{
-            backgroundColor: data?.customization.button_color || "white",
             color: data?.customization.font_color || "black",
           }}
-          onClick={() => onOpen("menuProducts", category.id)}>
-          {category.name}
+          onClick={() => onOpen("products", category.id)}>
+          <div
+            className="absolute inset-0 bg-cover bg-center brightness-50"
+            style={{
+              backgroundImage: `url(${category.image || placeholder.src})`,
+            }}
+          />
+
+          <div className="relative z-10 text-center">{category.name}</div>
         </Card>
       ))}
     </div>

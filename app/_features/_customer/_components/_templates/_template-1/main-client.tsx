@@ -145,7 +145,7 @@ export const MainClient = () => {
           ) : (
             <div>
               {session ? (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-x-10 gap-y-5 [&>*]:h-28 [&>*]:flex [&>*]:items-center [&>*]:justify-center">
                   <Card
                     style={{
                       backgroundColor:
@@ -181,7 +181,7 @@ export const MainClient = () => {
                   </Card>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-x-10 gap-y-5 [&>*]:h-28 [&>*]:flex [&>*]:items-center [&>*]:justify-center">
                   <Card
                     style={{
                       backgroundColor:

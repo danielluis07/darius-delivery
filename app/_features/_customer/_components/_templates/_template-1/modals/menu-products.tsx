@@ -7,11 +7,12 @@ import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
 import { useGetProducts } from "@/app/_features/_customer/_queries/use-get-products";
 import { Product } from "@/types";
-import { MoveLeft } from "lucide-react";
+import { MoveLeft, ShoppingCart } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
 import { useCartStore } from "@/hooks/use-cart-store";
 import { toast } from "sonner";
+import { useModalStore } from "@/hooks/use-modal-store";
 
 export const MenuProducts = ({
   categoryId,
@@ -20,6 +21,8 @@ export const MenuProducts = ({
 }) => {
   const { data } = useStore();
   const addToCart = useCartStore((state) => state.addToCart);
+  const { cart } = useCartStore();
+  const { onOpen } = useModalStore();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data: products, isLoading: isProductsLoading } = useGetProducts(
@@ -54,6 +57,16 @@ export const MenuProducts = ({
         backgroundColor: data?.customization.background_color || "white",
       }}
       className="relative">
+      <div className="absolute top-0 left-0 z-40">
+        <div
+          onClick={() => onOpen("cart")}
+          className="relative cursor-pointer w-10 h-10 rounded-full flex items-center justify-center text-white">
+          <span className="absolute flex justify-center items-center top-0 right-0 text-xs bg-destructive size-4 rounded-full text-white font-semibold">
+            {cart.length}
+          </span>
+          <ShoppingCart />
+        </div>
+      </div>
       {selectedProduct ? (
         <motion.div
           key="productDetails"
@@ -128,7 +141,7 @@ export const MenuProducts = ({
           animate={{ x: 0 }}
           exit={{ x: "-100%" }}
           transition={{ duration: 0.5 }}>
-          <div className="space-y-3">
+          <div className="space-y-3 pt-14">
             {products.map((product) => (
               <Card
                 key={product.id}
