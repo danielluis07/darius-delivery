@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { motion } from "motion/react";
 import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
@@ -113,7 +112,7 @@ export const Combos = () => {
           transition={{ duration: 0.5 }}>
           <div className="space-y-3">
             {combos.map((combo) => (
-              <Card
+              <div
                 key={combo.id}
                 style={{
                   backgroundColor: data?.customization.button_color || "white",
@@ -129,14 +128,14 @@ export const Combos = () => {
                       : null,
                   })
                 }
-                className="cursor-pointer">
+                className="cursor-pointer rounded-lg p-3">
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
                     <h2
                       style={{
                         color: data?.customization.font_color || "black",
                       }}
-                      className="text-md font-semibold">
+                      className="text-md font-semibold text-lg">
                       {combo.name}
                     </h2>
                     <p
@@ -163,7 +162,7 @@ export const Combos = () => {
                     />
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         </motion.div>

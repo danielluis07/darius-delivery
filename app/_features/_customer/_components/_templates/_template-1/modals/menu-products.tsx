@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { motion } from "motion/react";
 import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
@@ -143,7 +142,7 @@ export const MenuProducts = ({
           transition={{ duration: 0.5 }}>
           <div className="space-y-3 pt-14">
             {products.map((product) => (
-              <Card
+              <div
                 key={product.id}
                 style={{
                   backgroundColor: data?.customization.button_color || "white",
@@ -160,7 +159,7 @@ export const MenuProducts = ({
                       : null,
                   })
                 }
-                className="cursor-pointer">
+                className="cursor-pointer rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
                     <h2
@@ -194,7 +193,7 @@ export const MenuProducts = ({
                     />
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         </motion.div>

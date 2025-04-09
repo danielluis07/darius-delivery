@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { SignUpForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-up-form";
-import { Card } from "@/components/ui/card";
 import {
   ClipboardList,
   Key,
@@ -61,7 +60,7 @@ export const MainClient = () => {
   return (
     <div className="flex h-screen items-center justify-center relative">
       <div
-        className="relative h-full sm:h-[600px] w-[450px] overflow-hidden rounded-[40px] border-[12px] border-gray-800 bg-white shadow-2xl p-6 bg-cover"
+        className="relative h-full sm:h-[600px] w-[450px] overflow-hidden rounded-[40px] border-[12px] border-gray-800 shadow-2xl p-6 bg-cover"
         style={{
           backgroundImage: `url(${data?.customization.banner})`,
         }}>
@@ -108,12 +107,12 @@ export const MainClient = () => {
         </div>
 
         {!data?.customization.isOpen && (
-          <Card
+          <div
             style={{
               backgroundColor: data?.customization.button_color || "white",
               color: data?.customization.font_color || "black",
             }}
-            className="text-center mb-10 relative z-0 text-sm">
+            className="text-center mb-10 relative z-0 text-sm rounded-lg">
             A loja está fechada no momento. Volte mais tarde.
             <div>
               <p className="font-semibold my-2">Horários de funcionamento</p>
@@ -123,7 +122,7 @@ export const MainClient = () => {
                 </p>
               ))}
             </div>
-          </Card>
+          </div>
         )}
 
         {/* Main Content */}
@@ -131,112 +130,112 @@ export const MainClient = () => {
         <div className="relative z-0">
           {!data?.customization.isOpen ? (
             <div className="flex justify-center">
-              <Card
+              <div
                 style={{
                   backgroundColor: data?.customization.button_color || "white",
                   color: data?.customization.font_color || "black",
                 }}
-                className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                 onClick={() => onOpen("menu")}>
                 <UtensilsCrossed />
                 Menu
-              </Card>
+              </div>
             </div>
           ) : (
             <div>
               {session ? (
                 <div className="grid grid-cols-2 gap-x-10 gap-y-5 [&>*]:h-28 [&>*]:flex [&>*]:items-center [&>*]:justify-center">
-                  <Card
+                  <div
                     style={{
                       backgroundColor:
                         data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
-                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("categories")}>
                     <Sandwich />
                     Categorias
-                  </Card>
-                  <Card
+                  </div>
+                  <div
                     style={{
                       backgroundColor:
                         data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("cart")}>
                     <ShoppingCart />
                     Meu carrinho
-                  </Card>
-                  <Card
+                  </div>
+                  <div
                     style={{
                       backgroundColor:
                         data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("combos")}>
                     <ShoppingBasket />
                     Combos
-                  </Card>
+                  </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-x-10 gap-y-5 [&>*]:h-28 [&>*]:flex [&>*]:items-center [&>*]:justify-center">
-                  <Card
+                  <div
                     style={{
                       backgroundColor:
                         data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
-                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("signUp")}>
                     <ClipboardList />
                     Registrar
-                  </Card>
-                  <Card
+                  </div>
+                  <div
                     style={{
                       backgroundColor:
                         data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
-                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("signIn")}>
                     <Key />
                     Entrar
-                  </Card>
-                  <Card
+                  </div>
+                  <div
                     style={{
                       backgroundColor:
                         data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
-                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("menu")}>
                     <UtensilsCrossed />
                     Menu
-                  </Card>
-                  <Card
+                  </div>
+                  <div
                     style={{
                       backgroundColor:
                         data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
-                    className="bg-white text-black flex flex-col items-center min-w-28 cursor-pointer"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("cart")}>
                     <ShoppingCart />
                     Meu carrinho
-                  </Card>
-                  <Card
+                  </div>
+                  <div
                     style={{
                       backgroundColor:
                         data?.customization.button_color || "white",
                       color: data?.customization.font_color || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("combos")}>
                     <ShoppingBasket />
                     Combos
-                  </Card>
+                  </div>
                 </div>
               )}
             </div>
