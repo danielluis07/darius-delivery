@@ -2,30 +2,25 @@
 
 import { CategoriesDataTable } from "@/app/_features/_user/_components/_categories/data-table";
 import { columns } from "@/app/_features/_user/_components/_categories/columns";
-
 import { Card } from "@/components/ui/card";
-import { InferResponseType } from "hono";
-import { client } from "@/lib/hono";
+import { useGetCategories } from "../../_queries/_categories/use-get-categories";
+import { useDeleteCategories } from "../../_queries/_categories/use-delete-categories";
 
-type ResponseType = InferResponseType<
-  (typeof client.api.categories.user)[":userId"]["$get"],
-  200
->["data"];
-
-type CategoriesProps = {
-  data: ResponseType;
-};
-
-export const CategoriesClient = ({ data }: CategoriesProps) => {
-  /* Create category dialog */
+export const CategoriesClient = ({ userId }: { userId: string }) => {
+  const { data, isLoading } = useGetCategories(userId);
+  const deleteCategories = useDeleteCategories(userId);
 
   return (
     <Card className="w-full">
       <h1 className="text-xl font-bold">Categorias</h1>
       <CategoriesDataTable
         columns={columns}
-        data={data}
-        onDelete={() => {}}
+        data={data || []}
+        isLoading={isLoading}
+        onDelete={(row) => {
+          const ids = row.map((r) => r.original.id);
+          deleteCategories.mutate(ids);
+        }}
         searchKey="name"
       />
     </Card>

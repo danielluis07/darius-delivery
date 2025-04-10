@@ -1,31 +1,42 @@
-import { InferRequestType, InferResponseType } from "hono";
+import { InferResponseType } from "hono";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 import { toast } from "sonner";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.categories)["delete-categories"]["$post"]
+  (typeof client.api.categories)[":id"]["$delete"]
 >;
-type RequestType = InferRequestType<
-  (typeof client.api.categories)["delete-categories"]["$post"]
->["json"];
 
-export const useDeleteCategories = () => {
+type Category = InferResponseType<
+  (typeof client.api.categories.user)[":userId"]["$get"],
+  200
+>["data"];
+
+export const useDeleteCategories = (userId: string | undefined) => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async (json) => {
-      const res = await client.api.categories["delete-categories"]["$post"]({
-        json,
+  const mutation = useMutation<ResponseType, Error, string[]>({
+    mutationFn: async (ids: string[]) => {
+      const res = await client.api.categories.delete.$post({
+        json: { ids },
       });
       return await res.json();
     },
-    onSuccess: () => {
-      toast.success("Categorias deletadas!");
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    onSuccess: (_data, ids) => {
+      toast.success("Categorias deletadas com sucesso!");
+      queryClient.setQueryData(
+        ["categories", userId],
+        (oldData: Category | undefined) => {
+          return oldData
+            ? oldData.filter((category) => !ids.includes(category.id))
+            : [];
+        }
+      );
+      queryClient.invalidateQueries({ queryKey: ["categories", userId] });
     },
-    onError: () => {
+    onError: (error) => {
       toast.error("Houve um erro ao deletar as categorias!");
+      console.error(error);
     },
   });
 

@@ -28,12 +28,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
+import { useConfirmContext } from "@/context/confirm-context";
 
 type CategoriesDataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onDelete: (rows: Row<TData>[]) => void;
+  isLoading?: boolean;
   disabled?: boolean;
   searchKey: string;
 };
@@ -41,6 +43,8 @@ type CategoriesDataTableProps<TData, TValue> = {
 export function CategoriesDataTable<TData, TValue>({
   columns,
   data,
+  isLoading,
+  onDelete,
   searchKey,
 }: CategoriesDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -48,6 +52,8 @@ export function CategoriesDataTable<TData, TValue>({
   );
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  const { confirm } = useConfirmContext();
 
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -84,12 +90,33 @@ export function CategoriesDataTable<TData, TValue>({
           }
           className="w-1/2"
         />
-        <Link href="/dashboard/categories/new">
-          <Button>
-            Adicionar Categoria
-            <Plus />
-          </Button>
-        </Link>
+        <div className="flex items-center gap-x-2">
+          <Link href="/dashboard/categories/new">
+            <Button>
+              Adicionar Categoria
+              <Plus />
+            </Button>
+          </Link>
+          {table.getFilteredSelectedRowModel().rows.length > 0 && (
+            <Button
+              onClick={async () => {
+                const ok = await confirm({
+                  title: "Tem certeza?",
+                  message:
+                    "Você está prestes a deletar as categorias selecionadas",
+                });
+
+                if (ok) {
+                  onDelete(table.getFilteredSelectedRowModel().rows);
+                  table.resetRowSelection();
+                }
+              }}
+              variant="destructive">
+              <Trash2 className="text-white" />
+              Deletar Categoria(s)
+            </Button>
+          )}
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -112,7 +139,15 @@ export function CategoriesDataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center">
+                  Carregando...
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

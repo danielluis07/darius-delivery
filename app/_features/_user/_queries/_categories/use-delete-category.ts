@@ -7,7 +7,12 @@ type ResponseType = InferResponseType<
   (typeof client.api.categories)[":id"]["$delete"]
 >;
 
-export const useDeleteCategory = (id?: string) => {
+type Categories = InferResponseType<
+  (typeof client.api.categories.user)[":userId"]["$get"],
+  200
+>["data"];
+
+export const useDeleteCategory = (id: string, userId: string | undefined) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error>({
@@ -19,8 +24,15 @@ export const useDeleteCategory = (id?: string) => {
     },
     onSuccess: () => {
       toast.success("Categoria deletada!");
-      queryClient.invalidateQueries({ queryKey: ["category", { id }] });
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.setQueryData(
+        ["categories", userId],
+        (oldData: Categories | undefined) => {
+          return oldData
+            ? oldData.filter((category) => category.id !== id)
+            : [];
+        }
+      );
+      queryClient.invalidateQueries({ queryKey: ["categories", userId] });
     },
     onError: () => {
       toast.error("Houve um erro ao deletar a categoria!");
