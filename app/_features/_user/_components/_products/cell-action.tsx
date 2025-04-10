@@ -9,9 +9,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { useDeleteCategory } from "@/app/_features/_user/_queries/_categories/use-delete-category";
 import { Ellipsis, Pencil } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export const ProductsCellAction = ({ id }: { id: string }) => {
   const deleteMutation = useDeleteCategory(id);
+  const router = useRouter();
 
   return (
     <DropdownMenu>
@@ -25,7 +27,7 @@ export const ProductsCellAction = ({ id }: { id: string }) => {
         <DropdownMenuItem
           disabled={deleteMutation.isPending}
           className="cursor-pointer"
-          onClick={() => {}}>
+          onClick={() => router.push(`/dashboard/products/${id}`)}>
           <Pencil className="mr-2 size-5" />
           Editar
         </DropdownMenuItem>

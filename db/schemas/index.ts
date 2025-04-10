@@ -284,6 +284,14 @@ export const insertProductSchema = baseCreateProductSchema.extend({
       : z.any().optional(),
 });
 
+export const updateProductSchema = baseCreateProductSchema.extend({
+  id: z.string(),
+  image:
+    typeof File !== "undefined"
+      ? z.union([z.array(z.instanceof(File)).optional(), z.string().optional()])
+      : z.union([z.any().optional(), z.string().optional()]),
+});
+
 export const insertCustomizationSchema = baseCreateCustomizationSchema.extend({
   banner:
     typeof File !== "undefined"

@@ -10,7 +10,7 @@ import placeholder from "@/public/placeholder-image.jpg";
 import { formatCurrencyFromCents } from "@/lib/utils";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.products)[":userId"]["$get"],
+  (typeof client.api.products.user)[":userId"]["$get"],
   200
 >["data"][0];
 
