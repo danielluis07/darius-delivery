@@ -49,7 +49,7 @@ import { useCreateOrder } from "@/app/_features/_user/_queries/_orders/use-creat
 import { toast } from "sonner";
 
 type Products = InferResponseType<
-  (typeof client.api.products)[":userId"]["$get"],
+  (typeof client.api.products.user)[":userId"]["$get"],
   200
 >["data"];
 
