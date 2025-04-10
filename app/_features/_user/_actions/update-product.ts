@@ -5,14 +5,7 @@ import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { products } from "@/db/schema";
 import { updateProductSchema } from "@/db/schemas";
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { revalidatePath } from "next/cache";
-import crypto from "crypto";
 import { and, eq } from "drizzle-orm";
 import { deleteFromS3, uploadImageToS3 } from "@/lib/s3-upload";
 
