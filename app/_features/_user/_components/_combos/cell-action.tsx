@@ -7,14 +7,34 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Pencil } from "lucide-react";
+import { Ellipsis, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
+import { useDeleteCombo } from "../../_queries/_combos/use-delete-combo";
+import { useConfirmContext } from "@/context/confirm-context";
 
 export const CombosCellAction = ({ id }: { id: string }) => {
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const session = useSession();
+
+  const userId =
+    session.data?.user.role === "EMPLOYEE"
+      ? session.data.user.restaurantOwnerId
+      : session?.data?.user.id;
+
+  const deleteMutation = useDeleteCombo(id, userId);
+
   const router = useRouter();
 
+  const { confirm } = useConfirmContext();
+
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      open={openDropdownId === id}
+      onOpenChange={(isOpen) => {
+        setOpenDropdownId(isOpen ? id : null);
+      }}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <span className="sr-only">Abrir menu</span>
@@ -23,10 +43,29 @@ export const CombosCellAction = ({ id }: { id: string }) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
+          disabled={deleteMutation.isPending}
           className="cursor-pointer"
           onClick={() => router.push(`/dashboard/combos/${id}`)}>
           <Pencil className="mr-2 size-5" />
           Editar
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={deleteMutation.isPending}
+          className="cursor-pointer"
+          onClick={async () => {
+            setOpenDropdownId(null);
+            const ok = await confirm({
+              title: "Deletar o combo",
+              message:
+                "Você tem certeza que deseja deletar esse combo? Essa ação é irreversível.",
+            });
+
+            if (ok) {
+              deleteMutation.mutate();
+            }
+          }}>
+          <Trash2 className="mr-2 size-5 text-error" />
+          Excluir
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

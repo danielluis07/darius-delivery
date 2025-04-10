@@ -20,15 +20,18 @@ const ComboPage = async ({ params }: { params: Promise<{ id: string }> }) => {
     return <p>Not authenticated</p>;
   }
 
-  const combo = await getCombo(id);
-  const products = await getProducts(userId);
+  // promise all
+  const [combo, products] = await Promise.all([
+    getCombo(id),
+    getProducts(userId),
+  ]);
 
   if (!combo) {
     return <p>Combo not found</p>;
   }
 
   if (!products) {
-    return <p>Products not found</p>;
+    return <p>Você precisa cadastrar ao menos um produto</p>;
   }
 
   return <UpdateComboForm combo={combo} products={products} />;

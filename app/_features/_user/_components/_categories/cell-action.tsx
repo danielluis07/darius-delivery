@@ -45,7 +45,7 @@ export const CategoriesCellAction = ({ id }: { id: string }) => {
         <DropdownMenuItem
           disabled={deleteMutation.isPending}
           className="cursor-pointer"
-          onClick={() => router.push(`/dashboard/products/${id}`)}>
+          onClick={() => router.push(`/dashboard/categories/${id}`)}>
           <Pencil className="mr-2 size-5" />
           Editar
         </DropdownMenuItem>

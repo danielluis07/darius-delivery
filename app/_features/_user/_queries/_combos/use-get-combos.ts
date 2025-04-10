@@ -4,7 +4,7 @@ import { client } from "@/lib/hono";
 export const useGetCombos = (userId?: string) => {
   const query = useQuery({
     enabled: !!userId, // the query will only be executed if we have the userId
-    queryKey: ["combos", { userId }],
+    queryKey: ["combos", userId],
     queryFn: async () => {
       const res = await client.api.combos.user[":userId"].$get({
         param: { userId },

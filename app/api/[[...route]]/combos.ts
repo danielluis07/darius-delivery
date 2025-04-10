@@ -6,6 +6,7 @@ import { combos } from "@/db/schema";
 import { insertComboSchema } from "@/db/schemas";
 import { eq, inArray } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
+import { deleteFromS3 } from "@/lib/s3-upload";
 
 const app = new Hono()
   .get(
@@ -88,12 +89,40 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
+      const uploadedFiles: string[] = [];
+
+      const existingImages = await db
+        .select({
+          image: combos.image,
+        })
+        .from(combos)
+        .where(inArray(combos.id, values.ids));
+
+      if (!existingImages || existingImages.length === 0) {
+        return c.json({ error: "Failed to fetch images" }, 500);
+      }
+
+      for (const image of existingImages) {
+        if (image.image) {
+          const imageName = image.image.split("/").pop() || "";
+          uploadedFiles.push(imageName);
+        }
+      }
+
+      for (const fileName of uploadedFiles) {
+        const { success, message } = await deleteFromS3(fileName);
+        if (!success) {
+          console.error(`Falha ao deletar ${fileName}: ${message}`);
+          return c.json({ error: message }, 500);
+        }
+      }
+
       const data = await db
         .delete(combos)
         .where(inArray(combos.id, values.ids));
 
       if (!data) {
-        return c.json({ error: "Failed to delete combos" }, 500);
+        return c.json({ error: "Falha ao deletar os combos" }, 500);
       }
 
       return c.json({ data });
@@ -101,7 +130,6 @@ const app = new Hono()
   )
   .delete(
     "/:id",
-    verifyAuth(),
     zValidator(
       "param",
       z.object({
@@ -109,21 +137,37 @@ const app = new Hono()
       })
     ),
     async (c) => {
-      const auth = c.get("authUser");
       const { id } = c.req.valid("param");
-
-      if (!auth || !auth.token?.sub) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
 
       if (!id) {
         return c.json({ error: "Missing id" }, 400);
       }
 
+      const [existingImage] = await db
+        .select({
+          image: combos.image,
+        })
+        .from(combos)
+        .where(eq(combos.id, id));
+
+      if (!existingImage || !existingImage.image) {
+        console.error("Failed to fetch image");
+        return c.json({ error: "Falha ao deletar o combo" }, 500);
+      }
+
+      const fileName = existingImage.image.split("/").pop() || "";
+
+      const { success, message } = await deleteFromS3(fileName);
+      if (!success) {
+        console.error(`Falha ao deletar ${fileName}: ${message}`);
+        return c.json({ error: message }, 500);
+      }
+
       const data = await db.delete(combos).where(eq(combos.id, id));
 
       if (!data) {
-        return c.json({ error: "Failed to delete deliverer" }, 500);
+        console.error("Failed to delete product");
+        return c.json({ error: "Falha ao deletar o produto" }, 500);
       }
 
       return c.json({ data });
