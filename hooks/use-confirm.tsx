@@ -11,16 +11,29 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+type ConfirmOptions = {
+  title?: string;
+  message?: string;
+};
+
 export const useConfirm = (
-  title: string,
-  message: string
-): [() => React.ReactElement, () => Promise<unknown>] => {
+  defaultTitle = "Tem certeza?",
+  defaultMessage = "Essa ação não poderá ser desfeita."
+): [
+  () => React.ReactElement,
+  (options?: ConfirmOptions) => Promise<boolean>
+] => {
   const [promise, setPromise] = useState<{
     resolve: (value: boolean) => void;
   } | null>(null);
 
-  const confirm = () =>
-    new Promise((resolve, reject) => {
+  const [title, setTitle] = useState(defaultTitle);
+  const [message, setMessage] = useState(defaultMessage);
+
+  const confirm = (options?: ConfirmOptions) =>
+    new Promise<boolean>((resolve) => {
+      if (options?.title) setTitle(options.title);
+      if (options?.message) setMessage(options.message);
       setPromise({ resolve });
     });
 

@@ -6,6 +6,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { auth } from "@/auth";
 import { ExitProvider } from "@/providers/exit-provider";
+import { ConfirmProvider } from "@/context/confirm-context";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -29,9 +30,11 @@ export default async function RootLayout({
         <body
           className={`${montserrat.className} antialiased max-w-[1920px] mx-auto`}>
           <QueryProvider>
-            {children}
-            <ExitProvider />
-            <Toaster />
+            <ConfirmProvider>
+              {children}
+              <ExitProvider />
+              <Toaster />
+            </ConfirmProvider>
           </QueryProvider>
         </body>
       </html>

@@ -25,7 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useConfirm } from "@/hooks/use-confirm";
 import { useUpdateOrderStatus } from "@/app/_features/_user/_queries/_order-routing/use-update-order-status";
 import Link from "next/link";
 import { useState } from "react";
@@ -49,6 +48,7 @@ import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import { useGetOrdersReceipts } from "@/app/_features/_user/_queries/_orders/use-get-orders-receipts";
 import { CloseCashRegister } from "@/app/_features/_user/_components/_orders/close-cash-register";
+import { useConfirmContext } from "@/context/confirm-context";
 
 export type Receipt = InferResponseType<
   (typeof client.api.receipts.user)[":userId"]["$get"],
@@ -91,10 +91,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
     (item) => item.order.status === "FINISHED"
   );
 
-  const [ConfirmStatusDialog, confirmStatus] = useConfirm(
-    "Tem certeza?",
-    "Você está prestes a mudar o status do pedido"
-  );
+  const { confirm } = useConfirmContext();
 
   const statusColors: Record<string, string> = {
     ACCEPTED: "bg-blue-500 text-white",
@@ -146,7 +143,6 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
 
   return (
     <>
-      <ConfirmStatusDialog />
       <div className="w-full mt-10">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">Pedidos</h1>
@@ -234,7 +230,11 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                                 className="cursor-pointer text-xs"
                                 onClick={async () => {
                                   setOpenDropdownId(null); // Close dropdown
-                                  const ok = await confirmStatus();
+                                  const ok = await confirm({
+                                    title: "Tem certeza?",
+                                    message:
+                                      "Você está prestes a mudar o status do pedido",
+                                  });
                                   if (ok) {
                                     mutate({
                                       orderId: item.order.id,
@@ -319,7 +319,11 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                                 className="cursor-pointer text-xs"
                                 onClick={async () => {
                                   setOpenDropdownId(null); // Close dropdown
-                                  const ok = await confirmStatus();
+                                  const ok = await confirm({
+                                    title: "Tem certeza?",
+                                    message:
+                                      "Você está prestes a mudar o status do pedido",
+                                  });
                                   if (ok) {
                                     mutate({
                                       orderId: item.order.id,

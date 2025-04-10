@@ -1,30 +1,25 @@
 "use client";
 
 import { columns } from "@/app/_features/_user/_components/_products/columns";
-
-import { InferResponseType } from "hono";
-import { client } from "@/lib/hono";
 import { ProductsDataTable } from "@/app/_features/_user/_components/_products/data-table";
+import { useGetProducts } from "../../_queries/_products/use-get-products";
+import { useDeleteProducts } from "../../_queries/_products/use-delete-products";
 
-type ResponseType = InferResponseType<
-  (typeof client.api.products.user)[":userId"]["$get"],
-  200
->["data"];
-
-type ProductsProps = {
-  data: ResponseType;
-};
-
-export const ProductsClient = ({ data }: ProductsProps) => {
-  /* Create category dialog */
+export const ProductsClient = ({ userId }: { userId: string }) => {
+  const { data, isLoading } = useGetProducts(userId);
+  const deleteProducts = useDeleteProducts(userId);
 
   return (
     <div className="w-full">
-      <h1 className="text-xl font-bold">Categorias</h1>
+      <h1 className="text-xl font-bold">Produtos</h1>
       <ProductsDataTable
         columns={columns}
-        data={data}
-        onDelete={() => {}}
+        data={data || []}
+        onDelete={(row) => {
+          const ids = row.map((r) => r.original.id);
+          deleteProducts.mutate(ids);
+        }}
+        isLoading={isLoading}
         searchKey="name"
       />
     </div>
