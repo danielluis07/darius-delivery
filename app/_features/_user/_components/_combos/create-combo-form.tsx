@@ -42,7 +42,7 @@ import { Card } from "@/components/ui/card";
 import { createCombo } from "@/app/_features/_user/_actions/create-combo";
 
 type Products = InferResponseType<
-  (typeof client.api.products)[":userId"]["$get"],
+  (typeof client.api.products.user)[":userId"]["$get"],
   200
 >["data"];
 
