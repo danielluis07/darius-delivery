@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
-import { insertProductSchema } from "@/db/schemas";
+import { updateCategorySchema } from "@/db/schemas";
 import { CloudUpload, Trash2 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -25,42 +25,31 @@ import {
 import { LoadingButton } from "@/components/ui/loading-button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency } from "@/lib/utils";
+import Image from "next/image";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { createProduct } from "@/app/_features/_user/_actions/create-product";
-import Image from "next/image";
-import { TagsInput } from "@/components/ui/tags-input";
+import { updateCategory } from "../../_actions/update-category";
 
-type ResponseType = InferResponseType<
-  (typeof client.api.categories.user)[":userId"]["$get"],
+type Category = InferResponseType<
+  (typeof client.api.categories)[":id"]["$get"],
   200
 >["data"];
 
-type FormData = z.infer<typeof insertProductSchema>;
+type FormData = z.infer<typeof updateCategorySchema>;
 
-export const CreateProductForm = ({ data }: { data: ResponseType }) => {
+export const UpdateCategoryForm = ({ category }: { category: Category }) => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    category.image
+  );
   const router = useRouter();
   const form = useForm<FormData>({
-    resolver: zodResolver(insertProductSchema),
+    resolver: zodResolver(updateCategorySchema),
     defaultValues: {
-      name: "",
-      image: [],
-      category_id: "",
-      description: "",
-      sizes: [],
-      price: 0,
+      id: category.id,
+      name: category.name,
+      image: category.image,
     },
   });
 
@@ -76,7 +65,7 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      createProduct(values)
+      updateCategory(values)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -84,12 +73,12 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard/products");
+            router.push("/dashboard/categories");
           }
         })
         .catch((error) => {
-          console.error("Error creating product:", error);
-          toast.error("Erro ao criar o produto");
+          console.error("Error updating category:", error);
+          toast.error("Erro ao atualizar a categoria");
         });
     });
   };
@@ -105,88 +94,33 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
             <FormItem>
               <FormLabel>Título</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value} required />
+                <Input {...field} value={field.value} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="category_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categorias</FormLabel>
-              <Select onValueChange={field.onChange} required>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {data.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="sizes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tamanhos</FormLabel>
-              <TagsInput
-                className="w-full"
-                value={field.value ?? []}
-                onValueChange={field.onChange}
-                placeholder="Selecione os tamanhos disponíveis (opcional)"
-              />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Conte um pouco sobre esse produto"
-                  className="resize-none"
-                  {...field}
-                  value={field.value ?? ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <FormField
           control={form.control}
           name="image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Imagem do Produto</FormLabel>
+              <FormLabel>Banner</FormLabel>
               <FormControl>
                 <FileUploader
                   value={field.value ?? []}
                   onValueChange={(newFiles: File[] | null) => {
                     if (newFiles && newFiles.length > 0) {
-                      const selectedFile = newFiles[0];
-                      field.onChange([selectedFile]);
+                      const selectedFile = newFiles[0]; // Keep only one file
+                      field.onChange([selectedFile]); // Update form state
                       const newPreviewUrl = URL.createObjectURL(selectedFile);
-                      setFiles([selectedFile]);
+                      setFiles([selectedFile]); // Update local state for UI
                       setImagePreview(newPreviewUrl);
                     } else {
                       field.onChange(null);
                       setFiles([]);
+                      setImagePreview(null);
                     }
                   }}
                   dropzoneOptions={dropZoneConfig}
@@ -199,8 +133,8 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
                       <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
                         <span className="font-semibold">
                           Clique para fazer o upload
-                        </span>
-                        &nbsp; ou arraste e solte um arquivo aqui.
+                        </span>{" "}
+                        ou arraste e solte um arquivo aqui.
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
                         SVG, PNG, JPG or GIF
@@ -215,6 +149,7 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
                           <span>{file.name}</span>
                         </FileUploaderItem>
                       ))}
+                    {/* Image Preview */}
                     {imagePreview && (
                       <div className="mt-4">
                         <p className="text-sm font-semibold mb-2">Preview:</p>
@@ -231,7 +166,7 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
                               setFiles([]);
                               form.setValue("image", null);
                             }}
-                            className="absolute top-1 right-1 p-1 bg-error rounded-lg cursor-pointer text-white">
+                            className="absolute top-1 right-1 p-1 bg-error rounded-lg text-white cursor-pointer">
                             <Trash2 />
                           </div>
                         </div>
@@ -244,32 +179,10 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Preço</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  value={formatCurrency(field.value)}
-                  placeholder="R$ 0,00"
-                  onChange={(e) => {
-                    const rawValue = e.target.value.replace(/\D/g, "");
-                    const numericValue = rawValue ? parseInt(rawValue, 10) : 0;
-                    field.onChange(numericValue);
-                  }}
-                  required
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <LoadingButton
-          label="Criar"
-          loadingLabel="Criando"
+          label="Atualizar"
+          loadingLabel="Atualizando"
           className="w-full"
           disabled={isPending}
           isPending={isPending}

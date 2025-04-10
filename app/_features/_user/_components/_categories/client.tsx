@@ -8,7 +8,7 @@ import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.categories)[":userId"]["$get"],
+  (typeof client.api.categories.user)[":userId"]["$get"],
   200
 >["data"];
 

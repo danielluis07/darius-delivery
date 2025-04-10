@@ -7,7 +7,29 @@ import { count, eq, inArray } from "drizzle-orm";
 
 const app = new Hono()
   .get(
-    "/:userId",
+    "/:id",
+    zValidator("param", z.object({ id: z.string().optional() })),
+    async (c) => {
+      const { id } = c.req.valid("param");
+
+      if (!id) {
+        return c.json({ error: "Missing id" }, 400);
+      }
+
+      const [data] = await db
+        .select()
+        .from(categories)
+        .where(eq(categories.id, id));
+
+      if (!data) {
+        return c.json({ error: "No category found" }, 404);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .get(
+    "/user/:userId",
     zValidator("param", z.object({ userId: z.string().optional() })),
     async (c) => {
       const { userId } = c.req.valid("param");

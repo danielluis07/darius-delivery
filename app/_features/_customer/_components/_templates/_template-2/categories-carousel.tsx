@@ -10,7 +10,7 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type Categories = InferResponseType<
-  (typeof client.api.categories)[":userId"]["$get"],
+  (typeof client.api.categories.user)[":userId"]["$get"],
   200
 >["data"];
 

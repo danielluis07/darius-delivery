@@ -295,6 +295,13 @@
       "when": 1743593870735,
       "tag": "0041_pale_cobalt_man",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1744286214640,
+      "tag": "0042_shocking_paper_doll",
+      "breakpoints": true
     }
   ]
 }

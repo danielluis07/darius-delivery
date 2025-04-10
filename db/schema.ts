@@ -223,7 +223,7 @@ export const categories = pgTable("categories", {
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("userId").references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  image: text("image").notNull(),
+  image: text("image"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

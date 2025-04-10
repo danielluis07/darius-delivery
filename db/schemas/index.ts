@@ -277,6 +277,14 @@ export const insertCategorySchema = baseCategorySchema.extend({
       : z.any().optional(),
 });
 
+export const updateCategorySchema = baseCategorySchema.extend({
+  id: z.string(),
+  image:
+    typeof File !== "undefined"
+      ? z.union([z.array(z.instanceof(File)).optional(), z.string().optional()])
+      : z.union([z.any().optional(), z.string().optional()]),
+});
+
 export const insertProductSchema = baseCreateProductSchema.extend({
   image:
     typeof File !== "undefined"

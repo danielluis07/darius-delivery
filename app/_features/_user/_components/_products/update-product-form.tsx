@@ -41,7 +41,7 @@ import { TagsInput } from "@/components/ui/tags-input";
 import { updateProduct } from "../../_actions/update-product";
 
 type Categories = InferResponseType<
-  (typeof client.api.categories)[":userId"]["$get"],
+  (typeof client.api.categories.user)[":userId"]["$get"],
   200
 >["data"];
 
@@ -102,8 +102,8 @@ export const UpdateProductForm = ({
           }
         })
         .catch((error) => {
-          console.error("Error creating product:", error);
-          toast.error("Erro ao criar o produto");
+          console.error("Error updating product:", error);
+          toast.error("Erro ao atualizar o produto");
         });
     });
   };
