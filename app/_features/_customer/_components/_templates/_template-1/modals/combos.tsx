@@ -19,6 +19,8 @@ export const Combos = () => {
   const [showComboDetails, setShowComboDetails] = useState(false);
   const { data: combos, isLoading } = useGetCombos(data?.userId);
 
+  console.log(combos, "combos");
+
   const handleComboClick = (combo: Combo) => {
     setSelectedCombo(combo);
     setShowComboDetails(false);

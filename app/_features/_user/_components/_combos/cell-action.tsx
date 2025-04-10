@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Ellipsis, Pencil } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export const CombosCellAction = ({ id }: { id: string }) => {
-  console.log(id);
+  const router = useRouter();
 
   return (
     <DropdownMenu>
@@ -21,7 +22,9 @@ export const CombosCellAction = ({ id }: { id: string }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem className="cursor-pointer" onClick={() => {}}>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => router.push(`/dashboard/combos/${id}`)}>
           <Pencil className="mr-2 size-5" />
           Editar
         </DropdownMenuItem>

@@ -7,13 +7,21 @@ const ProductPage = async ({ params }: { params: Promise<{ id: string }> }) => {
   const session = await auth();
   const { id } = await params;
 
-  if (!session || !session.user.id) {
+  if (!session) {
     return <p>Not authenticated</p>;
   }
 
+  const userId =
+    session.user.role === "EMPLOYEE"
+      ? session.user.restaurantOwnerId
+      : session.user.id;
+
+  if (!userId) {
+    return <p>Not authenticated</p>;
+  }
   // primise all
   const [categories, product] = await Promise.all([
-    getCategories(session.user.id),
+    getCategories(userId),
     getProduct(id),
   ]);
 

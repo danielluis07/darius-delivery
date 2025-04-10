@@ -126,6 +126,15 @@ export const insertComboSchema = baseComboSchema.extend({
   product_ids: z.array(z.string().uuid()),
 });
 
+export const updateComboSchema = baseComboSchema.extend({
+  id: z.string(),
+  image:
+    typeof File !== "undefined"
+      ? z.union([z.array(z.instanceof(File)).optional(), z.string().optional()])
+      : z.union([z.any().optional(), z.string().optional()]),
+  product_ids: z.array(z.string().uuid()),
+});
+
 export const insertOrderSchema = baseOrderSchema.extend({
   quantity: z.number().int().positive(),
   price: z.number().int(),

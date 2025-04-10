@@ -3,8 +3,9 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { categories } from "@/db/schema";
-import { updateCategorySchema } from "@/db/schemas";
+import { combos, comboProducts } from "@/db/schema";
+import { and, eq } from "drizzle-orm";
+import { updateComboSchema } from "@/db/schemas";
 import {
   S3Client,
   PutObjectCommand,
@@ -13,12 +14,6 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { revalidatePath } from "next/cache";
 import crypto from "crypto";
-import { and, eq } from "drizzle-orm";
-
-type UpdatedData = {
-  name: string;
-  image?: string | null | undefined;
-};
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
@@ -27,6 +22,14 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
 });
+
+type UpdatedData = {
+  name: string;
+  description: string;
+  price: number;
+  product_ids: string[];
+  image?: string | null | undefined;
+};
 
 const uploadImageToS3 = async (imageFile: File) => {
   if (!imageFile) {
@@ -96,12 +99,12 @@ const deleteFromS3 = async (fileName: string) => {
   }
 };
 
-export const updateCategory = async (
-  values: z.infer<typeof updateCategorySchema>
+export const updateCombo = async (
+  values: z.infer<typeof updateComboSchema>
 ) => {
   try {
     const session = await auth();
-    const validatedValues = updateCategorySchema.safeParse(values);
+    const validatedValues = updateComboSchema.safeParse(values);
 
     if (!session) {
       return { success: false, message: "Not authenticated" };
@@ -120,11 +123,20 @@ export const updateCategory = async (
       return { success: false, message: "Campos inválidos" };
     }
 
-    const { id: category_id, name, image } = validatedValues.data;
+    const {
+      id: combo_id,
+      name,
+      image,
+      description,
+      price,
+      product_ids,
+    } = validatedValues.data;
 
-    if (!name || !image || !category_id) {
+    if (!name || !image || !description || !price || !product_ids) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
     }
+
+    /* Image Upload */
 
     const imageFile = image[0];
 
@@ -133,13 +145,13 @@ export const updateCategory = async (
     if (imageFile && typeof imageFile !== "string") {
       const [existingCategory] = await db
         .select({
-          image: categories.image,
+          image: combos.image,
         })
-        .from(categories)
-        .where(and(eq(categories.id, category_id), eq(categories.userId, id)));
+        .from(combos)
+        .where(and(eq(combos.id, combo_id), eq(combos.userId, id)));
 
       if (!existingCategory.image) {
-        return { success: false, message: "Categoria não encontrada" };
+        return { success: false, message: "Combo não encontrado" };
       }
 
       const fileName = existingCategory.image.split("/").pop()!;
@@ -155,29 +167,54 @@ export const updateCategory = async (
 
     const updateData: UpdatedData = {
       name: name,
+      description: description,
+      price: price,
+      product_ids: product_ids,
     };
 
     if (imageUrl !== undefined) updateData.image = imageUrl;
 
-    const category = await db
-      .update(categories)
-      .set(updateData)
-      .where(and(eq(categories.id, category_id), eq(categories.userId, id)));
+    const deleteComboProducts = await db
+      .delete(comboProducts)
+      .where(eq(comboProducts.combo_id, combo_id));
 
-    if (!category) {
+    if (!deleteComboProducts) {
+      console.error("Erro ao deletar produtos do combo");
       return {
         success: false,
-        message: "Falha ao atualizar a categoria",
+        message: "Falha ao atualizar o combo",
       };
     }
 
-    revalidatePath("/dashboard/categories");
-    return { success: true, message: "Categoria atualizada com sucesso" };
+    const [combo] = await db
+      .update(combos)
+      .set(updateData)
+      .where(and(eq(combos.id, combo_id), eq(combos.userId, id)))
+      .returning({ id: combos.id });
+
+    if (!combo) {
+      return {
+        success: false,
+        message: "Falha ao atualizar o combo",
+      };
+    }
+
+    if (product_ids.length > 0) {
+      await db.insert(comboProducts).values(
+        product_ids.map((product_id) => ({
+          combo_id: combo.id,
+          product_id,
+        }))
+      );
+    }
+
+    revalidatePath("/dashboard/combos");
+    return { success: true, message: "Combo atualizado com sucesso" };
   } catch (error) {
     console.error(error);
     return {
       success: false,
-      message: "Erro inesperado ao atualizar a categoria",
+      message: "Erro inesperado ao atualizar o combo",
     };
   }
 };
