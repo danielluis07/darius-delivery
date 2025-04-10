@@ -6,7 +6,7 @@ export const useGetCategories = (userId?: string) => {
     enabled: !!userId, // the query will only be executed if we have the userId
     queryKey: ["categories", userId],
     queryFn: async () => {
-      const res = await client.api.categories[":userId"].$get({
+      const res = await client.api.categories.user[":userId"].$get({
         param: { userId },
       });
 
