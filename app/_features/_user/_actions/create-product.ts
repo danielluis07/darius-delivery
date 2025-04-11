@@ -44,8 +44,15 @@ export const createProduct = async (
       return { success: false, message: "Campos inválidos" };
     }
 
-    const { name, image, price, category_id, description, sizes } =
-      validatedValues.data;
+    const {
+      name,
+      image,
+      price,
+      category_id,
+      description,
+      sizes,
+      allowHalfOption,
+    } = validatedValues.data;
 
     if (!name || !image || !price || !category_id || !description) {
       return { success: false, message: "Campos obrigatórios não preenchidos" };
@@ -112,6 +119,7 @@ export const createProduct = async (
       sizes: sizes || [],
       category_id,
       description,
+      allowHalfOption,
       userId: id,
     });
 

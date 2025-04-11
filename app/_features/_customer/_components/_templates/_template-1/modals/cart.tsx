@@ -33,6 +33,7 @@ import { useCheckDeliveryAreaDialog } from "@/hooks/use-check-delivery-area";
 import { CheckDeliveryAreaDialog } from "@/app/_features/_customer/_components/_templates/_template-1/delivery-area-dialog";
 import { useDeliveryFeeAlert } from "@/hooks/use-delivery-areas-fee-alert";
 import { FeeAlertDialog } from "@/app/_features/_customer/_components/_templates/_template-1/fee-alert-dialog";
+import { useModalStore } from "@/hooks/use-modal-store";
 
 enum STEPS {
   FIRST = 0,
@@ -140,12 +141,11 @@ export type OrderData = z.infer<typeof orderSchema>;
 export const Cart = () => {
   const params = useParams<{ domain: string }>();
   const { cart, removeFromCart, updateQuantity } = useCartStore();
-  const { onOpen } = useCheckDeliveryAreaDialog();
+  const { onOpenDelivery } = useCheckDeliveryAreaDialog();
   const { onOpenAlert } = useDeliveryFeeAlert();
+  const { onOpen, onClose } = useModalStore();
   const [step, setStep] = useState<STEPS>(STEPS.FIRST);
   const { data, session } = useStore();
-
-  console.log("Cart data", cart);
 
   const form = useForm<OrderData>({
     resolver: zodResolver(orderSchema),
@@ -224,6 +224,7 @@ export const Cart = () => {
   const onSubmit = async (values: OrderData) => {
     if (!session?.user) {
       toast.error("Você precisa estar logado para finalizar o pedido");
+      onOpen("signIn");
       return;
     }
 
@@ -242,7 +243,7 @@ export const Cart = () => {
     );
 
     if (!success) {
-      onOpen();
+      onOpenDelivery();
       return;
     }
 
@@ -396,6 +397,10 @@ export const Cart = () => {
                                         <RadioGroupItem
                                           value={method}
                                           id={method}
+                                          colorClass={
+                                            data?.customization.font_color ||
+                                            "black"
+                                          }
                                         />
                                       </FormControl>
                                       {paymentIcons[method]}

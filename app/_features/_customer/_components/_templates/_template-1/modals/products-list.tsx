@@ -12,6 +12,10 @@ import { useStore } from "@/context/store-context";
 import { useCartStore } from "@/hooks/use-cart-store";
 import { toast } from "sonner";
 import { useModalStore } from "@/hooks/use-modal-store";
+import { useFooterSheet } from "@/hooks/use-template-footer";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const ProductsList = ({
   categoryId,
@@ -20,8 +24,10 @@ export const ProductsList = ({
 }) => {
   const { data } = useStore();
   const addToCart = useCartStore((state) => state.addToCart);
-  const { cart } = useCartStore();
-  const { onOpen } = useModalStore();
+  const { onOpenSheet } = useFooterSheet();
+  const [halfOption, setHalfOption] = useState<"Inteira" | "Meio a Meio">(
+    "Inteira"
+  );
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data: products, isLoading: isProductsLoading } = useGetProducts(
@@ -52,16 +58,6 @@ export const ProductsList = ({
 
   return (
     <div className="relative">
-      <div className="absolute top-0 left-0 z-40">
-        <div
-          onClick={() => onOpen("cart")}
-          className="relative cursor-pointer w-10 h-10 rounded-full flex items-center justify-center text-white">
-          <span className="absolute flex justify-center items-center top-0 right-0 text-xs bg-destructive size-4 rounded-full text-white font-semibold">
-            {cart.length}
-          </span>
-          <ShoppingCart />
-        </div>
-      </div>
       {selectedProduct ? (
         <motion.div
           key="productDetails"
@@ -69,8 +65,8 @@ export const ProductsList = ({
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
           transition={{ duration: 0.5 }}
-          className="absolute inset-0 p-6 z-10">
-          <div className="pb-5">
+          className="absolute inset-0 z-10">
+          <ScrollArea className="h-[450px] px-3">
             <div className="flex justify-end mb-4">
               <div
                 style={{
@@ -94,14 +90,40 @@ export const ProductsList = ({
               style={{
                 color: data?.customization.font_color || "black",
               }}
-              className="mb-4 text-xs">
+              className="text-xs">
               {selectedProduct.description}
             </p>
+            {selectedProduct.allowHalfOption && (
+              <div className="mt-2">
+                <RadioGroup
+                  defaultValue={halfOption}
+                  onValueChange={(value) =>
+                    setHalfOption(value as "Inteira" | "Meio a Meio")
+                  }>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      colorClass={data?.customization.font_color || "black"}
+                      value="Inteira"
+                      id="inteira"
+                    />
+                    <Label htmlFor="inteira">Inteira</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      colorClass={data?.customization.font_color || "black"}
+                      value="Meio a Meio"
+                      id="meio-a-meio"
+                    />
+                    <Label htmlFor="meio-a-meio">Meio a Meio</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
             <p
               style={{
                 color: data?.customization.font_color || "black",
               }}
-              className="text-lg font-semibold mb-4">
+              className="text-lg font-semibold mt-2">
               {formatCurrencyFromCents(selectedProduct.price)}
             </p>
             <button
@@ -109,9 +131,13 @@ export const ProductsList = ({
                 backgroundColor: data?.customization.button_color || "white",
                 color: data?.customization.font_color || "black",
               }}
-              className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md mt-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+              className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md mt-5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
               onClick={() => {
-                const wasAdded = addToCart(selectedProduct, data?.userId || "");
+                onOpenSheet();
+                const wasAdded = addToCart(
+                  { ...selectedProduct, halfOption },
+                  data?.userId || ""
+                );
                 if (wasAdded) {
                   toast.success("Produto adicionado ao carrinho");
                 } else {
@@ -120,7 +146,7 @@ export const ProductsList = ({
               }}>
               Adicionar ao carrinho
             </button>
-          </div>
+          </ScrollArea>
         </motion.div>
       ) : (
         <motion.div
@@ -129,7 +155,7 @@ export const ProductsList = ({
           animate={{ x: 0 }}
           exit={{ x: "-100%" }}
           transition={{ duration: 0.5 }}>
-          <div className="space-y-3 pt-14">
+          <div className="space-y-3 mt-5">
             {products.map((product) => (
               <div
                 key={product.id}

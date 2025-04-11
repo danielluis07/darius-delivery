@@ -90,6 +90,7 @@ export type PaymentBody = {
 export type Product = {
   id: string;
   name: string;
+  allowHalfOption: boolean;
   userId: string | null;
   image: string | null;
   createdAt: Date | null;

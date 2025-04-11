@@ -10,6 +10,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { formatAddress, getGeoCode } from "@/lib/google-geocode";
+import { deleteFromS3 } from "@/lib/s3-upload";
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
@@ -156,14 +157,58 @@ export const createCustomization = async (
     let logoDesktopUrl: string | null | undefined;
 
     if (banner?.[0]) {
+      const [existingCustomization] = await db
+        .select({ banner: customizations.banner, logo: customizations.logo })
+        .from(customizations)
+        .where(eq(customizations.user_id, session.user.id));
+
+      if (!existingCustomization || !existingCustomization.banner) {
+        return {
+          success: false,
+          message: "Customização não encontrada",
+        };
+      }
+
+      const fileName = existingCustomization.banner.split("/").pop()!;
+
+      const { success } = await deleteFromS3(fileName);
+
+      if (!success) {
+        console.log("Erro ao deletar o banner existente do S3");
+        return { success: false, message: "Erro ao atualizar o banner" };
+      }
+
       bannerUrl = await uploadImageToS3(banner[0]);
+
       if (!bannerUrl) {
         return { success: false, message: "Erro ao fazer upload do banner" };
       }
     }
 
     if (logo?.[0]) {
+      const [existingCustomization] = await db
+        .select({ banner: customizations.banner, logo: customizations.logo })
+        .from(customizations)
+        .where(eq(customizations.user_id, session.user.id));
+
+      if (!existingCustomization || !existingCustomization.logo) {
+        return {
+          success: false,
+          message: "Customização não encontrada",
+        };
+      }
+
+      const fileName = existingCustomization.logo.split("/").pop()!;
+
+      const { success } = await deleteFromS3(fileName);
+
+      if (!success) {
+        console.log("Erro ao deletar o logo existente do S3");
+        return { success: false, message: "Erro ao atualizar o logo" };
+      }
+
       logoDesktopUrl = await uploadImageToS3(logo[0]);
+
       if (!logoDesktopUrl) {
         return { success: false, message: "Erro ao fazer upload do logo" };
       }

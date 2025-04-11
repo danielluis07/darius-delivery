@@ -14,6 +14,7 @@ type UpdatedData = {
   price: number;
   category_id: string;
   description: string;
+  allowHalfOption?: boolean;
   sizes: string[] | null | undefined;
   image?: string | null | undefined;
 };
@@ -48,6 +49,7 @@ export const updateProduct = async (
       image,
       price,
       category_id,
+      allowHalfOption,
       description,
       sizes,
     } = validatedValues.data;
@@ -88,6 +90,7 @@ export const updateProduct = async (
       price,
       category_id,
       description,
+      allowHalfOption,
       sizes: sizes,
     };
 

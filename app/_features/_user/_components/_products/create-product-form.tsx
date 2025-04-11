@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -39,6 +40,7 @@ import {
 import { createProduct } from "@/app/_features/_user/_actions/create-product";
 import Image from "next/image";
 import { TagsInput } from "@/components/ui/tags-input";
+import { Switch } from "@/components/ui/switch";
 
 type ResponseType = InferResponseType<
   (typeof client.api.categories.user)[":userId"]["$get"],
@@ -59,6 +61,7 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
       image: [],
       category_id: "",
       description: "",
+      allowHalfOption: false,
       sizes: [],
       price: 0,
     },
@@ -93,6 +96,7 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
         });
     });
   };
+
   return (
     <Form {...form}>
       <form
@@ -147,6 +151,28 @@ export const CreateProductForm = ({ data }: { data: ResponseType }) => {
                 onValueChange={field.onChange}
                 placeholder="Selecione os tamanhos disponíveis (opcional)"
               />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="allowHalfOption"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm w-[400px] h-[130px] mt-8">
+              <div className="space-y-0.5">
+                <FormLabel>Permitir partes</FormLabel>
+                <FormDescription>
+                  Permitir se o produto pode ser dividido em partes (inteira ou
+                  meio a meio).
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isPending}
+                />
+              </FormControl>
             </FormItem>
           )}
         />

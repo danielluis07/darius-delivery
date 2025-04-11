@@ -312,12 +312,21 @@ export const updateProductSchema = baseCreateProductSchema.extend({
 export const insertCustomizationSchema = baseCreateCustomizationSchema.extend({
   banner:
     typeof File !== "undefined"
-      ? z.array(z.instanceof(File)).optional()
-      : z.any().optional(),
+      ? z.union([
+          z.array(z.instanceof(File)).optional(),
+          z.string().optional(),
+          z.null(),
+        ])
+      : z.union([z.any().optional(), z.string().optional(), z.null()]),
   logo:
     typeof File !== "undefined"
-      ? z.array(z.instanceof(File)).optional()
-      : z.any().optional(),
+      ? z.union([
+          z.array(z.instanceof(File)).optional(),
+          z.string().optional(),
+          z.null(),
+        ])
+      : z.union([z.any().optional(), z.string().optional(), z.null()]),
+
   opening_hours: z
     .array(
       z.object({

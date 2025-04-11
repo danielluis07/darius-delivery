@@ -1,0 +1,1 @@
+ALTER TABLE "orders" ADD COLUMN "half_option" text;

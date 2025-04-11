@@ -1,11 +1,15 @@
 import { Product, Combo } from "@/types";
 import { create } from "zustand";
 
-type CartItem = (Product | Combo) & { quantity: number };
+type Pizza = Product & {
+  halfOption?: string;
+};
+
+type CartItem = (Product | Combo | Pizza) & { quantity: number };
 
 type CartState = {
   cart: CartItem[];
-  addToCart: (product: Product | Combo, userId: string) => boolean;
+  addToCart: (product: Product | Combo | Pizza, userId: string) => boolean;
   removeFromCart: (id: string, userId: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -40,7 +44,6 @@ export const useCartStore = create<CartState>((set, get) => ({
         { method: "POST" }
       )
         .then((res) => res.json())
-        .then((data) => console.log("Carrinho atualizado:", data))
         .catch((err) => console.error("Erro ao registrar no backend:", err));
     }
 

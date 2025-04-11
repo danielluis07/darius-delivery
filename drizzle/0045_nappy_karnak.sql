@@ -1,0 +1,1 @@
+ALTER TABLE "products" ALTER COLUMN "allow_half_option" SET NOT NULL;

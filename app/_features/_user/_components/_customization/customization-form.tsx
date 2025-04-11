@@ -100,8 +100,12 @@ export const CustomizationForm = ({
   const [isPending, startTransition] = useTransition();
   const [bannerfiles, setBannerFiles] = useState<File[] | null>(null);
   const [desktopfiles, setDesktopFiles] = useState<File[] | null>(null);
-  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
-  const [desktopPreview, setDesktopPreview] = useState<string | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(
+    customization?.banner
+  );
+  const [desktopPreview, setDesktopPreview] = useState<string | null>(
+    customization?.logo
+  );
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomizationSchema),
     defaultValues: {

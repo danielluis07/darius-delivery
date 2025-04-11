@@ -12,6 +12,7 @@ import { useStore } from "@/context/store-context";
 import { useCartStore } from "@/hooks/use-cart-store";
 import { toast } from "sonner";
 import { useModalStore } from "@/hooks/use-modal-store";
+import { useFooterSheet } from "@/hooks/use-template-footer";
 
 export const MenuProducts = ({
   categoryId,
@@ -20,8 +21,7 @@ export const MenuProducts = ({
 }) => {
   const { data } = useStore();
   const addToCart = useCartStore((state) => state.addToCart);
-  const { cart } = useCartStore();
-  const { onOpen } = useModalStore();
+  const { onOpenSheet } = useFooterSheet();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data: products, isLoading: isProductsLoading } = useGetProducts(
@@ -56,16 +56,6 @@ export const MenuProducts = ({
         backgroundColor: data?.customization.background_color || "white",
       }}
       className="relative">
-      <div className="absolute top-0 left-0 z-40">
-        <div
-          onClick={() => onOpen("cart")}
-          className="relative cursor-pointer w-10 h-10 rounded-full flex items-center justify-center text-white">
-          <span className="absolute flex justify-center items-center top-0 right-0 text-xs bg-destructive size-4 rounded-full text-white font-semibold">
-            {cart.length}
-          </span>
-          <ShoppingCart />
-        </div>
-      </div>
       {selectedProduct ? (
         <motion.div
           key="productDetails"
@@ -122,11 +112,12 @@ export const MenuProducts = ({
               }}
               className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md mt-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
               onClick={() => {
+                onOpenSheet();
                 const wasAdded = addToCart(selectedProduct, data?.userId || "");
                 if (wasAdded) {
                   toast.success("Produto adicionado ao carrinho");
                 } else {
-                  toast.error("Esse Produto já está no carrinho");
+                  toast.error("Esse produto já está no carrinho");
                 }
               }}>
               Adicionar ao carrinho

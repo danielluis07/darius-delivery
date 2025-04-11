@@ -23,6 +23,9 @@ import { Cart } from "@/app/_features/_customer/_components/_templates/_template
 import { Categories } from "@/app/_features/_customer/_components/_templates/_template-1/modals/categories";
 import { useEffect } from "react";
 import { Combos } from "./modals/combos";
+import { FooterSheet } from "./modals/footer";
+import { hexToRgba } from "@/lib/utils";
+import { useCartStore } from "@/hooks/use-cart-store";
 
 const registerMenuView = async (userId: string | undefined) => {
   const lastView = localStorage.getItem(`menuView-${userId}`);
@@ -49,6 +52,7 @@ const registerMenuView = async (userId: string | undefined) => {
 export const MainClient = () => {
   const { modalStack, onOpen, onClose } = useModalStore();
   const currentModal = modalStack[modalStack.length - 1] || null;
+  const { cart } = useCartStore();
   const { data, session } = useStore();
 
   const userId = data?.userId;
@@ -77,7 +81,15 @@ export const MainClient = () => {
                 color: data?.customization.font_color || "black",
               }}
               className="absolute inset-0 z-10 p-6 overflow-y-auto shadow-2xl rounded-lg">
-              <div className="flex justify-end mb-4">
+              <div className="flex justify-between">
+                <div
+                  onClick={() => onOpen("cart")}
+                  className="relative cursor-pointer w-10 h-10 rounded-full flex items-center justify-center text-white">
+                  <span className="absolute flex justify-center items-center top-0 right-0 text-xs bg-destructive size-4 rounded-full text-white font-semibold">
+                    {cart.length}
+                  </span>
+                  <ShoppingCart />
+                </div>
                 <div
                   style={{
                     color: data?.customization.font_color || "black",
@@ -132,13 +144,15 @@ export const MainClient = () => {
             <div className="flex justify-center">
               <div
                 style={{
-                  backgroundColor: data?.customization.button_color || "white",
+                  backgroundColor: data?.customization.button_color
+                    ? hexToRgba(data.customization.button_color, 0.7)
+                    : "rgba(255, 255, 255, 0.7)",
                   color: data?.customization.font_color || "black",
                 }}
                 className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                 onClick={() => onOpen("menu")}>
-                <UtensilsCrossed />
-                Menu
+                <UtensilsCrossed className="size-12" />
+                <span className="font-semibold">Menu</span>
               </div>
             </div>
           ) : (
@@ -147,100 +161,109 @@ export const MainClient = () => {
                 <div className="grid grid-cols-2 gap-x-10 gap-y-5 [&>*]:h-28 [&>*]:flex [&>*]:items-center [&>*]:justify-center">
                   <div
                     style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
+                      backgroundColor: data?.customization.button_color
+                        ? hexToRgba(data.customization.button_color, 0.7)
+                        : "rgba(255, 255, 255, 0.7)",
                       color: data?.customization.font_color || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("categories")}>
-                    <Sandwich />
-                    Categorias
+                    <Sandwich className="size-12" />
+                    <span className="font-semibold">Categorias</span>
                   </div>
                   <div
                     style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
+                      backgroundColor: data?.customization.button_color
+                        ? hexToRgba(data.customization.button_color, 0.7)
+                        : "rgba(255, 255, 255, 0.7)",
                       color: data?.customization.font_color || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("cart")}>
-                    <ShoppingCart />
-                    Meu carrinho
+                    <ShoppingCart className="size-12" />
+                    <span className="font-semibold">Meu Carrinho</span>
                   </div>
                   <div
                     style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
+                      backgroundColor: data?.customization.button_color
+                        ? hexToRgba(data.customization.button_color, 0.7)
+                        : "rgba(255, 255, 255, 0.7)",
                       color: data?.customization.font_color || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("combos")}>
-                    <ShoppingBasket />
-                    Combos
+                    <ShoppingBasket className="size-12" />
+                    <span className="font-semibold">Combos</span>
                   </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-x-10 gap-y-5 [&>*]:h-28 [&>*]:flex [&>*]:items-center [&>*]:justify-center">
                   <div
                     style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
+                      backgroundColor: data?.customization.button_color
+                        ? hexToRgba(data.customization.button_color, 0.7)
+                        : "rgba(255, 255, 255, 0.7)",
                       color: data?.customization.font_color || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("signUp")}>
-                    <ClipboardList />
-                    Registrar
+                    <ClipboardList className="size-12" />
+                    <span className="font-semibold">Registrar</span>
                   </div>
                   <div
                     style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
+                      backgroundColor: data?.customization.button_color
+                        ? hexToRgba(data.customization.button_color, 0.7)
+                        : "rgba(255, 255, 255, 0.7)",
                       color: data?.customization.font_color || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("signIn")}>
-                    <Key />
-                    Entrar
+                    <Key className="size-12" />
+                    <span className="font-semibold">Entrar</span>
                   </div>
                   <div
                     style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
+                      backgroundColor: data?.customization.button_color
+                        ? hexToRgba(data.customization.button_color, 0.7)
+                        : "rgba(255, 255, 255, 0.7)",
                       color: data?.customization.font_color || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("menu")}>
-                    <UtensilsCrossed />
-                    Menu
+                    <UtensilsCrossed className="size-12" />
+                    <span className="font-semibold">Menu</span>
                   </div>
                   <div
                     style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
+                      backgroundColor: data?.customization.button_color
+                        ? hexToRgba(data.customization.button_color, 0.7)
+                        : "rgba(255, 255, 255, 0.7)",
                       color: data?.customization.font_color || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("cart")}>
-                    <ShoppingCart />
-                    Meu carrinho
+                    <ShoppingCart className="size-12" />
+                    <span className="font-semibold">Meu Carrinho</span>
                   </div>
                   <div
                     style={{
-                      backgroundColor:
-                        data?.customization.button_color || "white",
+                      backgroundColor: data?.customization.button_color
+                        ? hexToRgba(data.customization.button_color, 0.7)
+                        : "rgba(255, 255, 255, 0.7)",
                       color: data?.customization.font_color || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("combos")}>
-                    <ShoppingBasket />
-                    Combos
+                    <ShoppingBasket className="size-12" />
+                    <span className="font-semibold">Combos</span>
                   </div>
                 </div>
               )}
             </div>
           )}
         </div>
+        <FooterSheet />
       </div>
     </div>
   );
