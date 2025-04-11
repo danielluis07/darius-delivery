@@ -143,7 +143,7 @@ export const Cart = () => {
   const { cart, removeFromCart, updateQuantity } = useCartStore();
   const { onOpenDelivery } = useCheckDeliveryAreaDialog();
   const { onOpenAlert } = useDeliveryFeeAlert();
-  const { onOpen, onClose } = useModalStore();
+  const { onOpen } = useModalStore();
   const [step, setStep] = useState<STEPS>(STEPS.FIRST);
   const { data, session } = useStore();
 

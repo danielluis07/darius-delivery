@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { NonModalSheet } from "@/components/ui/template-footer-sheet";
 import { cn, formatCurrency } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { useFooterSheet } from "@/hooks/use-template-footer";
 import { useCartStore } from "@/hooks/use-cart-store";
 import { useModalStore } from "@/hooks/use-modal-store";

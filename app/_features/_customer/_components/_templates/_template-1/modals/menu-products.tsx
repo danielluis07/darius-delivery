@@ -6,12 +6,11 @@ import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
 import { useGetProducts } from "@/app/_features/_customer/_queries/use-get-products";
 import { Product } from "@/types";
-import { MoveLeft, ShoppingCart } from "lucide-react";
+import { MoveLeft } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
 import { useCartStore } from "@/hooks/use-cart-store";
 import { toast } from "sonner";
-import { useModalStore } from "@/hooks/use-modal-store";
 import { useFooterSheet } from "@/hooks/use-template-footer";
 
 export const MenuProducts = ({
