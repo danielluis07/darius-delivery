@@ -444,6 +444,10 @@ export const Cart = () => {
                                         <RadioGroupItem
                                           value={method}
                                           id={method}
+                                          colorClass={
+                                            data?.customization.font_color ||
+                                            "black"
+                                          }
                                         />
                                       </FormControl>
                                       {paymentIcons[method]}

@@ -24,7 +24,7 @@ import { Categories } from "@/app/_features/_customer/_components/_templates/_te
 import { useEffect } from "react";
 import { Combos } from "./modals/combos";
 import { FooterSheet } from "./modals/footer";
-import { hexToRgba } from "@/lib/utils";
+import { cn, hexToRgba } from "@/lib/utils";
 import { useCartStore } from "@/hooks/use-cart-store";
 
 const registerMenuView = async (userId: string | undefined) => {
@@ -81,15 +81,27 @@ export const MainClient = () => {
                 color: data?.customization.font_color || "black",
               }}
               className="absolute inset-0 z-10 p-6 overflow-y-auto shadow-2xl rounded-lg">
-              <div className="flex justify-between">
-                <div
-                  onClick={() => onOpen("cart")}
-                  className="relative cursor-pointer w-10 h-10 rounded-full flex items-center justify-center text-white">
-                  <span className="absolute flex justify-center items-center top-0 right-0 text-xs bg-destructive size-4 rounded-full text-white font-semibold">
-                    {cart.length}
-                  </span>
-                  <ShoppingCart />
-                </div>
+              <div
+                className={cn(
+                  "flex mb-4",
+                  modalStack[0].type !== "signIn" &&
+                    modalStack[0].type !== "signUp"
+                    ? "justify-between"
+                    : "justify-end"
+                )}>
+                {modalStack[0].type !== "signIn" &&
+                  modalStack[0].type !== "signUp" && (
+                    <div className="flex justify-between">
+                      <div
+                        onClick={() => onOpen("cart")}
+                        className="relative cursor-pointer w-10 h-10 rounded-full flex items-center justify-center text-white">
+                        <span className="absolute flex justify-center items-center top-0 right-0 text-xs bg-destructive size-4 rounded-full text-white font-semibold">
+                          {cart.length}
+                        </span>
+                        <ShoppingCart />
+                      </div>
+                    </div>
+                  )}
                 <div
                   style={{
                     color: data?.customization.font_color || "black",
