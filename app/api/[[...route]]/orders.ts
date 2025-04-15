@@ -934,6 +934,7 @@ const app = new Hono()
         !admin ||
         !admin.walletId
       ) {
+        console.error("Failed to find order data");
         return c.json({ error: "Failed to find order data" }, 500);
       }
 
@@ -949,6 +950,7 @@ const app = new Hono()
       const geoCode = await getGeoCode(formattedAddress, user.googleApiKey);
 
       if (!geoCode.success) {
+        console.error("Failed to get geocode:", geoCode.message);
         return c.json({ error: geoCode.message }, 500);
       }
 
@@ -958,6 +960,7 @@ const app = new Hono()
         .where(eq(commissions.adminId, admin.id));
 
       if (!comission) {
+        console.error("Failed to find commission");
         return c.json({ error: "Failed to find commission" }, 500);
       }
 
@@ -1011,6 +1014,7 @@ const app = new Hono()
         });
 
       if (!order) {
+        console.error("Failed to create order");
         return c.json({ error: "Failed to create order" }, 500);
       }
 
@@ -1040,6 +1044,7 @@ const app = new Hono()
       );
 
       if (!success) {
+        console.error("Failed to create payment:", message);
         await db.delete(orders).where(eq(orders.id, order.id));
 
         return c.json({ error: message }, 500);
@@ -1056,6 +1061,7 @@ const app = new Hono()
       });
 
       if (!adminTransaction) {
+        console.error("Failed to create admin transaction");
         return c.json({ error: "Failed to create admin transaction" }, 500);
       }
 
