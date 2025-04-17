@@ -1,13 +1,13 @@
 "use client";
 
-import { useGetCategories } from "@/app/_features/_customer/_queries/use-get-categories";
+//import { useGetCategories } from "@/app/_features/_customer/_queries/use-get-categories";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useStore } from "@/context/store-context";
+//import { useStore } from "@/context/store-context";
 
 const categories = [
   {
@@ -93,7 +93,7 @@ const categories = [
 ];
 
 export const CategoriesCarousel = () => {
-  const { data } = useStore();
+  //const { data } = useStore();
   // const { data: categories, isLoading } = useGetCategories(data?.userId);
 
   const isLoading = false;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetCombos } from "@/app/_features/_user/_queries/_combos/use-get-combos";
+//import { useGetCombos } from "@/app/_features/_user/_queries/_combos/use-get-combos";
 import { useStore } from "@/context/store-context";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import Image from "next/image";
@@ -61,7 +61,7 @@ const combos = [
 ];
 
 export const Combos = () => {
-  const { data } = useStore();
+  //const { data } = useStore();
   //const { data: combos, isLoading } = useGetCombos(data?.userId);
 
   /*   if (isLoading) {

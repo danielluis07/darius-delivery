@@ -1,6 +1,6 @@
 "use client";
 
-import { useStore } from "@/context/store-context";
+//import { useStore } from "@/context/store-context";
 import Image from "next/image";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { useProductModal } from "@/hooks/template-2/use-product-modal";
@@ -54,7 +54,7 @@ const products = [
 ];
 
 export const Products = () => {
-  const { data } = useStore();
+  //const { data } = useStore();
   const { openModal } = useProductModal();
   // const { data: products, isLoading } = useGetProducts();
   return (
