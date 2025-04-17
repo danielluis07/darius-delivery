@@ -12,18 +12,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { credentialsSignInSchema } from "@/db/schemas";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { credentialsSignIn } from "@/app/_features/_customer/_actions/credentials-sign-in";
-import { useModalStore } from "@/hooks/template-1/use-modal-store";
-import { Loader2 } from "lucide-react";
 import { useStore } from "@/context/store-context";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 type FormData = z.infer<typeof credentialsSignInSchema>;
 
 export const SignInForm = () => {
   const [isPending, startTransition] = useTransition();
-  const { onClose } = useModalStore();
   const { data } = useStore();
   const form = useForm<FormData>({
     resolver: zodResolver(credentialsSignInSchema),
@@ -49,7 +47,6 @@ export const SignInForm = () => {
           if (res.success) {
             toast.success(res.message);
             router.refresh();
-            onClose();
           }
         })
         .catch((error) => {
@@ -65,8 +62,9 @@ export const SignInForm = () => {
         style={{
           color: "black",
         }}
-        className="space-y-4"
+        className="space-y-4 w-5/6"
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+        <h1 className="font-semibold text-center">Entrar</h1>
         <FormField
           control={form.control}
           name="email"
@@ -74,7 +72,7 @@ export const SignInForm = () => {
             <FormItem>
               <FormControl>
                 <input
-                  className="h-9 px-4 py-2 w-full"
+                  className="h-9 px-4 py-2 w-full border rounded-md"
                   disabled={isPending}
                   type="email"
                   {...field}
@@ -94,7 +92,7 @@ export const SignInForm = () => {
               <FormControl>
                 <input
                   disabled={isPending}
-                  className="h-9 px-4 py-2 w-full"
+                  className="h-9 px-4 py-2 w-full border rounded-md"
                   type="password"
                   {...field}
                   value={field.value}

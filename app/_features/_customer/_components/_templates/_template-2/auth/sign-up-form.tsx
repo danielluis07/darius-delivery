@@ -107,7 +107,9 @@ export const SignUpForm = () => {
         style={{
           color: "black",
         }}
+        className="w-5/6"
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+        <h1 className="font-semibold text-center mb-4">Cadastrar</h1>
         {step === STEPS.FIRST && (
           <div className="w-full space-y-4">
             <FormField
@@ -121,7 +123,7 @@ export const SignUpForm = () => {
                       value={field.value}
                       disabled={isPending}
                       placeholder="Nome"
-                      className="h-9 px-4 py-2 w-full"
+                      className="h-9 px-4 py-2 w-full border rounded-md"
                       required
                     />
                   </FormControl>
@@ -141,7 +143,7 @@ export const SignUpForm = () => {
                       disabled={isPending}
                       placeholder="Email"
                       type="email"
-                      className="h-9 px-4 py-2 w-full"
+                      className="h-9 px-4 py-2 w-full border rounded-md"
                       required
                     />
                   </FormControl>
@@ -165,7 +167,7 @@ export const SignUpForm = () => {
                       }}
                       disabled={isPending}
                       placeholder="CPF"
-                      className="h-9 px-4 py-2 w-full"
+                      className="h-9 px-4 py-2 w-full border rounded-md"
                       required
                     />
                   </FormControl>
@@ -189,7 +191,7 @@ export const SignUpForm = () => {
                         field.onChange(formattedPhoneNumber);
                       }}
                       disabled={isPending}
-                      className="h-9 px-4 py-2 w-full"
+                      className="h-9 px-4 py-2 w-full border rounded-md"
                       placeholder="Telefone"
                       required
                     />
@@ -212,7 +214,7 @@ export const SignUpForm = () => {
                     <FormControl>
                       <input
                         {...field}
-                        className="h-9 px-4 py-2 w-full"
+                        className="h-9 px-4 py-2 w-full border rounded-md"
                         placeholder="Endereço"
                         required
                       />
@@ -229,7 +231,7 @@ export const SignUpForm = () => {
                     <FormControl>
                       <input
                         {...field}
-                        className="h-9 px-4 py-2 w-full"
+                        className="h-9 px-4 py-2 w-full border rounded-md"
                         placeholder="Número"
                         required
                       />
@@ -246,7 +248,7 @@ export const SignUpForm = () => {
                     <FormControl>
                       <input
                         {...field}
-                        className="h-9 px-4 py-2 w-full"
+                        className="h-9 px-4 py-2 w-full border rounded-md"
                         placeholder="Bairro"
                         required
                       />
@@ -263,7 +265,7 @@ export const SignUpForm = () => {
                     <FormControl>
                       <input
                         {...field}
-                        className="h-9 px-4 py-2 w-full"
+                        className="h-9 px-4 py-2 w-full border rounded-md"
                         placeholder="Complemento"
                       />
                     </FormControl>
@@ -272,111 +274,113 @@ export const SignUpForm = () => {
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <input
-                      {...field}
-                      className="h-9 px-4 py-2 w-full"
-                      placeholder="Cidade"
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="state"
-              render={({ field }) => (
-                <FormItem className="bg-white">
-                  <Select
-                    disabled={isPending}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}>
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Estado" />
-                      </SelectTrigger>
+                      <input
+                        {...field}
+                        className="h-9 px-4 py-2 w-full border rounded-md"
+                        placeholder="Cidade"
+                        required
+                      />
                     </FormControl>
-                    <SelectContent>
-                      {state.map((state, index) => (
-                        <SelectItem key={index} value={state}>
-                          {state}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="postalCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <input
-                      {...field}
-                      className="h-9 px-4 py-2 w-full"
-                      value={field.value ?? ""}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        const formattedValue = formatPostalCode(value);
-                        field.onChange(formattedValue);
-                      }}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem className="bg-white">
+                    <Select
                       disabled={isPending}
-                      placeholder="CEP"
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <input
-                      {...field}
-                      type="password"
-                      className="h-9 px-4 py-2 w-full"
-                      value={field.value}
-                      disabled={isPending}
-                      placeholder="Senha"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="repeat_password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <input
-                      {...field}
-                      type="password"
-                      className="h-9 px-4 py-2 w-full"
-                      value={field.value}
-                      disabled={isPending}
-                      placeholder="Repita a senha"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Estado" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {state.map((state, index) => (
+                          <SelectItem key={index} value={state}>
+                            {state}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="postalCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <input
+                        {...field}
+                        className="h-9 px-4 py-2 w-full border rounded-md"
+                        value={field.value ?? ""}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          const formattedValue = formatPostalCode(value);
+                          field.onChange(formattedValue);
+                        }}
+                        disabled={isPending}
+                        placeholder="CEP"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <input
+                        {...field}
+                        type="password"
+                        className="h-9 px-4 py-2 w-full border rounded-md"
+                        value={field.value}
+                        disabled={isPending}
+                        placeholder="Senha"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="repeat_password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <input
+                        {...field}
+                        type="password"
+                        className="h-9 px-4 py-2 w-full border rounded-md"
+                        value={field.value}
+                        disabled={isPending}
+                        placeholder="Repita a senha"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         )}
 

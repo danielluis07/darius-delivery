@@ -4,7 +4,7 @@ import { z } from "zod";
 import { InputMask } from "@react-input/mask";
 import Image from "next/image";
 import { FaPix, FaCreditCard, FaMoneyBill1Wave } from "react-icons/fa6";
-import { useCartStore } from "@/hooks/use-cart-store";
+import { useCartStore } from "@/hooks/template-1/use-cart-store";
 import { X } from "lucide-react";
 import { formatCurrency, formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
@@ -33,7 +33,7 @@ import { useCheckDeliveryAreaDialog } from "@/hooks/use-check-delivery-area";
 import { CheckDeliveryAreaDialog } from "@/app/_features/_customer/_components/_templates/_template-1/delivery-area-dialog";
 import { useDeliveryFeeAlert } from "@/hooks/use-delivery-areas-fee-alert";
 import { FeeAlertDialog } from "@/app/_features/_customer/_components/_templates/_template-1/fee-alert-dialog";
-import { useModalStore } from "@/hooks/use-modal-store";
+import { useModalStore } from "@/hooks/template-1/use-modal-store";
 
 enum STEPS {
   FIRST = 0,

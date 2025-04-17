@@ -8,7 +8,7 @@ import { Combo } from "@/types";
 import { MoveLeft } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
-import { useCartStore } from "@/hooks/use-cart-store";
+import { useCartStore } from "@/hooks/template-1/use-cart-store";
 import { toast } from "sonner";
 import { useGetCombos } from "@/app/_features/_user/_queries/_combos/use-get-combos";
 

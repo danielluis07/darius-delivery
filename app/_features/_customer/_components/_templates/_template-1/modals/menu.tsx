@@ -1,6 +1,6 @@
 "use client";
 
-import { useModalStore } from "@/hooks/use-modal-store";
+import { useModalStore } from "@/hooks/template-1/use-modal-store";
 import { useGetCategories } from "@/app/_features/_customer/_queries/use-get-categories";
 import { useStore } from "@/context/store-context";
 import placeholder from "@/public/placeholder-image.jpg";

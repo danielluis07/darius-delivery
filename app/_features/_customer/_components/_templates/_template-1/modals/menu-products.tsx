@@ -9,9 +9,9 @@ import { Product } from "@/types";
 import { MoveLeft } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
-import { useCartStore } from "@/hooks/use-cart-store";
+import { useCartStore } from "@/hooks/template-1/use-cart-store";
 import { toast } from "sonner";
-import { useFooterSheet } from "@/hooks/use-template-footer";
+import { useFooterSheet } from "@/hooks/template-1/use-template-footer";
 
 export const MenuProducts = ({
   categoryId,

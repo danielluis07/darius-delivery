@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { NonModalSheet } from "@/components/ui/template-footer-sheet";
 import { cn, formatCurrency } from "@/lib/utils";
-import { useFooterSheet } from "@/hooks/use-template-footer";
-import { useCartStore } from "@/hooks/use-cart-store";
-import { useModalStore } from "@/hooks/use-modal-store";
+import { useFooterSheet } from "@/hooks/template-1/use-template-footer";
+import { useCartStore } from "@/hooks/template-1/use-cart-store";
+import { useModalStore } from "@/hooks/template-1/use-modal-store";
 import { useStore } from "@/context/store-context";
 
 export const FooterSheet = () => {

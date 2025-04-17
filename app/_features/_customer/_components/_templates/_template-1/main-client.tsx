@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useModalStore } from "@/hooks/use-modal-store";
+import { useModalStore } from "@/hooks/template-1/use-modal-store";
 import { SignInForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-in-form";
 import placeholder from "@/public/placeholder-image.jpg";
 import { ProductsList } from "@/app/_features/_customer/_components/_templates/_template-1/modals/products-list";
@@ -25,7 +25,7 @@ import { useEffect } from "react";
 import { Combos } from "./modals/combos";
 import { FooterSheet } from "./modals/footer";
 import { cn, hexToRgba } from "@/lib/utils";
-import { useCartStore } from "@/hooks/use-cart-store";
+import { useCartStore } from "@/hooks/template-1/use-cart-store";
 
 const registerMenuView = async (userId: string | undefined) => {
   const lastView = localStorage.getItem(`menuView-${userId}`);
