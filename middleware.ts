@@ -8,6 +8,18 @@ const { auth } = NextAuth(authConfig);
 
 export default auth(async (req) => {
   const { nextUrl } = req;
+
+  const isMaintenanceMode = process.env.MAINTENANCE_MODE === "true";
+  const isMaintenancePage = nextUrl.pathname === "/maintenance";
+
+  if (
+    isMaintenanceMode &&
+    !isMaintenancePage &&
+    !nextUrl.pathname.startsWith("/api")
+  ) {
+    return NextResponse.rewrite(new URL("/maintenance", req.url));
+  }
+
   const isLoggedIn = !!req.auth;
 
   const secret = process.env.AUTH_SECRET!;
