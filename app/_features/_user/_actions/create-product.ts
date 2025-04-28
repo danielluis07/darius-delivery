@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { additionalGroups, additionals, products } from "@/db/schema";
+import { products } from "@/db/schema";
 import { insertProductSchema } from "@/db/schemas";
 import { revalidatePath } from "next/cache";
 import { uploadImageToS3 } from "@/lib/s3-upload";
@@ -40,7 +40,6 @@ export const createProduct = async (
       description,
       sizes,
       allowHalfOption,
-      additionalGroups: groupsData,
     } = validatedValues.data;
 
     if (!name || !image || !price || !category_id || !description) {
@@ -85,33 +84,6 @@ export const createProduct = async (
         success: false,
         message: "Falha ao criar o produto",
       };
-    }
-
-    if (groupsData && groupsData.length > 0) {
-      for (const group of groupsData) {
-        const [newGroup] = await db
-          .insert(additionalGroups)
-          .values({
-            productId: product.id,
-            userId: id,
-            name: group.name,
-            selectionType: group.selectionType,
-            isRequired: group.isRequired,
-          })
-          .returning({
-            id: additionalGroups.id,
-          });
-
-        if (group.additionals && group.additionals.length > 0) {
-          const additionalValues = group.additionals.map((add) => ({
-            additionalGroupId: newGroup.id,
-            name: add.name,
-            priceAdjustment: add.priceAdjustment,
-          }));
-
-          await db.insert(additionals).values(additionalValues);
-        }
-      }
     }
 
     revalidatePath("/dashboard/products");
