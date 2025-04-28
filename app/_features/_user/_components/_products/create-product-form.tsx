@@ -13,13 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  useForm,
-  useFieldArray,
-  FieldErrors,
-  Control,
-  UseFormRegister,
-} from "react-hook-form";
+import { useForm, FieldErrors } from "react-hook-form";
 import { insertProductSchema } from "@/db/schemas";
 import { CloudUpload, Trash2 } from "lucide-react";
 import { useState } from "react";
