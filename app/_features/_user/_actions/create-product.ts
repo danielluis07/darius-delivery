@@ -3,20 +3,10 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { products } from "@/db/schema";
+import { additionalGroups, additionals, products } from "@/db/schema";
 import { insertProductSchema } from "@/db/schemas";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { revalidatePath } from "next/cache";
-import crypto from "crypto";
-
-const s3 = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+import { uploadImageToS3 } from "@/lib/s3-upload";
 
 export const createProduct = async (
   values: z.infer<typeof insertProductSchema>
@@ -24,8 +14,6 @@ export const createProduct = async (
   try {
     const session = await auth();
     const validatedValues = insertProductSchema.safeParse(values);
-    const generateFileName = (bytes = 32) =>
-      crypto.randomBytes(bytes).toString("hex");
 
     if (!session) {
       return { success: false, message: "Not authenticated" };
@@ -52,6 +40,7 @@ export const createProduct = async (
       description,
       sizes,
       allowHalfOption,
+      additionalGroups: groupsData,
     } = validatedValues.data;
 
     if (!name || !image || !price || !category_id || !description) {
@@ -69,65 +58,60 @@ export const createProduct = async (
       };
     }
 
-    const arrayBuffer = await imageFile.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const hash = crypto.createHash("sha256");
-    hash.update(buffer);
-    const hashHex = hash.digest("hex");
+    const imageUrl = await uploadImageToS3(imageFile);
 
-    const putObjectCommand = new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME!,
-      Key: generateFileName(),
-      ContentType: imageFile.type,
-      ContentLength: imageFile.size,
-      ChecksumSHA256: hashHex,
-      Metadata: {
+    if (!imageUrl) {
+      return { success: false, message: "Erro ao fazer upload do banner" };
+    }
+
+    const [product] = await db
+      .insert(products)
+      .values({
+        name,
+        image: imageUrl,
+        price,
+        sizes: sizes || [],
+        category_id,
+        description,
+        allowHalfOption,
         userId: id,
-      },
-    });
-
-    const signedURL = await getSignedUrl(s3, putObjectCommand, {
-      expiresIn: 3600,
-    });
-
-    if (!signedURL) {
-      return {
-        success: false,
-        message: "Falha ao criar a URL de upload",
-      };
-    }
-
-    const res = await fetch(signedURL, {
-      method: "PUT",
-      body: imageFile,
-      headers: {
-        "Content-Type": imageFile.type,
-      },
-    });
-
-    if (!res.ok) {
-      return {
-        success: false,
-        message: "Falha ao realizar o upload da imagem",
-      };
-    }
-
-    const product = await db.insert(products).values({
-      name,
-      image: signedURL.split("?")[0],
-      price,
-      sizes: sizes || [],
-      category_id,
-      description,
-      allowHalfOption,
-      userId: id,
-    });
+      })
+      .returning({
+        id: products.id,
+      });
 
     if (!product) {
       return {
         success: false,
         message: "Falha ao criar o produto",
       };
+    }
+
+    if (groupsData && groupsData.length > 0) {
+      for (const group of groupsData) {
+        const [newGroup] = await db
+          .insert(additionalGroups)
+          .values({
+            productId: product.id,
+            userId: id,
+            name: group.name,
+            selectionType: group.selectionType,
+            isRequired: group.isRequired,
+          })
+          .returning({
+            id: additionalGroups.id,
+          });
+
+        if (group.additionals && group.additionals.length > 0) {
+          const additionalValues = group.additionals.map((add) => ({
+            additionalGroupId: newGroup.id,
+            name: add.name,
+            priceAdjustment: add.priceAdjustment,
+          }));
+
+          await db.insert(additionals).values(additionalValues);
+        }
+      }
     }
 
     revalidatePath("/dashboard/products");

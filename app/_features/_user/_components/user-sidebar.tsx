@@ -33,6 +33,7 @@ import {
   Settings,
   UserRoundCog,
   Files,
+  Plus,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -110,6 +111,12 @@ export function UserSidebar({ user }: { user: User }) {
       url: "/dashboard/customization",
       icon: Paintbrush,
       label: "Personalização",
+      allowed: true,
+    },
+    {
+      url: "/dashboard/additionals",
+      icon: Plus,
+      label: "Adicionais",
       allowed: true,
     },
     {
@@ -265,6 +272,36 @@ export function UserSidebar({ user }: { user: User }) {
                     </Collapsible>
                   );
                 }
+
+                if (item.label === "Produtos") {
+                  return (
+                    <Collapsible
+                      key={item.label}
+                      defaultOpen={false}
+                      className="group/collapsible">
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton>
+                            <item.icon />
+                            <span>{item.label}</span>
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub className="space-y-1">
+                            <SidebarMenuSubItem
+                              onClick={() =>
+                                router.push("/dashboard/additionals")
+                              }
+                              className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
+                              Adicionais
+                            </SidebarMenuSubItem>
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
+
                 return (
                   <SidebarMenuItem
                     className={cn(

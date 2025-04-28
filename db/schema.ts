@@ -605,3 +605,50 @@ export const referrals = pgTable("referrals", {
     .defaultNow()
     .notNull(),
 });
+
+// To group options for a product (e.g., "Toppings", "Bread Type")
+export const additionalGroups = pgTable("additional_groups", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  selectionType: text("selection_type", { enum: ["single", "multiple"] })
+    .notNull()
+    .default("multiple"),
+  isRequired: boolean("is_required").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const additionals = pgTable("additionals", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  additionalGroupId: text("additional_group_id")
+    .notNull()
+    .references(() => additionalGroups.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  priceAdjustment: integer("price_adjustment").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const productAdditionalGroups = pgTable(
+  "product_additional_groups",
+  {
+    productId: text("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    additionalGroupId: text("additional_group_id")
+      .notNull()
+      .references(() => additionalGroups.id, { onDelete: "cascade" }),
+    priceAdjustmentOverride: integer("price_adjustment_override"),
+    selectionTypeOverride: text("selection_type_override", {
+      enum: ["single", "multiple"],
+    }),
+    isRequiredOverride: boolean("is_required_override"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.productId, t.additionalGroupId] })]
+);

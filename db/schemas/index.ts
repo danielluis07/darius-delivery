@@ -294,6 +294,22 @@ export const updateCategorySchema = baseCategorySchema.extend({
       : z.union([z.any().optional(), z.string().optional()]),
 });
 
+const additionalSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, "Option name cannot be empty"),
+  priceAdjustment: z.number().default(0),
+});
+
+export const additionalGroupSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, "Group name cannot be empty"),
+  selectionType: z.enum(["single", "multiple"]).default("multiple"),
+  isRequired: z.boolean().default(false),
+  additionals: z
+    .array(additionalSchema)
+    .min(1, "Add at least one option to this group"),
+});
+
 export const insertProductSchema = baseCreateProductSchema.extend({
   image:
     typeof File !== "undefined"

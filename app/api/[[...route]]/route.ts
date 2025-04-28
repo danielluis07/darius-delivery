@@ -22,6 +22,7 @@ import commissions from "@/app/api/[[...route]]/commissions";
 import transactions from "@/app/api/[[...route]]/transactions";
 import restaurantData from "@/app/api/[[...route]]/restaurant-data";
 import subscriptions from "@/app/api/[[...route]]/subscriptions";
+import additionals from "@/app/api/[[...route]]/additionals";
 
 export const runtime = "nodejs";
 
@@ -57,7 +58,8 @@ const routes = app
   .route("/commissions", commissions)
   .route("/transactions", transactions)
   .route("/restaurant-data", restaurantData)
-  .route("/subscriptions", subscriptions);
+  .route("/subscriptions", subscriptions)
+  .route("/additionals", additionals);
 
 export const GET = handle(app);
 export const POST = handle(app);
