@@ -42,6 +42,8 @@ export const orderStatus = pgEnum("order_status", [
   "IN_TRANSIT",
   "DELIVERED",
   "CANCELLED",
+  "WITHDRAWN",
+  "CONSUME_ON_SITE",
 ]);
 
 export const orderPaymentType = pgEnum("order_payment_type", [

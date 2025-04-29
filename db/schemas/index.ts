@@ -164,7 +164,15 @@ export const insertCustomerOrderSchema = baseOrderSchema.extend({
   payment_type: z.enum(["CASH", "CREDIT_CARD", "DEBIT_CARD", "PIX"]).optional(),
   type: z.enum(["LOCAL", "WEBSITE", "WHATSAPP"]).optional(),
   status: z
-    .enum(["ACCEPTED", "PREPARING", "FINISHED", "IN_TRANSIT", "DELIVERED"])
+    .enum([
+      "ACCEPTED",
+      "PREPARING",
+      "FINISHED",
+      "IN_TRANSIT",
+      "DELIVERED",
+      "WITHDRAWN",
+      "CONSUME_ON_SITE",
+    ])
     .optional(),
 });
 
@@ -177,6 +185,8 @@ export const updateOrderSchema = z.object({
     "IN_TRANSIT",
     "DELIVERED",
     "CANCELLED",
+    "WITHDRAWN",
+    "CONSUME_ON_SITE",
   ]),
   type: z.enum(["LOCAL", "WEBSITE", "WHATSAPP"]),
   payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]),

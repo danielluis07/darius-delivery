@@ -42,6 +42,8 @@ export const ReceiptsClient = ({ userId }: { userId: string }) => {
     FINISHED: "Finalizado",
     IN_TRANSIT: "Em trânsito",
     DELIVERED: "Entregue",
+    WITHDRAWN: "Retirada",
+    CONSUME_ON_SITE: "Consumir no local",
   };
 
   const filteredReceipts = useMemo(() => {

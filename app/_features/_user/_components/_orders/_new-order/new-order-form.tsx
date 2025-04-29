@@ -410,7 +410,6 @@ export const NewOrderForm = ({
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="LOCAL">Local</SelectItem>
-                            <SelectItem value="WEBSITE">Site</SelectItem>
                             <SelectItem value="WHATSAPP">Whatsapp</SelectItem>
                           </SelectContent>
                         </Select>
@@ -495,11 +494,10 @@ export const NewOrderForm = ({
                             <SelectItem value="PREPARING">
                               Preparando
                             </SelectItem>
-                            <SelectItem value="DELIVERING">
-                              Em trânsito
+                            <SelectItem value="WITHDRAWN">Retirada</SelectItem>
+                            <SelectItem value="CONSUME_ON_SITE">
+                              Consumir no local
                             </SelectItem>
-                            <SelectItem value="DELIVERED">Entregue</SelectItem>
-                            <SelectItem value="FINISHED">Finalizado</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

@@ -26,7 +26,9 @@ export const useUpdateOrderStatus = (userId?: string) => {
         | "FINISHED"
         | "IN_TRANSIT"
         | "DELIVERED"
-        | "CANCELLED";
+        | "CANCELLED"
+        | "WITHDRAWN"
+        | "CONSUME_ON_SITE";
     }
   >({
     mutationFn: async ({ orderId, status }) => {

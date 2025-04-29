@@ -6,6 +6,8 @@ import { ptBR } from "date-fns/locale";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const TrialCountdown = ({
   trialEndsAt,
@@ -28,16 +30,19 @@ export const TrialCountdown = ({
   }, [trialEndsAt]);
 
   return (
-    <Alert className="bg-error text-white [&>svg]:text-white">
-      <AlertCircle className="h-4 w-4" />
-      <AlertTitle>Atenção!</AlertTitle>
-      {remainingTime ? (
-        <AlertDescription>
-          Seu período grátis termina em {remainingTime}
-        </AlertDescription>
-      ) : (
-        <Skeleton className="w-80 h-5" />
-      )}
+    <Alert className="flex justify-between bg-error text-white [&>svg]:text-white">
+      <div className="flex items-center gap-2">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle className="mt-1">Atenção!</AlertTitle>
+        {remainingTime ? (
+          <AlertDescription>Seu período grátis termina em asd</AlertDescription>
+        ) : (
+          <Skeleton className="w-80 h-5" />
+        )}
+      </div>
+      <Link href="/">
+        <Button variant="secondary">Assinar Agora</Button>
+      </Link>
     </Alert>
   );
 };

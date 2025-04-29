@@ -351,6 +351,13 @@
       "when": 1745958347146,
       "tag": "0049_steep_famine",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1745969073300,
+      "tag": "0050_fast_cyclops",
+      "breakpoints": true
     }
   ]
 }

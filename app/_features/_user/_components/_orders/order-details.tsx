@@ -143,6 +143,8 @@ export const OrderDetails = ({
     IN_TRANSIT: "Em trânsito",
     DELIVERED: "Entregue",
     FINISHED: "Finalizado",
+    WITHDRAWN: "Retirada",
+    CONSUME_ON_SITE: "Consumir no local",
   };
 
   const onInvalid = (errors: FieldErrors<FormData>) => {
@@ -538,7 +540,6 @@ export const OrderDetails = ({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="LOCAL">Local</SelectItem>
-                          <SelectItem value="WEBSITE">Site</SelectItem>
                           <SelectItem value="WHATSAPP">Whatsapp</SelectItem>
                         </SelectContent>
                       </Select>
@@ -591,11 +592,10 @@ export const OrderDetails = ({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="PREPARING">Preparando</SelectItem>
-                          <SelectItem value="IN_TRANSIT">
-                            Em trânsito
+                          <SelectItem value="WITHDRAWN">Retirada</SelectItem>
+                          <SelectItem value="CONSUME_ON_SITE">
+                            Consumir no local
                           </SelectItem>
-                          <SelectItem value="DELIVERED">Entregue</SelectItem>
-                          <SelectItem value="FINISHED">Finalizado</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -62,6 +62,8 @@ const orderStatus: Array<
   | "IN_TRANSIT"
   | "DELIVERED"
   | "CANCELLED"
+  | "WITHDRAWN"
+  | "CONSUME_ON_SITE"
 > = [
   "ACCEPTED",
   "PREPARING",
@@ -69,6 +71,8 @@ const orderStatus: Array<
   "DELIVERED",
   "FINISHED",
   "CANCELLED",
+  "WITHDRAWN",
+  "CONSUME_ON_SITE",
 ];
 
 export const OrdersClient = ({ userId }: { userId: string }) => {
@@ -111,7 +115,6 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
   };
 
   const statusTranslations: Record<string, string> = {
-    ACCEPTED: "Aceito",
     PREPARING: "Em preparo",
     IN_TRANSIT: "Em trânsito",
     DELIVERED: "Entregue",

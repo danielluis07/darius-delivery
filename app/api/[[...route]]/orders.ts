@@ -1153,6 +1153,8 @@ const app = new Hono()
           "IN_TRANSIT",
           "DELIVERED",
           "CANCELLED",
+          "WITHDRAWN",
+          "CONSUME_ON_SITE",
         ]),
         type: z.enum(["LOCAL", "WEBSITE", "WHATSAPP"]),
         payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]),
@@ -1298,6 +1300,8 @@ const app = new Hono()
           "IN_TRANSIT",
           "DELIVERED",
           "CANCELLED",
+          "WITHDRAWN",
+          "CONSUME_ON_SITE",
         ]),
       })
     ),
