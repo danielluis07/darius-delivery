@@ -105,8 +105,8 @@ export const SignInForm = () => {
         />
         <button
           style={{
-            backgroundColor: data?.customization.button_color || "white",
-            color: data?.customization.font_color || "black",
+            backgroundColor: data?.colors.button || "white",
+            color: data?.colors.font || "black",
           }}
           className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
           {isPending ? (
