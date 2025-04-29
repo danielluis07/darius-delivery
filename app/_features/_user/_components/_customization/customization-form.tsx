@@ -99,12 +99,12 @@ export const CustomizationForm = ({
   const [isPending, startTransition] = useTransition();
   const [bannerfiles, setBannerFiles] = useState<File[] | null>(null);
   const [desktopfiles, setDesktopFiles] = useState<File[] | null>(null);
-  const [bannerPreview, setBannerPreview] = useState<string | null>(
+  /*   const [bannerPreview, setBannerPreview] = useState<string | null>(
     customization?.banner
   );
   const [desktopPreview, setDesktopPreview] = useState<string | null>(
     customization?.logo
-  );
+  ); */
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomizationSchema),
     defaultValues: {
@@ -437,9 +437,9 @@ export const CustomizationForm = ({
                     if (newFiles && newFiles.length > 0) {
                       const selectedFile = newFiles[0];
                       field.onChange([selectedFile]);
-                      const newPreviewUrl = URL.createObjectURL(selectedFile);
+                      //const newPreviewUrl = URL.createObjectURL(selectedFile);
                       setBannerFiles([selectedFile]);
-                      setBannerPreview(newPreviewUrl);
+                      //setBannerPreview(newPreviewUrl);
                     } else {
                       field.onChange(null);
                       setBannerFiles([]);
@@ -492,9 +492,9 @@ export const CustomizationForm = ({
                     if (newFiles && newFiles.length > 0) {
                       const selectedFile = newFiles[0];
                       field.onChange([selectedFile]);
-                      const newPreviewUrl = URL.createObjectURL(selectedFile);
+                      //const newPreviewUrl = URL.createObjectURL(selectedFile);
                       setDesktopFiles([selectedFile]);
-                      setDesktopPreview(newPreviewUrl);
+                      //setDesktopPreview(newPreviewUrl);
                     } else {
                       field.onChange(null);
                       setDesktopFiles([]);
