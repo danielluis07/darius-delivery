@@ -76,9 +76,8 @@ export const MainClient = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               style={{
-                backgroundColor:
-                  data?.customization.background_color || "white",
-                color: data?.customization.font_color || "black",
+                backgroundColor: data?.colors.background || "white",
+                color: data?.colors.font || "black",
               }}
               className="absolute inset-0 z-10 p-6 overflow-y-auto shadow-2xl rounded-lg">
               <div
@@ -104,7 +103,7 @@ export const MainClient = () => {
                   )}
                 <div
                   style={{
-                    color: data?.customization.font_color || "black",
+                    color: data?.colors.font || "black",
                   }}
                   onClick={onClose}
                   className="cursor-pointer">
@@ -133,8 +132,8 @@ export const MainClient = () => {
         {!data?.customization.isOpen && (
           <div
             style={{
-              backgroundColor: data?.customization.button_color || "white",
-              color: data?.customization.font_color || "black",
+              backgroundColor: data?.colors.button || "white",
+              color: data?.colors.font || "black",
             }}
             className="text-center mb-10 relative z-0 text-sm rounded-lg">
             A loja está fechada no momento. Volte mais tarde.
@@ -156,10 +155,10 @@ export const MainClient = () => {
             <div className="flex justify-center">
               <div
                 style={{
-                  backgroundColor: data?.customization.button_color
-                    ? hexToRgba(data.customization.button_color, 0.7)
+                  backgroundColor: data?.colors.button
+                    ? hexToRgba(data.colors.button, 0.7)
                     : "rgba(255, 255, 255, 0.7)",
-                  color: data?.customization.font_color || "black",
+                  color: data?.colors.font || "black",
                 }}
                 className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                 onClick={() => onOpen("menu")}>
@@ -173,10 +172,10 @@ export const MainClient = () => {
                 <div className="grid grid-cols-2 gap-x-10 gap-y-5 [&>*]:h-28 [&>*]:flex [&>*]:items-center [&>*]:justify-center">
                   <div
                     style={{
-                      backgroundColor: data?.customization.button_color
-                        ? hexToRgba(data.customization.button_color, 0.7)
+                      backgroundColor: data?.colors.button
+                        ? hexToRgba(data.colors.button, 0.7)
                         : "rgba(255, 255, 255, 0.7)",
-                      color: data?.customization.font_color || "black",
+                      color: data?.colors.font || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("categories")}>
@@ -185,10 +184,10 @@ export const MainClient = () => {
                   </div>
                   <div
                     style={{
-                      backgroundColor: data?.customization.button_color
-                        ? hexToRgba(data.customization.button_color, 0.7)
+                      backgroundColor: data?.colors.button
+                        ? hexToRgba(data.colors.button, 0.7)
                         : "rgba(255, 255, 255, 0.7)",
-                      color: data?.customization.font_color || "black",
+                      color: data?.colors.font || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("cart")}>
@@ -197,10 +196,10 @@ export const MainClient = () => {
                   </div>
                   <div
                     style={{
-                      backgroundColor: data?.customization.button_color
-                        ? hexToRgba(data.customization.button_color, 0.7)
+                      backgroundColor: data?.colors.button
+                        ? hexToRgba(data.colors.button, 0.7)
                         : "rgba(255, 255, 255, 0.7)",
-                      color: data?.customization.font_color || "black",
+                      color: data?.colors.font || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("combos")}>
@@ -212,10 +211,10 @@ export const MainClient = () => {
                 <div className="grid grid-cols-1 gap-y-5">
                   <div
                     style={{
-                      backgroundColor: data?.customization.button_color
-                        ? hexToRgba(data.customization.button_color, 0.7)
+                      backgroundColor: data?.colors.button
+                        ? hexToRgba(data.colors.button, 0.7)
                         : "rgba(255, 255, 255, 0.7)",
-                      color: data?.customization.font_color || "black",
+                      color: data?.colors.font || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("signUp")}>
@@ -224,10 +223,10 @@ export const MainClient = () => {
                   </div>
                   <div
                     style={{
-                      backgroundColor: data?.customization.button_color
-                        ? hexToRgba(data.customization.button_color, 0.7)
+                      backgroundColor: data?.colors.button
+                        ? hexToRgba(data.colors.button, 0.7)
                         : "rgba(255, 255, 255, 0.7)",
-                      color: data?.customization.font_color || "black",
+                      color: data?.colors.font || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("signIn")}>
@@ -236,10 +235,10 @@ export const MainClient = () => {
                   </div>
                   <div
                     style={{
-                      backgroundColor: data?.customization.button_color
-                        ? hexToRgba(data.customization.button_color, 0.7)
+                      backgroundColor: data?.colors.button
+                        ? hexToRgba(data.colors.button, 0.7)
                         : "rgba(255, 255, 255, 0.7)",
-                      color: data?.customization.font_color || "black",
+                      color: data?.colors.font || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("menu")}>
@@ -248,10 +247,10 @@ export const MainClient = () => {
                   </div>
                   <div
                     style={{
-                      backgroundColor: data?.customization.button_color
-                        ? hexToRgba(data.customization.button_color, 0.7)
+                      backgroundColor: data?.colors.button
+                        ? hexToRgba(data.colors.button, 0.7)
                         : "rgba(255, 255, 255, 0.7)",
-                      color: data?.customization.font_color || "black",
+                      color: data?.colors.font || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("cart")}>
@@ -260,10 +259,10 @@ export const MainClient = () => {
                   </div>
                   <div
                     style={{
-                      backgroundColor: data?.customization.button_color
-                        ? hexToRgba(data.customization.button_color, 0.7)
+                      backgroundColor: data?.colors.button
+                        ? hexToRgba(data.colors.button, 0.7)
                         : "rgba(255, 255, 255, 0.7)",
-                      color: data?.customization.font_color || "black",
+                      color: data?.colors.font || "black",
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("combos")}>

@@ -12,10 +12,13 @@ import {
   deliverers,
   combos,
   pixels,
+  colors,
 } from "@/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 
 export const baseUserSchema = createInsertSchema(users);
+
+export const insertColorsSchema = createInsertSchema(colors);
 
 const baseTemplateSchema = createInsertSchema(templates);
 

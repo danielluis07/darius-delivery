@@ -56,7 +56,7 @@ export const Combos = () => {
             <div className="flex justify-end mb-4">
               <div
                 style={{
-                  color: data?.customization.font_color || "black",
+                  color: data?.colors.font || "black",
                 }}
                 onClick={handleBack}
                 className="cursor-pointer">
@@ -75,22 +75,22 @@ export const Combos = () => {
             <h2 className="text-2xl font-bold mt-2">{selectedCombo.name}</h2>
             <p
               style={{
-                color: data?.customization.font_color || "black",
+                color: data?.colors.font || "black",
               }}
               className="mb-4 text-xs">
               {selectedCombo.description}
             </p>
             <p
               style={{
-                color: data?.customization.font_color || "black",
+                color: data?.colors.font || "black",
               }}
               className="text-lg font-semibold mb-4">
               {formatCurrencyFromCents(selectedCombo.price)}
             </p>
             <button
               style={{
-                backgroundColor: data?.customization.button_color || "white",
-                color: data?.customization.font_color || "black",
+                backgroundColor: data?.colors.button || "white",
+                color: data?.colors.font || "black",
               }}
               className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md mt-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
               onClick={() => {
@@ -117,7 +117,7 @@ export const Combos = () => {
               <div
                 key={combo.id}
                 style={{
-                  backgroundColor: data?.customization.button_color || "white",
+                  backgroundColor: data?.colors.button || "white",
                 }}
                 onClick={() =>
                   handleComboClick({
@@ -135,21 +135,21 @@ export const Combos = () => {
                   <div className="space-y-2">
                     <h2
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       className="text-md font-semibold text-lg">
                       {combo.name}
                     </h2>
                     <p
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       className="text-sm max-w-52 line-clamp-2">
                       {combo.description}
                     </p>
                     <p
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       className="text-sm font-semibold">
                       {formatCurrencyFromCents(combo.price)}

@@ -52,7 +52,7 @@ export const MenuProducts = ({
   return (
     <div
       style={{
-        backgroundColor: data?.customization.background_color || "white",
+        backgroundColor: data?.colors.background || "white",
       }}
       className="relative">
       {selectedProduct ? (
@@ -68,7 +68,7 @@ export const MenuProducts = ({
               <div
                 onClick={handleBack}
                 style={{
-                  color: data?.customization.font_color || "black",
+                  color: data?.colors.font || "black",
                 }}
                 className="cursor-pointer">
                 <MoveLeft />
@@ -85,29 +85,29 @@ export const MenuProducts = ({
             </div>
             <h2
               style={{
-                color: data?.customization.font_color || "black",
+                color: data?.colors.font || "black",
               }}
               className="text-2xl font-bold mt-2">
               {selectedProduct.name}
             </h2>
             <p
               style={{
-                color: data?.customization.font_color || "black",
+                color: data?.colors.font || "black",
               }}
               className="mb-4 text-xs">
               {selectedProduct.description}
             </p>
             <p
               style={{
-                color: data?.customization.font_color || "black",
+                color: data?.colors.font || "black",
               }}
               className="text-lg font-semibold mb-4">
               {formatCurrencyFromCents(selectedProduct.price)}
             </p>
             <button
               style={{
-                backgroundColor: data?.customization.button_color || "white",
-                color: data?.customization.font_color || "black",
+                backgroundColor: data?.colors.button || "white",
+                color: data?.colors.font || "black",
               }}
               className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md mt-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
               onClick={() => {
@@ -135,8 +135,8 @@ export const MenuProducts = ({
               <div
                 key={product.id}
                 style={{
-                  backgroundColor: data?.customization.button_color || "white",
-                  color: data?.customization.font_color || "black",
+                  backgroundColor: data?.colors.button || "white",
+                  color: data?.colors.font || "black",
                 }}
                 onClick={() =>
                   handleProductClick({
@@ -154,14 +154,14 @@ export const MenuProducts = ({
                   <div className="space-y-2">
                     <h2
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       className="text-md font-semibold">
                       {product.name}
                     </h2>
                     <p
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       className="text-sm max-w-52 line-clamp-2">
                       {product.description}
@@ -172,8 +172,7 @@ export const MenuProducts = ({
                           <div key={item.id}>
                             <span
                               style={{
-                                color:
-                                  data?.customization.font_color || "black",
+                                color: data?.colors.font || "black",
                               }}
                               className="text-xs font-semibold text-gray-500">
                               {item.name}
@@ -183,8 +182,7 @@ export const MenuProducts = ({
                                 <span
                                   key={additional.id}
                                   style={{
-                                    color:
-                                      data?.customization.font_color || "black",
+                                    color: data?.colors.font || "black",
                                   }}
                                   className="text-xs font-semibold text-gray-500">
                                   {additional.name}
@@ -197,7 +195,7 @@ export const MenuProducts = ({
                     )}
                     <p
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       className="text-sm font-semibold">
                       {formatCurrencyFromCents(product.price)}

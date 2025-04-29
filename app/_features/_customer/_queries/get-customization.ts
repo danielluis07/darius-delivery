@@ -1,5 +1,11 @@
 import { db } from "@/db/drizzle";
-import { users, customizations, templates, orderSettings } from "@/db/schema";
+import {
+  users,
+  customizations,
+  templates,
+  orderSettings,
+  colors,
+} from "@/db/schema";
 import { CustomizationWithTemplate } from "@/types";
 import { eq } from "drizzle-orm";
 
@@ -19,11 +25,13 @@ export const getCustomizationByDomain = async (
         userId: users.id,
         walletId: users.walletId,
         googleApiKey: users.googleApiKey,
+        colors: colors,
       })
       .from(users)
       .innerJoin(customizations, eq(users.id, customizations.user_id))
       .innerJoin(templates, eq(customizations.template_id, templates.id))
       .innerJoin(orderSettings, eq(users.id, orderSettings.user_id))
+      .leftJoin(colors, eq(users.id, colors.user_id))
       .where(eq(users.domain, domain));
 
     // @ts-expect-error - open_hours is an array of objects

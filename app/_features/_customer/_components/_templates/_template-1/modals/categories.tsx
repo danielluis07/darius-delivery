@@ -21,7 +21,7 @@ export const Categories = () => {
           key={i}
           className="relative flex flex-col items-center justify-center min-w-28 h-28 cursor-pointer font-semibold overflow-hidden rounded-lg"
           style={{
-            color: data?.customization.font_color || "black",
+            color: data?.colors.font || "black",
           }}
           onClick={() => onOpen("products", category.id)}>
           <div

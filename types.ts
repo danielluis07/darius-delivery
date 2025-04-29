@@ -1,4 +1,4 @@
-import { customizations, orderSettings } from "@/db/schema";
+import { colors, customizations, orderSettings } from "@/db/schema";
 import { AuthUser } from "@hono/auth-js";
 
 export type ExtendedAuthUser = AuthUser & {
@@ -19,6 +19,7 @@ export type CustomizationWithTemplate = {
   googleApiKey: string;
   userId: string;
   walletId: string;
+  colors: typeof colors.$inferSelect;
 };
 
 export type CartItem = {

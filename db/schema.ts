@@ -358,12 +358,26 @@ export const customizations = pgTable("customizations", {
   payment_methods: text("payment_methods").array().default([]),
   logo: text("logo"),
   banner: text("banner"),
-  button_color: varchar("button_color", { length: 7 }), // Hexadecimal (ex: #FFFFFF)
-  background_color: varchar("background_color", { length: 7 }),
-  header_color: varchar("header_color", { length: 7 }),
-  font_color: varchar("font_color", { length: 7 }),
-  footer_color: varchar("footer_color", { length: 7 }),
   opening_hours: jsonb("opening_hours").default([]).notNull(),
+});
+
+export const colors = pgTable("colors", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  template_id: text("template_id")
+    .notNull()
+    .references(() => templates.id, { onDelete: "cascade" }),
+  button: varchar("button", { length: 7 }).default("#ffffff"),
+  background: varchar("background", { length: 7 }).default("#ffffff"),
+  header: varchar("header", { length: 7 }).default("#ffffff"),
+  font: varchar("font", { length: 7 }).default("#000000"),
+  footer: varchar("footer", { length: 7 }).default("#ffffff"),
+  footer_button: varchar("footer_button", { length: 7 }).default("#ffffff"),
+  product_name: varchar("product_name", { length: 7 }).default("#000000"),
+  product_price: varchar("product_price", { length: 7 }).default("#000000"),
+  cart: varchar("cart", { length: 7 }).default("#000000"),
 });
 
 export const subscriptions = pgTable("subscriptions", {
@@ -643,11 +657,6 @@ export const productAdditionalGroups = pgTable(
     additionalGroupId: text("additional_group_id")
       .notNull()
       .references(() => additionalGroups.id, { onDelete: "cascade" }),
-    priceAdjustmentOverride: integer("price_adjustment_override"),
-    selectionTypeOverride: text("selection_type_override", {
-      enum: ["single", "multiple"],
-    }),
-    isRequiredOverride: boolean("is_required_override"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.productId, t.additionalGroupId] })]

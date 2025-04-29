@@ -83,11 +83,6 @@ export const createCustomization = async (
       store_phone,
       template_id,
       banner,
-      background_color,
-      button_color,
-      footer_color,
-      font_color,
-      header_color,
       logo,
       payment_methods,
       city,
@@ -223,12 +218,6 @@ export const createCustomization = async (
         updateData.store_phone = store_phone || null;
       if (template_id !== undefined) updateData.template_id = template_id;
       if (bannerUrl !== undefined) updateData.banner = bannerUrl;
-      if (background_color !== undefined)
-        updateData.background_color = background_color;
-      if (button_color !== undefined) updateData.button_color = button_color;
-      if (footer_color !== undefined) updateData.footer_color = footer_color;
-      if (font_color !== undefined) updateData.font_color = font_color;
-      if (header_color !== undefined) updateData.header_color = header_color;
       if (logoDesktopUrl !== undefined) updateData.logo = logoDesktopUrl;
       if (payment_methods !== undefined)
         updateData.payment_methods = payment_methods;
@@ -261,12 +250,7 @@ export const createCustomization = async (
         store_phone: store_phone || null,
         template_id,
         banner: bannerUrl!,
-        button_color,
-        background_color,
         opening_hours,
-        footer_color,
-        font_color,
-        header_color,
         latitude,
         longitude,
         placeId,

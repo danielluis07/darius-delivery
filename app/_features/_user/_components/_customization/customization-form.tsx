@@ -41,7 +41,6 @@ import {
 
 import { LoadingButton } from "@/components/ui/loading-button";
 import { toast } from "sonner";
-import { ColorPicker } from "@/components/color-picker";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import Image from "next/image";
@@ -112,11 +111,6 @@ export const CustomizationForm = ({
       id: customization?.id ?? "",
       store_name: customization?.store_name ?? "",
       store_phone: customization?.store_phone ?? "",
-      background_color: customization?.background_color ?? "",
-      button_color: customization?.button_color ?? "",
-      footer_color: customization?.footer_color ?? "",
-      header_color: customization?.header_color ?? "",
-      font_color: customization?.font_color ?? "",
       banner: [],
       logo: [],
       city: customization?.city ?? "",
@@ -540,94 +534,6 @@ export const CustomizationForm = ({
           )}
         />
 
-        <div className="flex items-center gap-10">
-          <FormField
-            control={form.control}
-            name="background_color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cor de Fundo</FormLabel>
-                <FormControl>
-                  <ColorPicker
-                    className="w-28"
-                    onChange={field.onChange}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="header_color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cor do Header</FormLabel>
-                <FormControl>
-                  <ColorPicker
-                    className="w-28"
-                    onChange={field.onChange}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="button_color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cor do botão</FormLabel>
-                <FormControl>
-                  <ColorPicker
-                    className="w-28"
-                    onChange={field.onChange}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="font_color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cor da Fonte</FormLabel>
-                <FormControl>
-                  <ColorPicker
-                    className="w-28"
-                    onChange={field.onChange}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="footer_color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cor do Footer</FormLabel>
-                <FormControl>
-                  <ColorPicker
-                    className="w-28"
-                    onChange={field.onChange}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
         <FormField
           control={form.control}
           name="payment_methods"
@@ -708,13 +614,14 @@ export const CustomizationForm = ({
           )}
         />
 
-        <CustomizationPreview
+        {/*         <CustomizationPreview
           logo={customization?.logo || desktopPreview}
           buttonColor={form.watch("button_color")}
           fontColor={form.watch("font_color")}
           backgroundColor={form.watch("background_color")}
           backgroundImage={customization?.banner || bannerPreview}
-        />
+        /> */}
+
         <LoadingButton
           label={customization ? "Atualizar" : "Criar"}
           loadingLabel={customization ? "Atualizando" : "Criando"}
@@ -728,7 +635,7 @@ export const CustomizationForm = ({
   );
 };
 
-const CustomizationPreview = ({
+export const CustomizationPreview = ({
   logo,
   buttonColor,
   fontColor,

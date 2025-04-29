@@ -74,7 +74,7 @@ export const ProductsList = ({
             <div className="flex justify-end mb-4">
               <div
                 style={{
-                  color: data?.customization.font_color || "black",
+                  color: data?.colors.font || "black",
                 }}
                 onClick={handleBack}
                 className="cursor-pointer">
@@ -92,7 +92,7 @@ export const ProductsList = ({
             <h2 className="text-2xl font-bold mt-2">{selectedProduct.name}</h2>
             <p
               style={{
-                color: data?.customization.font_color || "black",
+                color: data?.colors.font || "black",
               }}
               className="text-xs">
               {selectedProduct.description}
@@ -106,7 +106,7 @@ export const ProductsList = ({
                   }>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem
-                      colorClass={data?.customization.font_color || "black"}
+                      colorClass={data?.colors.font || "black"}
                       value="Inteira"
                       id="inteira"
                     />
@@ -114,7 +114,7 @@ export const ProductsList = ({
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem
-                      colorClass={data?.customization.font_color || "black"}
+                      colorClass={data?.colors.font || "black"}
                       value="Meio a Meio"
                       id="meio-a-meio"
                     />
@@ -129,7 +129,7 @@ export const ProductsList = ({
                   <div key={item.id}>
                     <span
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       className="font-semibold text-gray-500">
                       {item.name}
@@ -159,15 +159,15 @@ export const ProductsList = ({
             )}
             <p
               style={{
-                color: data?.customization.font_color || "black",
+                color: data?.colors.font || "black",
               }}
               className="text-lg font-semibold mt-2">
               {formatCurrencyFromCents(selectedProduct.price)}
             </p>
             <button
               style={{
-                backgroundColor: data?.customization.button_color || "white",
-                color: data?.customization.font_color || "black",
+                backgroundColor: data?.colors.button || "white",
+                color: data?.colors.font || "black",
               }}
               className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md mt-5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
               onClick={() => {
@@ -198,7 +198,7 @@ export const ProductsList = ({
               <div
                 key={product.id}
                 style={{
-                  backgroundColor: data?.customization.button_color || "white",
+                  backgroundColor: data?.colors.button || "white",
                 }}
                 onClick={() =>
                   handleProductClick({
@@ -216,21 +216,21 @@ export const ProductsList = ({
                   <div className="space-y-2">
                     <h2
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       className="text-md font-semibold text-xl">
                       {product.name}
                     </h2>
                     <p
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       className="text-sm max-w-52 line-clamp-2">
                       {product.description}
                     </p>
                     <p
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       className="text-sm font-semibold">
                       {formatCurrencyFromCents(product.price)}

@@ -300,6 +300,40 @@ export function UserSidebar({ user }: { user: User }) {
                   );
                 }
 
+                if (item.label === "Personalização") {
+                  return (
+                    <Collapsible
+                      key={item.label}
+                      defaultOpen={false}
+                      className="group/collapsible">
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton>
+                            <item.icon />
+                            <span>{item.label}</span>
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub className="space-y-1">
+                            <SidebarMenuSubItem
+                              onClick={() =>
+                                router.push("/dashboard/customization")
+                              }
+                              className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
+                              Configurações
+                            </SidebarMenuSubItem>
+                            <SidebarMenuSubItem
+                              onClick={() => router.push("/dashboard/colors")}
+                              className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
+                              Cores
+                            </SidebarMenuSubItem>
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
+
                 return (
                   <SidebarMenuItem
                     className={cn(

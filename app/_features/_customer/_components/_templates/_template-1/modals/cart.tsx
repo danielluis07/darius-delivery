@@ -289,8 +289,8 @@ export const Cart = () => {
       <FeeAlertDialog />
       <div
         style={{
-          backgroundColor: data?.customization.background_color || "white",
-          color: data?.customization.font_color || "black",
+          backgroundColor: data?.colors.background || "white",
+          color: data?.colors.font || "black",
         }}
         className="p-4">
         {cart.length === 0 ? (
@@ -316,16 +316,15 @@ export const Cart = () => {
                       <h3 className="font-semibold">{item.name}</h3>
                       <p
                         style={{
-                          color: data?.customization.font_color || "black",
+                          color: data?.colors.font || "black",
                         }}>
                         {formatCurrencyFromCents(item.price * item.quantity)}
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           style={{
-                            backgroundColor:
-                              data?.customization.button_color || "white",
-                            color: data?.customization.font_color || "black",
+                            backgroundColor: data?.colors.button || "white",
+                            color: data?.colors.font || "black",
                           }}
                           className="px-2 py-1 rounded"
                           onClick={() =>
@@ -339,9 +338,8 @@ export const Cart = () => {
                         <span className="px-2">{item.quantity}</span>
                         <button
                           style={{
-                            backgroundColor:
-                              data?.customization.button_color || "white",
-                            color: data?.customization.font_color || "black",
+                            backgroundColor: data?.colors.button || "white",
+                            color: data?.colors.font || "black",
                           }}
                           className="px-2 py-1 bg-gray-200 rounded cursor-pointer"
                           onClick={() =>
@@ -354,7 +352,7 @@ export const Cart = () => {
                     <div
                       className="text-error cursor-pointer"
                       style={{
-                        color: data?.customization.font_color || "black",
+                        color: data?.colors.font || "black",
                       }}
                       onClick={() =>
                         removeFromCart(item.id, data?.userId || "")
@@ -398,8 +396,7 @@ export const Cart = () => {
                                           value={method}
                                           id={method}
                                           colorClass={
-                                            data?.customization.font_color ||
-                                            "black"
+                                            data?.colors.font || "black"
                                           }
                                         />
                                       </FormControl>
@@ -445,8 +442,7 @@ export const Cart = () => {
                                           value={method}
                                           id={method}
                                           colorClass={
-                                            data?.customization.font_color ||
-                                            "black"
+                                            data?.colors.font || "black"
                                           }
                                         />
                                       </FormControl>
@@ -696,9 +692,8 @@ export const Cart = () => {
                       type="button"
                       onClick={handlePreviousStep}
                       style={{
-                        backgroundColor:
-                          data?.customization.button_color || "white",
-                        color: data?.customization.font_color || "black",
+                        backgroundColor: data?.colors.button || "white",
+                        color: data?.colors.font || "black",
                       }}
                       className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-40 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
                       Voltar
@@ -709,9 +704,8 @@ export const Cart = () => {
                         isPendingCashOnWebsite || isPendingCashOnDelivery
                       }
                       style={{
-                        backgroundColor:
-                          data?.customization.button_color || "white",
-                        color: data?.customization.font_color || "black",
+                        backgroundColor: data?.colors.button || "white",
+                        color: data?.colors.font || "black",
                       }}
                       className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-40 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
                       Finalizar Pedido
@@ -725,8 +719,8 @@ export const Cart = () => {
               <button
                 onClick={handleNextStep}
                 style={{
-                  backgroundColor: data?.customization.button_color || "white",
-                  color: data?.customization.font_color || "black",
+                  backgroundColor: data?.colors.button || "white",
+                  color: data?.colors.font || "black",
                 }}
                 className="inline-flex items-center justify-center gap-2 h-9 mt-3 px-4 py-2 w-full whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
                 Continuar

@@ -63,8 +63,8 @@ export const FooterSheet = () => {
         </div>
         <button
           style={{
-            backgroundColor: data?.customization.button_color || "white",
-            color: data?.customization.font_color || "black",
+            backgroundColor: data?.colors.button || "white",
+            color: data?.colors.font || "black",
           }}
           className="py-1 px-3 rounded-md text-sm font-medium"
           onClick={() => {
