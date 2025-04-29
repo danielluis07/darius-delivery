@@ -315,6 +315,7 @@ export const insertProductSchema = baseCreateProductSchema.extend({
     typeof File !== "undefined"
       ? z.array(z.instanceof(File)).optional()
       : z.any().optional(),
+  additionalGroupIds: z.array(z.string()),
 });
 
 export const updateProductSchema = baseCreateProductSchema.extend({
@@ -323,6 +324,7 @@ export const updateProductSchema = baseCreateProductSchema.extend({
     typeof File !== "undefined"
       ? z.union([z.array(z.instanceof(File)).optional(), z.string().optional()])
       : z.union([z.any().optional(), z.string().optional()]),
+  additionalGroupIds: z.array(z.string()),
 });
 
 export const insertCustomizationSchema = baseCreateCustomizationSchema.extend({

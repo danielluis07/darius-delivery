@@ -100,6 +100,17 @@ export type Product = {
   type: string;
   price: number;
   sizes: string[] | null;
+  additionalGroups: {
+    id: string;
+    name: string;
+    selectionType: "single" | "multiple";
+    isRequired: boolean;
+    additionals: {
+      id: string;
+      name: string;
+      priceAdjustment: number;
+    }[];
+  }[];
 };
 
 export type Combo = {

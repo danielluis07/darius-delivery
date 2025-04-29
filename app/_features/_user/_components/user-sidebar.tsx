@@ -114,12 +114,6 @@ export function UserSidebar({ user }: { user: User }) {
       allowed: true,
     },
     {
-      url: "/dashboard/additionals",
-      icon: Plus,
-      label: "Adicionais",
-      allowed: true,
-    },
-    {
       url: "/dashboard/deliverers",
       icon: RiMotorbikeFill,
       label: "Entregadores",
@@ -288,6 +282,11 @@ export function UserSidebar({ user }: { user: User }) {
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                           <SidebarMenuSub className="space-y-1">
+                            <SidebarMenuSubItem
+                              onClick={() => router.push("/dashboard/products")}
+                              className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
+                              Todos os Produtos
+                            </SidebarMenuSubItem>
                             <SidebarMenuSubItem
                               onClick={() =>
                                 router.push("/dashboard/additionals")

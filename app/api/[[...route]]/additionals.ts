@@ -18,20 +18,42 @@ const app = new Hono()
         return c.json({ error: "Missing id" }, 400);
       }
 
-      const [data] = await db
-        .select()
-        .from(additionals)
-        .innerJoin(
-          additionalGroups,
+      const rows = await db
+        .select({
+          groupId: additionalGroups.id,
+          groupName: additionalGroups.name,
+          additionalId: additionals.id,
+          additionalName: additionals.name,
+          additionalPrice: additionals.priceAdjustment,
+        })
+        .from(additionalGroups)
+        .leftJoin(
+          additionals,
           eq(additionalGroups.id, additionals.additionalGroupId)
         )
-        .where(eq(additionals.id, id));
+        .where(eq(additionalGroups.id, id));
 
-      if (!data) {
+      if (!rows.length) {
         return c.json({ error: "No additionals found" }, 404);
       }
 
-      return c.json({ data });
+      const { groupId, groupName } = rows[0];
+
+      const additionalsList = rows
+        .filter((row) => row.additionalId) // ignora linhas sem adicional (se houver)
+        .map((row) => ({
+          id: row.additionalId,
+          name: row.additionalName,
+          priceAdjustment: row.additionalPrice,
+        }));
+
+      return c.json({
+        data: {
+          id: groupId,
+          name: groupName,
+          additionals: additionalsList,
+        },
+      });
     }
   )
   .get(
@@ -98,6 +120,43 @@ const app = new Hono()
       }
 
       return c.json({ newGroup });
+    }
+  )
+  .patch(
+    "/:id",
+    verifyAuth(),
+    zValidator("json", additionalGroupSchema),
+    async (c) => {
+      const auth = c.get("authUser");
+      const values = c.req.valid("json");
+      const { id } = c.req.param();
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      await db
+        .update(additionalGroups)
+        .set({
+          name: values.name,
+          selectionType: values.selectionType,
+          isRequired: values.isRequired,
+        })
+        .where(eq(additionalGroups.id, id));
+
+      await db.delete(additionals).where(eq(additionals.additionalGroupId, id));
+
+      if (values.additionals && values.additionals.length > 0) {
+        const additionalValues = values.additionals.map((add) => ({
+          additionalGroupId: id,
+          name: add.name,
+          priceAdjustment: add.priceAdjustment,
+        }));
+
+        await db.insert(additionals).values(additionalValues);
+      }
+
+      return c.json({ success: true });
     }
   );
 

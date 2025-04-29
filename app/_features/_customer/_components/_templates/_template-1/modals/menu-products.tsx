@@ -166,6 +166,36 @@ export const MenuProducts = ({
                       className="text-sm max-w-52 line-clamp-2">
                       {product.description}
                     </p>
+                    {product.additionalGroups.length > 0 && (
+                      <div>
+                        {product.additionalGroups.map((item) => (
+                          <div>
+                            <span
+                              key={item.id}
+                              style={{
+                                color:
+                                  data?.customization.font_color || "black",
+                              }}
+                              className="text-xs font-semibold text-gray-500">
+                              {item.name}
+                            </span>
+                            <div>
+                              {item.additionals.map((additional) => (
+                                <span
+                                  key={additional.id}
+                                  style={{
+                                    color:
+                                      data?.customization.font_color || "black",
+                                  }}
+                                  className="text-xs font-semibold text-gray-500">
+                                  {additional.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <p
                       style={{
                         color: data?.customization.font_color || "black",

@@ -119,7 +119,7 @@ export const MainClient = () => {
           )}
         </AnimatePresence>
 
-        <div className="relative size-32 mx-auto mb-4">
+        <div className="relative size-44 mx-auto mb-4">
           <Image
             src={data?.customization.logo || placeholder}
             alt="logo"
@@ -163,8 +163,8 @@ export const MainClient = () => {
                 }}
                 className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                 onClick={() => onOpen("menu")}>
-                <UtensilsCrossed className="size-12" />
-                <span className="font-semibold">Menu</span>
+                <UtensilsCrossed className="size-8" />
+                <span className="font-semibold text-sm">Menu</span>
               </div>
             </div>
           ) : (
@@ -180,8 +180,8 @@ export const MainClient = () => {
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("categories")}>
-                    <Sandwich className="size-12" />
-                    <span className="font-semibold">Categorias</span>
+                    <Sandwich className="size-8" />
+                    <span className="font-semibold text-sm">Categorias</span>
                   </div>
                   <div
                     style={{
@@ -192,8 +192,8 @@ export const MainClient = () => {
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("cart")}>
-                    <ShoppingCart className="size-12" />
-                    <span className="font-semibold">Meu Carrinho</span>
+                    <ShoppingCart className="size-8" />
+                    <span className="font-semibold text-sm">Meu Carrinho</span>
                   </div>
                   <div
                     style={{
@@ -204,12 +204,12 @@ export const MainClient = () => {
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("combos")}>
-                    <ShoppingBasket className="size-12" />
-                    <span className="font-semibold">Combos</span>
+                    <ShoppingBasket className="size-8" />
+                    <span className="font-semibold text-sm">Combos</span>
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-x-10 gap-y-5 [&>*]:h-28 [&>*]:flex [&>*]:items-center [&>*]:justify-center">
+                <div className="grid grid-cols-1 gap-y-5">
                   <div
                     style={{
                       backgroundColor: data?.customization.button_color
@@ -219,8 +219,8 @@ export const MainClient = () => {
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("signUp")}>
-                    <ClipboardList className="size-12" />
-                    <span className="font-semibold">Registrar</span>
+                    <ClipboardList className="size-8" />
+                    <span className="font-semibold text-sm">Registrar</span>
                   </div>
                   <div
                     style={{
@@ -231,8 +231,8 @@ export const MainClient = () => {
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("signIn")}>
-                    <Key className="size-12" />
-                    <span className="font-semibold">Entrar</span>
+                    <Key className="size-8" />
+                    <span className="font-semibold text-sm">Entrar</span>
                   </div>
                   <div
                     style={{
@@ -243,8 +243,8 @@ export const MainClient = () => {
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("menu")}>
-                    <UtensilsCrossed className="size-12" />
-                    <span className="font-semibold">Menu</span>
+                    <UtensilsCrossed className="size-8" />
+                    <span className="font-semibold text-sm">Menu</span>
                   </div>
                   <div
                     style={{
@@ -255,8 +255,8 @@ export const MainClient = () => {
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("cart")}>
-                    <ShoppingCart className="size-12" />
-                    <span className="font-semibold">Meu Carrinho</span>
+                    <ShoppingCart className="size-8" />
+                    <span className="font-semibold text-sm">Meu Carrinho</span>
                   </div>
                   <div
                     style={{
@@ -267,8 +267,8 @@ export const MainClient = () => {
                     }}
                     className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                     onClick={() => onOpen("combos")}>
-                    <ShoppingBasket className="size-12" />
-                    <span className="font-semibold">Combos</span>
+                    <ShoppingBasket className="size-8" />
+                    <span className="font-semibold text-sm">Combos</span>
                   </div>
                 </div>
               )}

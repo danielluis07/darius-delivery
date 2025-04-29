@@ -1,14 +1,14 @@
-import { client } from "@/lib/hono";
-import { InferResponseType } from "hono";
+import { UpdateProduct } from "../../_components/_products/update-product-form";
 
-type ResponseType = InferResponseType<
-  (typeof client.api.products)[":id"]["$get"],
-  200
->["data"];
+type GetProductResult = {
+  rows: UpdateProduct[];
+};
 
 const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/products`;
 
-export const getProduct = async (id: string): Promise<ResponseType | null> => {
+export const getProduct = async (
+  id: string
+): Promise<GetProductResult | null> => {
   try {
     const res = await fetch(`${URL}/${id}`);
 

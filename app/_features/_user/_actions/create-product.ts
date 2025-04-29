@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { products } from "@/db/schema";
+import { products, productAdditionalGroups } from "@/db/schema";
 import { insertProductSchema } from "@/db/schemas";
 import { revalidatePath } from "next/cache";
 import { uploadImageToS3 } from "@/lib/s3-upload";
@@ -40,6 +40,7 @@ export const createProduct = async (
       description,
       sizes,
       allowHalfOption,
+      additionalGroupIds,
     } = validatedValues.data;
 
     if (!name || !image || !price || !category_id || !description) {
@@ -84,6 +85,22 @@ export const createProduct = async (
         success: false,
         message: "Falha ao criar o produto",
       };
+    }
+
+    if (additionalGroupIds && additionalGroupIds.length > 0) {
+      const data = await db.insert(productAdditionalGroups).values(
+        additionalGroupIds.map((groupId) => ({
+          productId: product.id,
+          additionalGroupId: groupId,
+        }))
+      );
+
+      if (!data) {
+        return {
+          success: false,
+          message: "Falha ao criar os grupos adicionais",
+        };
+      }
     }
 
     revalidatePath("/dashboard/products");

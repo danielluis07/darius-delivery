@@ -2,10 +2,45 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import { products } from "@/db/schema";
-import { and, count, eq, inArray } from "drizzle-orm";
+import {
+  additionalGroups,
+  additionals,
+  productAdditionalGroups,
+  products,
+} from "@/db/schema";
+import { and, count, eq, inArray, sql } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 import { deleteFromS3 } from "@/lib/s3-upload";
+
+interface Additional {
+  id: string;
+  name: string;
+  priceAdjustment: number;
+}
+
+interface AdditionalGroup {
+  id: string;
+  name: string;
+  selectionType: "single" | "multiple";
+  isRequired: boolean;
+  additionals: Additional[];
+}
+
+interface ProductWithAdditionals {
+  id: string;
+  name: string;
+  allowHalfOption: boolean;
+  userId: string | null;
+  image: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  category_id: string | null | undefined;
+  description: string | null;
+  type: string;
+  price: number;
+  sizes: string[] | null;
+  additionalGroups: AdditionalGroup[];
+}
 
 const app = new Hono()
   .get(
@@ -18,10 +53,17 @@ const app = new Hono()
         return c.json({ error: "Missing product id" }, 400);
       }
 
-      const [data] = await db
-        .select()
-        .from(products)
-        .where(eq(products.id, id));
+      const data = await db.execute(
+        sql`
+          SELECT 
+            p.*, 
+            ARRAY_REMOVE(ARRAY_AGG(pag.additional_group_id), NULL) AS "additionalGroupIds"
+          FROM products p
+          LEFT JOIN product_additional_groups pag ON pag.product_id = p.id
+          WHERE p.id = ${id}
+          GROUP BY p.id
+        `
+      );
 
       if (!data) {
         return c.json({ error: "No product found" }, 404);
@@ -69,8 +111,24 @@ const app = new Hono()
       }
 
       const data = await db
-        .select()
+        .select({
+          product: products,
+          additionalGroup: additionalGroups,
+          additional: additionals,
+        })
         .from(products)
+        .leftJoin(
+          productAdditionalGroups,
+          eq(productAdditionalGroups.productId, products.id)
+        )
+        .leftJoin(
+          additionalGroups,
+          eq(additionalGroups.id, productAdditionalGroups.additionalGroupId)
+        )
+        .leftJoin(
+          additionals,
+          eq(additionals.additionalGroupId, additionalGroups.id)
+        )
         .where(
           and(eq(products.userId, userId), eq(products.category_id, categoryId))
         );
@@ -79,9 +137,49 @@ const app = new Hono()
         return c.json({ error: "No products found" }, 404);
       }
 
-      return c.json({ data });
+      const productMap = new Map<string, ProductWithAdditionals>();
+
+      for (const item of data) {
+        const productId = item.product.id;
+
+        if (!productMap.has(productId)) {
+          productMap.set(productId, {
+            ...item.product,
+            additionalGroups: [],
+          });
+        }
+
+        const product = productMap.get(productId)!; // o `!` é seguro aqui porque acabamos de criar ou garantir que existe
+
+        if (item.additionalGroup && item.additionalGroup.id) {
+          let group = product.additionalGroups.find(
+            (g) => g.id === item?.additionalGroup?.id
+          );
+
+          if (!group) {
+            group = {
+              ...item.additionalGroup,
+              additionals: [],
+            };
+            product.additionalGroups.push(group);
+          }
+
+          if (item.additional && item.additional.id) {
+            if (!group.additionals.some((a) => a.id === item?.additional?.id)) {
+              group.additionals.push(item.additional);
+            }
+          }
+        }
+      }
+
+      const finalResult: ProductWithAdditionals[] = Array.from(
+        productMap.values()
+      );
+
+      return c.json({ data: finalResult });
     }
   )
+
   .get(
     "/count/:userId",
     zValidator("param", z.object({ userId: z.string() })),

@@ -22,6 +22,9 @@ export const ProductsList = ({
   categoryId: string | null | undefined;
 }) => {
   const { data } = useStore();
+  const [additionalValue, setAdditionalValue] = useState<string | undefined>(
+    undefined
+  );
   const addToCart = useCartStore((state) => state.addToCart);
   const { onOpenSheet } = useFooterSheet();
   const [halfOption, setHalfOption] = useState<"Inteira" | "Meio a Meio">(
@@ -33,6 +36,8 @@ export const ProductsList = ({
     data?.userId,
     categoryId
   );
+
+  console.log("products", products);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -116,6 +121,40 @@ export const ProductsList = ({
                     <Label htmlFor="meio-a-meio">Meio a Meio</Label>
                   </div>
                 </RadioGroup>
+              </div>
+            )}
+            {selectedProduct.additionalGroups.length > 0 && (
+              <div className="mt-4 border p-3 rounded-md">
+                {selectedProduct.additionalGroups.map((item) => (
+                  <div key={item.id}>
+                    <span
+                      style={{
+                        color: data?.customization.font_color || "black",
+                      }}
+                      className="font-semibold text-gray-500">
+                      {item.name}
+                    </span>
+                    <div className="mt-3">
+                      {item.additionals.map((additional) => (
+                        <div
+                          key={additional.id}
+                          className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            id={additional.name}
+                            name="additional"
+                            value={additional.name}
+                            checked={additionalValue === additional.name}
+                            onChange={() => setAdditionalValue(additional.name)}
+                          />
+                          <label htmlFor={additional.name}>
+                            {additional.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
             <p
