@@ -33,7 +33,6 @@ import {
   Settings,
   UserRoundCog,
   Files,
-  Plus,
 } from "lucide-react";
 import {
   DropdownMenu,

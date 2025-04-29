@@ -169,9 +169,8 @@ export const MenuProducts = ({
                     {product.additionalGroups.length > 0 && (
                       <div>
                         {product.additionalGroups.map((item) => (
-                          <div>
+                          <div key={item.id}>
                             <span
-                              key={item.id}
                               style={{
                                 color:
                                   data?.customization.font_color || "black",
