@@ -49,7 +49,7 @@ export const useUpdateOrderStatus = (userId?: string) => {
           );
         }
       );
-      queryClient.invalidateQueries({ queryKey: ["orders", userId] });
+      queryClient.invalidateQueries({ queryKey: ["orders-receipts", userId] });
     },
     onError: () => {
       toast.error("Houve um erro ao atualizar o pedido!");

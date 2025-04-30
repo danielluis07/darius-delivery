@@ -2,7 +2,11 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import { additionals, additionalGroups } from "@/db/schema";
+import {
+  additionals,
+  additionalGroups,
+  categoryAdditionalGroups,
+} from "@/db/schema";
 import { additionalGroupSchema } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
@@ -93,33 +97,43 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const [newGroup] = await db
-        .insert(additionalGroups)
-        .values({
-          userId: auth.token.sub,
-          name: values.name,
-          selectionType: values.selectionType,
-          isRequired: values.isRequired,
-        })
-        .returning({
-          id: additionalGroups.id,
+      try {
+        const [newGroup] = await db
+          .insert(additionalGroups)
+          .values({
+            userId: auth.token.sub,
+            name: values.name,
+            selectionType: values.selectionType,
+            isRequired: values.isRequired,
+          })
+          .returning({
+            id: additionalGroups.id,
+          });
+
+        if (!newGroup) {
+          return c.json({ error: "Failed to create additional group" }, 500);
+        }
+
+        if (values.additionals && values.additionals.length > 0) {
+          const additionalValues = values.additionals.map((add) => ({
+            additionalGroupId: newGroup.id,
+            name: add.name,
+            priceAdjustment: add.priceAdjustment,
+          }));
+
+          await db.insert(additionals).values(additionalValues);
+        }
+
+        await db.insert(categoryAdditionalGroups).values({
+          categoryId: values.category_id,
+          additionalGroupId: newGroup.id,
         });
 
-      if (values.additionals && values.additionals.length > 0) {
-        const additionalValues = values.additionals.map((add) => ({
-          additionalGroupId: newGroup.id,
-          name: add.name,
-          priceAdjustment: add.priceAdjustment,
-        }));
-
-        await db.insert(additionals).values(additionalValues);
+        return c.json({ newGroup }, 201);
+      } catch (error) {
+        console.error("Error creating additional group:", error);
+        return c.json({ error: "Failed to create additional group" }, 500);
       }
-
-      if (!newGroup) {
-        return c.json({ error: "Failed to insert data" }, 500);
-      }
-
-      return c.json({ newGroup });
     }
   )
   .patch(

@@ -9,6 +9,8 @@ export const ProductsClient = ({ userId }: { userId: string }) => {
   const { data, isLoading } = useGetProducts(userId);
   const deleteProducts = useDeleteProducts(userId);
 
+  console.log(data);
+
   return (
     <div className="w-full">
       <h1 className="text-xl font-bold">Produtos</h1>

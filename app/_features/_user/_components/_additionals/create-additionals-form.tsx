@@ -19,16 +19,35 @@ import { useCreateAdditional } from "@/app/_features/_user/_queries/_additionals
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { InferResponseType } from "hono";
+import { client } from "@/lib/hono";
+
+type Categories = InferResponseType<
+  (typeof client.api.categories.user)[":userId"]["$get"],
+  200
+>["data"];
 
 type FormData = z.infer<typeof additionalGroupSchema>;
 
-export const CreateAdditionalsForm = () => {
+export const CreateAdditionalsForm = ({
+  categories,
+}: {
+  categories: Categories;
+}) => {
   const { mutate, isPending } = useCreateAdditional();
   const form = useForm<FormData>({
     resolver: zodResolver(additionalGroupSchema),
     defaultValues: {
       additionals: [],
       isRequired: false,
+      category_id: "",
       name: "",
       selectionType: "multiple",
     },
@@ -73,6 +92,31 @@ export const CreateAdditionalsForm = () => {
                   required
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categorias</FormLabel>
+              <Select onValueChange={field.onChange} required>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Vincule o adicional a uma categoria" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

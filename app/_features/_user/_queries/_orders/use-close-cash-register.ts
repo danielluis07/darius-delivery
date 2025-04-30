@@ -33,7 +33,7 @@ export const useCloseCashRegister = (userId: string) => {
     onSuccess: (data) => {
       toast.success("Caixa fechado com sucesso!");
       // Invalidar queries relacionadas (ex.: lista de pedidos ou estado do caixa)
-      queryClient.invalidateQueries({ queryKey: ["orders", userId] });
+      queryClient.invalidateQueries({ queryKey: ["orders-receipts", userId] });
       queryClient.invalidateQueries({ queryKey: ["cash-register"] });
       // Opcional: Armazenar o relatório no cache do React Query
       queryClient.setQueryData(

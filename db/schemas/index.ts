@@ -318,6 +318,7 @@ export const additionalGroupSchema = z.object({
   name: z.string().min(1, "Group name cannot be empty"),
   selectionType: z.enum(["single", "multiple"]).default("multiple"),
   isRequired: z.boolean().default(false),
+  category_id: z.string(),
   additionals: z
     .array(additionalSchema)
     .min(1, "Add at least one option to this group"),
@@ -328,7 +329,6 @@ export const insertProductSchema = baseCreateProductSchema.extend({
     typeof File !== "undefined"
       ? z.array(z.instanceof(File)).optional()
       : z.any().optional(),
-  additionalGroupIds: z.array(z.string()),
 });
 
 export const updateProductSchema = baseCreateProductSchema.extend({
@@ -337,7 +337,6 @@ export const updateProductSchema = baseCreateProductSchema.extend({
     typeof File !== "undefined"
       ? z.union([z.array(z.instanceof(File)).optional(), z.string().optional()])
       : z.union([z.any().optional(), z.string().optional()]),
-  additionalGroupIds: z.array(z.string()),
 });
 
 export const insertCustomizationSchema = baseCreateCustomizationSchema.extend({

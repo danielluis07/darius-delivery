@@ -41,21 +41,9 @@ import { createProduct } from "@/app/_features/_user/_actions/create-product";
 import Image from "next/image";
 import { TagsInput } from "@/components/ui/tags-input";
 import { Switch } from "@/components/ui/switch";
-import {
-  MultiSelector,
-  MultiSelectorContent,
-  MultiSelectorItem,
-  MultiSelectorList,
-  MultiSelectorTrigger,
-} from "@/components/ui/multi-select";
 
 type Categories = InferResponseType<
   (typeof client.api.categories.user)[":userId"]["$get"],
-  200
->["data"];
-
-type Additionals = InferResponseType<
-  (typeof client.api.additionals.user)[":userId"]["$get"],
   200
 >["data"];
 
@@ -63,9 +51,7 @@ type FormData = z.infer<typeof insertProductSchema>;
 
 export const CreateProductForm = ({
   categories,
-  additionals,
 }: {
-  additionals: Additionals;
   categories: Categories;
 }) => {
   const [isPending, startTransition] = useTransition();
@@ -78,20 +64,12 @@ export const CreateProductForm = ({
       name: "",
       image: [],
       category_id: "",
-      additionalGroupIds: [],
       description: "",
       allowHalfOption: false,
       sizes: [],
       price: 0,
     },
   });
-
-  const selectedNames =
-    additionals
-      ?.filter((additional) =>
-        form.watch("additionalGroupIds")?.includes(additional.id)
-      )
-      .map((additional) => additional.name) || [];
 
   const dropZoneConfig = {
     maxFiles: 1,
@@ -165,35 +143,6 @@ export const CreateProductForm = ({
             </FormItem>
           )}
         />
-        {additionals && additionals.length > 0 && (
-          <FormField
-            control={form.control}
-            name="additionalGroupIds"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Adicionais</FormLabel>
-                <FormControl>
-                  <MultiSelector
-                    onValuesChange={field.onChange}
-                    values={field.value}
-                    loop={false}>
-                    <MultiSelectorTrigger selectedNames={selectedNames} />
-                    <MultiSelectorContent>
-                      <MultiSelectorList>
-                        {additionals.map((additional, i) => (
-                          <MultiSelectorItem key={i} value={additional.id}>
-                            {additional.name}
-                          </MultiSelectorItem>
-                        ))}
-                      </MultiSelectorList>
-                    </MultiSelectorContent>
-                  </MultiSelector>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
         <FormField
           control={form.control}
           name="sizes"

@@ -222,6 +222,13 @@ export const Cart = () => {
   };
 
   const onSubmit = async (values: OrderData) => {
+    console.log(
+      cart.reduce(
+        (total, item) =>
+          total + (item.effectivePriceInCents || 0) * item.quantity,
+        0
+      )
+    );
     if (!session?.user) {
       toast.error("Você precisa estar logado para finalizar o pedido");
       onOpen("signIn");
@@ -250,7 +257,8 @@ export const Cart = () => {
     const orderData: OrderData = {
       items: cart,
       totalPrice: cart.reduce(
-        (total, item) => total + item.price * item.quantity,
+        (total, item) =>
+          total + (item.effectivePriceInCents || 0) * item.quantity,
         0
       ),
       customerId: values.customerId,
@@ -314,11 +322,11 @@ export const Cart = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold">{item.name}</h3>
-                      <p
-                        style={{
-                          color: data?.colors.font || "black",
-                        }}>
-                        {formatCurrencyFromCents(item.price * item.quantity)}
+                      <p style={{ color: data?.colors.font || "black" }}>
+                        {/* CORRECT: Use the item's specific calculated price */}
+                        {formatCurrencyFromCents(
+                          (item.effectivePriceInCents || 0) * item.quantity
+                        )}
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <button

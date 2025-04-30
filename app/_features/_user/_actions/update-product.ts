@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { productAdditionalGroups, products } from "@/db/schema";
+import { products } from "@/db/schema";
 import { updateProductSchema } from "@/db/schemas";
 import { revalidatePath } from "next/cache";
 import { and, eq } from "drizzle-orm";
@@ -52,7 +52,6 @@ export const updateProduct = async (
       allowHalfOption,
       description,
       sizes,
-      additionalGroupIds,
     } = validatedValues.data;
 
     if (!name || !image || !price || !category_id || !description) {
@@ -110,37 +109,6 @@ export const updateProduct = async (
         success: false,
         message: "Falha ao atualizar o produto",
       };
-    }
-
-    if (additionalGroupIds && additionalGroupIds.length > 0) {
-      const existingRelations = await db
-        .select({
-          additionalGroupId: productAdditionalGroups.additionalGroupId,
-        })
-        .from(productAdditionalGroups)
-        .where(eq(productAdditionalGroups.productId, product.id));
-
-      const existingIds = existingRelations
-        .map((r) => r.additionalGroupId)
-        .sort();
-      const newIds = [...additionalGroupIds].sort();
-
-      const arraysAreDifferent =
-        existingIds.length !== newIds.length ||
-        existingIds.some((id, i) => id !== newIds[i]);
-
-      if (arraysAreDifferent) {
-        await db
-          .delete(productAdditionalGroups)
-          .where(eq(productAdditionalGroups.productId, product.id));
-
-        await db.insert(productAdditionalGroups).values(
-          additionalGroupIds.map((groupId) => ({
-            additionalGroupId: groupId,
-            productId: product.id,
-          }))
-        );
-      }
     }
 
     revalidatePath("/dashboard/products");

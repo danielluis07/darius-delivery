@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { getCategories } from "@/app/_features/_user/_queries/_categories/get-categories";
 import { CreateProductForm } from "@/app/_features/_user/_components/_products/create-product-form";
-import { getAdditionals } from "@/app/_features/_user/_queries/_additionals/get-additionals";
 
 const NewProductPage = async () => {
   const session = await auth();
@@ -19,10 +18,7 @@ const NewProductPage = async () => {
     return <div>Usuário não encontrado</div>;
   }
 
-  const [categories, additionals] = await Promise.all([
-    getCategories(id),
-    getAdditionals(id),
-  ]);
+  const categories = await getCategories(id);
 
   if (!categories) {
     return (
@@ -30,12 +26,7 @@ const NewProductPage = async () => {
     );
   }
 
-  return (
-    <CreateProductForm
-      categories={categories}
-      additionals={additionals || []}
-    />
-  );
+  return <CreateProductForm categories={categories} />;
 };
 
 export default NewProductPage;

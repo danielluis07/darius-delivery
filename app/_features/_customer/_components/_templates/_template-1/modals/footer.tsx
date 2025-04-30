@@ -15,9 +15,10 @@ export const FooterSheet = () => {
   const { data } = useStore();
   const [sheetState, setSheetState] = useState<"full" | "closed">("closed");
 
-  const totalPrice = cart
-    .reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0)
-    .toFixed(2);
+  const totalPrice = cart.reduce((total, item) => {
+    const itemPrice = item.effectivePriceInCents || 0;
+    return total + itemPrice * item.quantity;
+  }, 0);
 
   useEffect(() => {
     if (isOpen && cart.length > 0) {

@@ -656,7 +656,21 @@ export const additionals = pgTable("additionals", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
-export const productAdditionalGroups = pgTable(
+export const categoryAdditionalGroups = pgTable(
+  "category_additional_groups",
+  {
+    categoryId: text("category_id")
+      .notNull()
+      .references(() => categories.id, { onDelete: "cascade" }),
+    additionalGroupId: text("additional_group_id")
+      .notNull()
+      .references(() => additionalGroups.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.categoryId, t.additionalGroupId] })]
+);
+
+/* export const productAdditionalGroups = pgTable(
   "product_additional_groups",
   {
     productId: text("product_id")
@@ -668,4 +682,4 @@ export const productAdditionalGroups = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.productId, t.additionalGroupId] })]
-);
+); */

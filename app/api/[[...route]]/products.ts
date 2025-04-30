@@ -5,7 +5,8 @@ import { db } from "@/db/drizzle";
 import {
   additionalGroups,
   additionals,
-  productAdditionalGroups,
+  categories,
+  categoryAdditionalGroups,
   products,
 } from "@/db/schema";
 import { and, count, eq, inArray, sql } from "drizzle-orm";
@@ -110,76 +111,87 @@ const app = new Hono()
         return c.json({ error: "Missing userId or categoryId" }, 400);
       }
 
-      const data = await db
-        .select({
-          product: products,
-          additionalGroup: additionalGroups,
-          additional: additionals,
-        })
-        .from(products)
-        .leftJoin(
-          productAdditionalGroups,
-          eq(productAdditionalGroups.productId, products.id)
-        )
-        .leftJoin(
-          additionalGroups,
-          eq(additionalGroups.id, productAdditionalGroups.additionalGroupId)
-        )
-        .leftJoin(
-          additionals,
-          eq(additionals.additionalGroupId, additionalGroups.id)
-        )
-        .where(
-          and(eq(products.userId, userId), eq(products.category_id, categoryId))
-        );
-
-      if (!data || data.length === 0) {
-        return c.json({ error: "No products found" }, 404);
-      }
-
-      const productMap = new Map<string, ProductWithAdditionals>();
-
-      for (const item of data) {
-        const productId = item.product.id;
-
-        if (!productMap.has(productId)) {
-          productMap.set(productId, {
-            ...item.product,
-            additionalGroups: [],
-          });
-        }
-
-        const product = productMap.get(productId)!; // o `!` é seguro aqui porque acabamos de criar ou garantir que existe
-
-        if (item.additionalGroup && item.additionalGroup.id) {
-          let group = product.additionalGroups.find(
-            (g) => g.id === item?.additionalGroup?.id
+      try {
+        const data = await db
+          .select({
+            product: products,
+            additionalGroup: additionalGroups,
+            additional: additionals,
+          })
+          .from(products)
+          .innerJoin(categories, eq(products.category_id, categories.id))
+          .leftJoin(
+            categoryAdditionalGroups,
+            eq(categories.id, categoryAdditionalGroups.categoryId)
+          )
+          .leftJoin(
+            additionalGroups,
+            eq(additionalGroups.id, categoryAdditionalGroups.additionalGroupId)
+          )
+          .leftJoin(
+            additionals,
+            eq(additionals.additionalGroupId, additionalGroups.id)
+          )
+          .where(
+            and(
+              eq(products.userId, userId),
+              eq(products.category_id, categoryId),
+              eq(categories.userId, userId) // Ensure category belongs to user
+            )
           );
 
-          if (!group) {
-            group = {
-              ...item.additionalGroup,
-              additionals: [],
-            };
-            product.additionalGroups.push(group);
+        if (!data || data.length === 0) {
+          return c.json({ error: "No products found" }, 404);
+        }
+
+        const productMap = new Map<string, ProductWithAdditionals>();
+
+        for (const item of data) {
+          const productId = item.product.id;
+
+          if (!productMap.has(productId)) {
+            productMap.set(productId, {
+              ...item.product,
+              additionalGroups: [],
+            });
           }
 
-          if (item.additional && item.additional.id) {
-            if (!group.additionals.some((a) => a.id === item?.additional?.id)) {
-              group.additionals.push(item.additional);
+          const product = productMap.get(productId)!;
+
+          if (item.additionalGroup && item.additionalGroup.id) {
+            let group = product.additionalGroups.find(
+              (g) => g.id === item.additionalGroup?.id
+            );
+
+            if (!group) {
+              group = {
+                ...item.additionalGroup,
+                additionals: [],
+              };
+              product.additionalGroups.push(group);
+            }
+
+            if (item.additional && item.additional.id) {
+              if (
+                !group.additionals.some((a) => a.id === item.additional?.id)
+              ) {
+                group.additionals.push(item.additional);
+              }
             }
           }
         }
+
+        const finalResult: ProductWithAdditionals[] = Array.from(
+          productMap.values()
+        );
+
+        return c.json({ data: finalResult }, 200);
+      } catch (error) {
+        console.error("Error fetching products with additionals:", error);
+        return c.json({ error: "Failed to fetch products" }, 500);
       }
-
-      const finalResult: ProductWithAdditionals[] = Array.from(
-        productMap.values()
-      );
-
-      return c.json({ data: finalResult });
     }
   )
-
   .get(
     "/count/:userId",
     zValidator("param", z.object({ userId: z.string() })),

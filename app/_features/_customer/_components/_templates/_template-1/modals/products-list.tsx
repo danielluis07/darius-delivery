@@ -25,6 +25,7 @@ export const ProductsList = ({
     {}
   );
   const addToCart = useCartStore((state) => state.addToCart);
+  const { cart } = useCartStore();
   const { onOpenSheet } = useFooterSheet();
   const [halfOption, setHalfOption] = useState<"Inteira" | "Meio a Meio">(
     "Inteira"
@@ -38,6 +39,8 @@ export const ProductsList = ({
     data?.userId,
     categoryId
   );
+
+  console.log("cart", cart);
 
   const handleChange = (groupId: string, value: string) => {
     setSelectedValues((prev) => ({ ...prev, [groupId]: value }));
@@ -78,7 +81,7 @@ export const ProductsList = ({
           exit={{ x: "100%" }}
           transition={{ duration: 0.5 }}
           className="absolute inset-0 z-10">
-          <div className="h-[450px] px-3 custom-scroll-hide overflow-auto">
+          <div className="h-[430px] px-3 custom-scroll-hide overflow-auto">
             <div className="flex justify-end mb-4">
               <div
                 style={{
@@ -213,19 +216,26 @@ export const ProductsList = ({
                           {group.additionals.map((additional) => (
                             <div
                               key={additional.id}
-                              className="flex items-center space-x-2">
-                              <RadioGroupItem
-                                colorClass={
-                                  data?.colors.additionals_font || "black"
-                                }
-                                className="size-3.5"
-                                value={additional.name}
-                                id={`additional-${group.id}-${additional.id}`}
-                              />
-                              <Label
-                                htmlFor={`additional-${group.id}-${additional.id}`}>
-                                {additional.name}
-                              </Label>
+                              className="flex items-center justify-between">
+                              <div className="space-x-2">
+                                <RadioGroupItem
+                                  colorClass={
+                                    data?.colors.additionals_font || "black"
+                                  }
+                                  className="size-3.5"
+                                  value={additional.name}
+                                  id={`additional-${group.id}-${additional.id}`}
+                                />
+                                <Label
+                                  htmlFor={`additional-${group.id}-${additional.id}`}>
+                                  {additional.name}
+                                </Label>
+                              </div>
+                              <div className="text-xs font-semibold">
+                                {formatCurrencyFromCents(
+                                  additional.priceAdjustment
+                                )}
+                              </div>
                             </div>
                           ))}
                         </RadioGroup>
@@ -243,13 +253,20 @@ export const ProductsList = ({
               }}
               className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md mt-5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
               onClick={() => {
-                onOpenSheet();
+                onOpenSheet(); // Opens the sheet as before
+
+                // Call the updated addToCart from your store
                 const wasAdded = addToCart(
-                  { ...selectedProduct, halfOption },
-                  data?.userId || ""
+                  { ...selectedProduct, halfOption }, // 1st arg: Product data (including halfOption if needed)
+                  data?.userId || "", // 2nd arg: User ID
+                  selectedValues // 3rd arg: Your selected additionals state object
                 );
+
+                // Handle the result and show toast messages as before
                 if (wasAdded) {
                   toast.success("Produto adicionado ao carrinho");
+                  // You might want to reset the selections after adding to cart:
+                  // setSelectedValues({}); // Uncomment this line if needed
                 } else {
                   toast.error("Esse Produto já está no carrinho");
                 }

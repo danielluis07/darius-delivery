@@ -120,6 +120,9 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
     DELIVERED: "Entregue",
     FINISHED: "Finalizado",
     CANCELLED: "Cancelado",
+    ACCEPTED: "Aceito",
+    WITHDRAWN: "Retirado",
+    CONSUME_ON_SITE: "Consumido no local",
   };
 
   if (isLoading) return <div>Carregando...</div>;
