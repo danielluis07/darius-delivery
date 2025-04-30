@@ -21,9 +21,21 @@ import { Trash2 } from "lucide-react";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import { useUpdateAdditional } from "../../_queries/_additionals/use-update-additional";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ResponseType = InferResponseType<
   (typeof client.api.additionals)[":id"]["$get"],
+  200
+>["data"];
+
+type Categories = InferResponseType<
+  (typeof client.api.categories.user)[":userId"]["$get"],
   200
 >["data"];
 
@@ -32,15 +44,20 @@ type FormData = z.infer<typeof additionalGroupSchema>;
 export const UpdateAdditionalsForm = ({
   id,
   data,
+  categories,
+  categoryId,
 }: {
   id: string;
   data: ResponseType;
+  categories: Categories;
+  categoryId: string;
 }) => {
   const { mutate, isPending } = useUpdateAdditional(id);
   const form = useForm<FormData>({
     resolver: zodResolver(additionalGroupSchema),
     defaultValues: {
       name: data.name ?? "",
+      category_id: categoryId ?? "",
       additionals: data.additionals.map((a) => ({
         id: a.id ?? undefined, // se você quiser manter o ID (não é obrigatório)
         name: a.name ?? "",
@@ -87,6 +104,34 @@ export const UpdateAdditionalsForm = ({
                   required
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categorias</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                required>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Vincule o adicional a uma categoria" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

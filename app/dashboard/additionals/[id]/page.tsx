@@ -1,5 +1,9 @@
 import { UpdateAdditionalsForm } from "@/app/_features/_user/_components/_additionals/update-additionals-form";
-import { getAdditional } from "@/app/_features/_user/_queries/_additionals/get-additional";
+import {
+  getAdditional,
+  getCategoryIdByAdditionalGroup,
+} from "@/app/_features/_user/_queries/_additionals/get-additional";
+import { getCategories } from "@/app/_features/_user/_queries/_categories/get-categories";
 import { auth } from "@/auth";
 
 const AdditionalPage = async ({
@@ -14,13 +18,35 @@ const AdditionalPage = async ({
     return <p>Not authenticated</p>;
   }
 
-  const additional = await getAdditional(id);
+  //promise all
+  const [additional, categories, data] = await Promise.all([
+    getAdditional(id),
+    getCategories(session.user.id),
+    getCategoryIdByAdditionalGroup(session.user.id, id),
+  ]);
 
   if (!additional) {
     return <p>Additional not found</p>;
   }
 
-  return <UpdateAdditionalsForm id={id} data={additional} />;
+  if (!categories) {
+    return (
+      <div>Você precisa adicionar categorias antes de criar um adicional</div>
+    );
+  }
+
+  if (!data) {
+    return <p>Category not found</p>;
+  }
+
+  return (
+    <UpdateAdditionalsForm
+      id={id}
+      data={additional}
+      categories={categories}
+      categoryId={data.categoryId}
+    />
+  );
 };
 
 export default AdditionalPage;

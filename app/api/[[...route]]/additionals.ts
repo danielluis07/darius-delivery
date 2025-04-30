@@ -8,7 +8,7 @@ import {
   categoryAdditionalGroups,
 } from "@/db/schema";
 import { additionalGroupSchema } from "@/db/schemas";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 
 const app = new Hono()
@@ -80,6 +80,36 @@ const app = new Hono()
 
       if (!data || data.length === 0) {
         return c.json({ error: "No additionals found" }, 404);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .get(
+    "/user/:userId/additional-group/:groupId",
+    zValidator(
+      "param",
+      z.object({
+        userId: z.string().optional(),
+        groupId: z.string().optional(),
+      })
+    ),
+    async (c) => {
+      const { userId, groupId } = c.req.valid("param");
+
+      if (!userId || !groupId) {
+        return c.json({ error: "Missing user id or group id" }, 400);
+      }
+
+      const [data] = await db
+        .select({
+          categoryId: categoryAdditionalGroups.categoryId,
+        })
+        .from(categoryAdditionalGroups)
+        .where(eq(categoryAdditionalGroups.additionalGroupId, groupId));
+
+      if (!data) {
+        return c.json({ error: "No category found" }, 404);
       }
 
       return c.json({ data });
@@ -171,6 +201,65 @@ const app = new Hono()
       }
 
       return c.json({ success: true });
+    }
+  )
+  .post(
+    "/delete",
+    verifyAuth(),
+    zValidator(
+      "json",
+      z.object({
+        ids: z.array(z.string()),
+      })
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { ids } = c.req.valid("json");
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!ids || ids.length === 0) {
+        return c.json({ error: "Missing ids" }, 400);
+      }
+
+      const data = await db
+        .delete(additionalGroups)
+        .where(inArray(additionalGroups.id, ids));
+
+      if (!data) {
+        return c.json({ error: "Failed to delete additional groups" }, 500);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .delete(
+    "/:id",
+    verifyAuth(),
+    zValidator("param", z.object({ id: z.string().optional() })),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { id } = c.req.valid("param");
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!id) {
+        return c.json({ error: "Missing id" }, 400);
+      }
+
+      const data = await db
+        .delete(additionalGroups)
+        .where(eq(additionalGroups.id, id));
+
+      if (!data) {
+        return c.json({ error: "Failed to delete additional group" }, 500);
+      }
+
+      return c.json({ data });
     }
   );
 

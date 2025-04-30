@@ -27,8 +27,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useConfirmContext } from "@/context/confirm-context";
+import Link from "next/link";
 
 type AdditionalsDataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
@@ -80,32 +81,43 @@ export function AdditionalsDataTable<TData, TValue>({
 
   return (
     <div className="relative mt-10">
-      <Input
-        placeholder="Procurar..."
-        value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-        onChange={(event) =>
-          table.getColumn(searchKey)?.setFilterValue(event.target.value)
-        }
-        className="w-1/2"
-      />
-      {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div
-          onClick={async () => {
-            const ok = await confirm({
-              title: "Deletar entregadores",
-              message:
-                "Você tem certeza que deseja deletar esses entregadores? Essa ação é irreversível.",
-            });
+      <div className="flex items-center justify-between py-4">
+        <Input
+          placeholder="Procurar..."
+          value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn(searchKey)?.setFilterValue(event.target.value)
+          }
+          className="w-1/2"
+        />
+        <div className="flex items-center gap-x-2">
+          <Link href="/dashboard/additionals/new">
+            <Button>
+              Criar Adicional
+              <Plus />
+            </Button>
+          </Link>
+          {table.getFilteredSelectedRowModel().rows.length > 0 && (
+            <Button
+              onClick={async () => {
+                const ok = await confirm({
+                  title: "Tem certeza?",
+                  message:
+                    "Você está prestes a deletar os adicionais selecionados",
+                });
 
-            if (ok) {
-              onDelete(table.getFilteredSelectedRowModel().rows);
-              table.resetRowSelection();
-            }
-          }}
-          className="absolute right-0 top-0 p-1 rounded-lg bg-error cursor-pointer">
-          <Trash2 className="text-white" />
+                if (ok) {
+                  onDelete(table.getFilteredSelectedRowModel().rows);
+                  table.resetRowSelection();
+                }
+              }}
+              variant="destructive">
+              <Trash2 className="text-white" />
+              Deletar Adicionais
+            </Button>
+          )}
         </div>
-      )}
+      </div>
       <div className="rounded-md border mt-5">
         <Table>
           <TableHeader>
