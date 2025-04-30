@@ -54,17 +54,10 @@ const app = new Hono()
         return c.json({ error: "Missing product id" }, 400);
       }
 
-      const data = await db.execute(
-        sql`
-          SELECT 
-            p.*, 
-            ARRAY_REMOVE(ARRAY_AGG(pag.additional_group_id), NULL) AS "additionalGroupIds"
-          FROM products p
-          LEFT JOIN product_additional_groups pag ON pag.product_id = p.id
-          WHERE p.id = ${id}
-          GROUP BY p.id
-        `
-      );
+      const [data] = await db
+        .select()
+        .from(products)
+        .where(eq(products.id, id));
 
       if (!data) {
         return c.json({ error: "No product found" }, 404);

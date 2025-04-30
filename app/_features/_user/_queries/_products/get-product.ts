@@ -1,14 +1,14 @@
-import { UpdateProduct } from "../../_components/_products/update-product-form";
+import { client } from "@/lib/hono";
+import { InferResponseType } from "hono";
 
-type GetProductResult = {
-  rows: UpdateProduct[];
-};
+type ResponseType = InferResponseType<
+  (typeof client.api.products)[":id"]["$get"],
+  200
+>["data"];
 
 const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/products`;
 
-export const getProduct = async (
-  id: string
-): Promise<GetProductResult | null> => {
+export const getProduct = async (id: string): Promise<ResponseType | null> => {
   try {
     const res = await fetch(`${URL}/${id}`);
 
@@ -19,7 +19,7 @@ export const getProduct = async (
     const { data } = await res.json();
     return data;
   } catch (error) {
-    console.error("Error fetching product:", error);
+    console.error("Error fetching products:", error);
     throw error;
   }
 };

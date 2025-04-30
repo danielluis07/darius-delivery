@@ -41,50 +41,25 @@ import Image from "next/image";
 import { TagsInput } from "@/components/ui/tags-input";
 import { updateProduct } from "../../_actions/update-product";
 import { Switch } from "@/components/ui/switch";
-import {
-  MultiSelector,
-  MultiSelectorContent,
-  MultiSelectorItem,
-  MultiSelectorList,
-  MultiSelectorTrigger,
-} from "@/components/ui/multi-select";
 
 type Categories = InferResponseType<
   (typeof client.api.categories.user)[":userId"]["$get"],
   200
 >["data"];
 
-type Additionals = InferResponseType<
-  (typeof client.api.additionals.user)[":userId"]["$get"],
+type Product = InferResponseType<
+  (typeof client.api.products)[":id"]["$get"],
   200
 >["data"];
-
-export type UpdateProduct = {
-  id: string;
-  name: string;
-  allowHalfOption: boolean;
-  userId: string | null;
-  image: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  category_id: string | null | undefined;
-  description: string | null;
-  type: string;
-  price: number;
-  sizes: string[] | null;
-  additionalGroupIds?: string[] | null;
-};
 
 type FormData = z.infer<typeof updateProductSchema>;
 
 export const UpdateProductForm = ({
   categories,
   product,
-  additionals,
 }: {
   categories: Categories;
-  product: UpdateProduct;
-  additionals: Additionals;
+  product: Product;
 }) => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
