@@ -328,7 +328,7 @@ export const createCustomization = async (
     }
   } catch (error) {
     console.error("Erro inesperado na action createCustomization:", error);
-    let message = "Ocorreu um erro inesperado.";
+    const message = "Ocorreu um erro inesperado.";
     return { success: false, message };
   }
 };
