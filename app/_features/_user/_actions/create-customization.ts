@@ -3,87 +3,37 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { customizations, users, orderSettings } from "@/db/schema";
+import { customizations, users, orderSettings, colors } from "@/db/schema";
 import { insertCustomizationSchema } from "@/db/schemas";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import crypto from "crypto";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { formatAddress, getGeoCode } from "@/lib/google-geocode";
-import { deleteFromS3 } from "@/lib/s3-upload";
-
-const s3 = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
-
-const uploadImageToS3 = async (imageFile: File) => {
-  if (!imageFile) {
-    return null;
-  }
-
-  const generateFileName = (bytes = 32) =>
-    crypto.randomBytes(bytes).toString("hex");
-
-  const arrayBuffer = await imageFile.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  const hash = crypto.createHash("sha256");
-  hash.update(buffer);
-  const hashHex = hash.digest("hex");
-
-  const fileName = generateFileName();
-  const putObjectCommand = new PutObjectCommand({
-    Bucket: process.env.AWS_BUCKET_NAME!,
-    Key: fileName,
-    ContentType: imageFile.type,
-    ContentLength: imageFile.size,
-    ChecksumSHA256: hashHex,
-  });
-
-  const signedURL = await getSignedUrl(s3, putObjectCommand, {
-    expiresIn: 3600,
-  });
-
-  const res = await fetch(signedURL, {
-    method: "PUT",
-    body: imageFile,
-    headers: {
-      "Content-Type": imageFile.type,
-    },
-  });
-
-  if (!res.ok) {
-    return null;
-  }
-
-  return signedURL.split("?")[0];
-};
+import { deleteFromS3, uploadImageToS3 } from "@/lib/s3-upload";
 
 export const createCustomization = async (
   values: z.infer<typeof insertCustomizationSchema>
 ) => {
   try {
+    // 1. Authentication and Basic Validation
     const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: "Usuário não autenticado." };
+    }
+    const userId = session.user.id;
+
     const validatedValues = insertCustomizationSchema.safeParse(values);
-
-    if (!session || !session.user.id) {
-      return { success: false, message: "Not authenticated" };
-    }
-
     if (!validatedValues.success) {
-      return { success: false, message: "Campos inválidos" };
+      console.error("Validation Errors:", validatedValues.error.flatten());
+      return { success: false, message: "Dados inválidos." };
     }
 
+    // Destructure validated data, separating id, files, and other fields
     const {
-      id,
+      id, // This will be undefined/null for creation, present for update
+      banner, // Expecting File[] or similar from form
+      logo, // Expecting File[] or similar from form
       store_name,
       store_phone,
       template_id,
-      banner,
-      logo,
       payment_methods,
       city,
       state,
@@ -93,42 +43,47 @@ export const createCustomization = async (
       neighborhood,
       opening_hours,
       isOpen,
+      // latitude, longitude, placeId are removed here, will be fetched/updated later
+      ...otherData // Any other fields in your schema
     } = validatedValues.data;
 
-    // For creation, enforce required fields
-    if (
-      !id &&
-      (!store_name || !template_id || !banner || !logo || !payment_methods)
-    ) {
-      return { success: false, message: "Campos obrigatórios não preenchidos" };
-    }
+    const [existingColors] = await db
+      .select({ id: colors.id })
+      .from(colors)
+      .where(eq(colors.user_id, userId));
 
-    const [user] = await db
-      .select({ googleApiKey: users.googleApiKey })
-      .from(users)
-      .where(eq(users.id, session.user.id));
-
-    if (!user.googleApiKey) {
+    if (!existingColors) {
       return {
         success: false,
-        message:
-          "Você precisa configurar a chave da API do Google Maps antes de criar uma customização",
+        message: "Cores não definidas. Por favor, defina as cores primeiro.",
+      };
+    }
+
+    const [userData] = await db
+      .select({ googleApiKey: users.googleApiKey })
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (!userData?.googleApiKey) {
+      return {
+        success: false,
+        message: "Chave da API do Google Maps não configurada.",
       };
     }
 
     const [orderSettingsData] = await db
-      .select()
+      .select({ id: orderSettings.id })
       .from(orderSettings)
-      .where(eq(orderSettings.user_id, session.user.id));
+      .where(eq(orderSettings.user_id, userId));
 
     if (!orderSettingsData) {
       return {
         success: false,
-        message:
-          "Você precisa configurar os tempos de entrega dos pedidos antes de criar uma customização",
+        message: "Configurações de tempo de entrega não definidas.",
       };
     }
 
+    // 3. Geocoding (Needed for both Create and Update if address changed)
     const formattedAddress = formatAddress({
       street,
       street_number,
@@ -137,146 +92,243 @@ export const createCustomization = async (
       state,
       postalCode,
     });
+    const geoResult = await getGeoCode(formattedAddress, userData.googleApiKey);
 
-    const { success, latitude, longitude, message, placeId } = await getGeoCode(
-      formattedAddress,
-      user.googleApiKey
-    );
-
-    if (!success) {
-      return { success: false, message };
+    if (!geoResult.success) {
+      return {
+        success: false,
+        message: geoResult.message ?? "Falha ao obter geolocalização.",
+      };
     }
+    const { latitude, longitude, placeId } = geoResult; // Get calculated geo data
 
-    // Handle image uploads only if new files are provided
-    let bannerUrl: string | null | undefined;
-    let logoDesktopUrl: string | null | undefined;
-
-    if (banner?.[0]) {
-      const [existingCustomization] = await db
-        .select({ banner: customizations.banner, logo: customizations.logo })
-        .from(customizations)
-        .where(eq(customizations.user_id, session.user.id));
-
-      if (!existingCustomization || !existingCustomization.banner) {
-        return {
-          success: false,
-          message: "Customização não encontrada",
-        };
-      }
-
-      const fileName = existingCustomization.banner.split("/").pop()!;
-
-      const { success } = await deleteFromS3(fileName);
-
-      if (!success) {
-        console.log("Erro ao deletar o banner existente do S3");
-        return { success: false, message: "Erro ao atualizar o banner" };
-      }
-
-      bannerUrl = await uploadImageToS3(banner[0]);
-
-      if (!bannerUrl) {
-        return { success: false, message: "Erro ao fazer upload do banner" };
-      }
-    }
-
-    if (logo?.[0]) {
-      const [existingCustomization] = await db
-        .select({ banner: customizations.banner, logo: customizations.logo })
-        .from(customizations)
-        .where(eq(customizations.user_id, session.user.id));
-
-      if (!existingCustomization || !existingCustomization.logo) {
-        return {
-          success: false,
-          message: "Customização não encontrada",
-        };
-      }
-
-      const fileName = existingCustomization.logo.split("/").pop()!;
-
-      const { success } = await deleteFromS3(fileName);
-
-      if (!success) {
-        console.log("Erro ao deletar o logo existente do S3");
-        return { success: false, message: "Erro ao atualizar o logo" };
-      }
-
-      logoDesktopUrl = await uploadImageToS3(logo[0]);
-
-      if (!logoDesktopUrl) {
-        return { success: false, message: "Erro ao fazer upload do logo" };
-      }
-    }
+    // 4. Initialize Image URLs and Fetch Existing Data (for Update)
+    let bannerUrl: string | null | undefined = undefined; // Use undefined to distinguish from null if needed
+    let logoDesktopUrl: string | null | undefined = undefined;
+    let existingCustomization: {
+      banner?: string | null;
+      logo?: string | null;
+    } | null = null;
 
     if (id) {
-      // Update case: only set fields that were provided
-      const updateData: Partial<typeof validatedValues.data> = {};
+      // --- UPDATE Scenario ---
+      const [fetchedData] = await db
+        .select({ banner: customizations.banner, logo: customizations.logo })
+        .from(customizations)
+        .where(
+          and(eq(customizations.id, id), eq(customizations.user_id, userId))
+        ); // Match ID and User
 
-      if (store_name !== undefined) updateData.store_name = store_name;
-      if (store_phone !== undefined)
-        updateData.store_phone = store_phone || null;
-      if (template_id !== undefined) updateData.template_id = template_id;
-      if (bannerUrl !== undefined) updateData.banner = bannerUrl;
-      if (logoDesktopUrl !== undefined) updateData.logo = logoDesktopUrl;
-      if (payment_methods !== undefined)
-        updateData.payment_methods = payment_methods;
-      if (city !== undefined) updateData.city = city;
-      if (latitude !== undefined) updateData.latitude = latitude;
-      if (longitude !== undefined) updateData.longitude = longitude;
-      if (placeId !== undefined) updateData.placeId = placeId;
-      if (state !== undefined) updateData.state = state;
-      if (street !== undefined) updateData.street = street;
-      if (street_number !== undefined) updateData.street_number = street_number;
-      if (postalCode !== undefined) updateData.postalCode = postalCode;
-      if (neighborhood !== undefined) updateData.neighborhood = neighborhood;
-      if (isOpen !== undefined) updateData.isOpen = isOpen;
-      if (opening_hours !== undefined) updateData.opening_hours = opening_hours;
-
-      const updatedCustomization = await db
-        .update(customizations)
-        .set(updateData)
-        .where(eq(customizations.id, id));
-
-      if (!updatedCustomization) {
-        return { success: false, message: "Falha ao atualizar a customização" };
+      if (!fetchedData) {
+        // IMPORTANT: Return specific error if ID provided but record not found/owned
+        return {
+          success: false,
+          message:
+            "Customização a ser atualizada não encontrada ou pertence a outro usuário.",
+        };
       }
-
-      return { success: true, message: "Customização atualizada com sucesso" };
+      existingCustomization = fetchedData;
+      // Pre-fill URLs with existing values; will be overwritten if new files are uploaded
+      bannerUrl = existingCustomization.banner;
+      logoDesktopUrl = existingCustomization.logo;
     } else {
-      // Insert case: all required fields are already validated
-      const customization = await db.insert(customizations).values({
+      // --- CREATE Scenario ---
+      // Check required fields specifically for creation *before* uploads
+      if (
+        !store_name ||
+        !template_id ||
+        !payment_methods ||
+        !banner?.[0] ||
+        !logo?.[0]
+      ) {
+        // Adjust this check based on whether banner/logo are truly mandatory on creation
+        return {
+          success: false,
+          message:
+            "Campos obrigatórios (nome, template, pagamentos, banner, logo) não preenchidos para criação.",
+        };
+      }
+    }
+
+    // 5. Handle Image Uploads & Deletions (Conditional)
+    // --- Banner ---
+    if (banner?.[0]) {
+      // Check if a new banner file was provided
+      const uploadedUrl = await uploadImageToS3(banner[0]);
+      if (!uploadedUrl) {
+        return {
+          success: false,
+          message: "Erro ao fazer upload do novo banner.",
+        };
+      }
+      const previousBannerUrl = bannerUrl; // Store the potentially existing URL before overwriting
+      bannerUrl = uploadedUrl; // Update with the new URL
+
+      // Delete old banner ONLY if updating AND an old banner existed AND it's different
+      if (
+        id &&
+        existingCustomization?.banner &&
+        previousBannerUrl !== bannerUrl
+      ) {
+        const oldFileName = existingCustomization.banner.split("/").pop();
+        if (oldFileName) {
+          const { success: deleteSuccess } = await deleteFromS3(oldFileName);
+          if (!deleteSuccess) {
+            console.warn(
+              `Falha ao deletar banner antigo do S3: ${oldFileName}. Continuando a operação.`
+            );
+            // Decide if this is critical. Logging might be sufficient.
+          }
+        }
+      }
+    }
+
+    // --- Logo ---
+    if (logo?.[0]) {
+      // Check if a new logo file was provided
+      const uploadedUrl = await uploadImageToS3(logo[0]);
+      if (!uploadedUrl) {
+        return {
+          success: false,
+          message: "Erro ao fazer upload do novo logo.",
+        };
+      }
+      const previousLogoUrl = logoDesktopUrl; // Store potentially existing URL
+      logoDesktopUrl = uploadedUrl; // Update with the new URL
+
+      // Delete old logo ONLY if updating AND an old logo existed AND it's different
+      if (
+        id &&
+        existingCustomization?.logo &&
+        previousLogoUrl !== logoDesktopUrl
+      ) {
+        const oldFileName = existingCustomization.logo.split("/").pop();
+        if (oldFileName) {
+          const { success: deleteSuccess } = await deleteFromS3(oldFileName);
+          if (!deleteSuccess) {
+            console.warn(
+              `Falha ao deletar logo antigo do S3: ${oldFileName}. Continuando a operação.`
+            );
+            // Decide if this is critical.
+          }
+        }
+      }
+    }
+
+    // 6. Perform Database Operation (Update or Insert)
+    if (id) {
+      // --- UPDATE ---
+      const updateData: Partial<typeof customizations.$inferInsert> = {
+        // Include fields from validated data that are allowed to change
         store_name,
-        store_phone: store_phone || null,
+        store_phone: store_phone ?? null, // Handle optional phone
         template_id,
-        banner: bannerUrl!,
-        opening_hours,
-        latitude,
-        longitude,
-        placeId,
-        postalCode,
-        logo: logoDesktopUrl!,
+        payment_methods,
         city,
         state,
+        postalCode,
         street,
         street_number,
         neighborhood,
+        opening_hours,
         isOpen,
-        payment_methods,
-        user_id: session.user.id,
-      });
+        ...otherData, // Include other validated fields if they exist
+        // Include recalculated/updated fields
+        latitude,
+        longitude,
+        placeId,
+        banner: bannerUrl, // Use final banner URL (could be new, old, or null)
+        logo: logoDesktopUrl, // Use final logo URL
+      };
 
-      if (!customization) {
-        return { success: false, message: "Falha ao criar a customização" };
+      // Optional: Remove undefined fields if your DB adapter requires it
+      // Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
+
+      if (Object.keys(updateData).length === 0) {
+        return {
+          success: true,
+          message: "Nenhum dado fornecido para atualização.",
+          customizationId: id,
+        };
       }
 
-      return { success: true, message: "Customização criada com sucesso" };
+      const [updatedResult] = await db
+        .update(customizations)
+        .set(updateData)
+        .where(eq(customizations.id, id)) // Condition already checked user ownership
+        .returning({ updatedId: customizations.id });
+
+      if (!updatedResult?.updatedId) {
+        return {
+          success: false,
+          message: "Falha ao atualizar a customização no banco de dados.",
+        };
+      }
+
+      return {
+        success: true,
+        message: "Customização atualizada com sucesso!",
+        customizationId: updatedResult.updatedId,
+      };
+    } else {
+      // --- INSERT ---
+      // Final check: Ensure required image URLs were successfully obtained if they were required
+      if (!bannerUrl || !logoDesktopUrl) {
+        // This check depends on whether images are truly mandatory for creation.
+        // If upload failed earlier, it would have returned. This catches the case where
+        // the file was required but somehow bannerUrl/logoDesktopUrl are still null/undefined.
+        return {
+          success: false,
+          message:
+            "Falha ao processar arquivos de imagem necessários para criação.",
+        };
+      }
+
+      const insertData: typeof customizations.$inferInsert = {
+        // Include fields from validated data
+        store_name, // Already checked if mandatory
+        store_phone: store_phone ?? null,
+        template_id, // Already checked if mandatory
+        payment_methods, // Already checked if mandatory
+        city,
+        state,
+        postalCode,
+        street,
+        street_number,
+        neighborhood,
+        opening_hours,
+        isOpen,
+        ...otherData, // Include other validated fields
+        // Include required relationships and calculated data
+        user_id: userId,
+        latitude,
+        longitude,
+        placeId,
+        banner: bannerUrl, // Use the (required and uploaded) banner URL
+        logo: logoDesktopUrl, // Use the (required and uploaded) logo URL
+      };
+
+      const [insertedResult] = await db
+        .insert(customizations)
+        .values(insertData)
+        .returning({ insertedId: customizations.id });
+
+      if (!insertedResult?.insertedId) {
+        return {
+          success: false,
+          message: "Falha ao salvar a nova customização no banco de dados.",
+        };
+      }
+
+      return {
+        success: true,
+        message: "Customização criada com sucesso!",
+        customizationId: insertedResult.insertedId,
+      };
     }
   } catch (error) {
-    console.error(error);
-    return {
-      success: false,
-      message: "Erro inesperado ao criar a customização",
-    };
+    console.error("Erro inesperado na action createCustomization:", error);
+    let message = "Ocorreu um erro inesperado.";
+    return { success: false, message };
   }
 };
