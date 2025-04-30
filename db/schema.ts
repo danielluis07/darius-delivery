@@ -51,6 +51,7 @@ export const orderPaymentType = pgEnum("order_payment_type", [
   "CREDIT_CARD",
   "PIX",
   "CARD",
+  "DEBIT_CARD",
 ]);
 
 export const orderType = pgEnum("order_type", ["LOCAL", "WEBSITE", "WHATSAPP"]);

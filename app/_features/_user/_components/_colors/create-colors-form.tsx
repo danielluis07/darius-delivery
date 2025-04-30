@@ -61,6 +61,10 @@ export const ColorsForm = ({
       footer: colors?.footer,
       footer_button: colors?.footer_button,
       product_name: colors?.product_name,
+      product_price: colors?.product_price,
+      additionals: colors?.additionals,
+      additionals_font: colors?.additionals_font,
+      cart: colors?.cart,
     },
   });
 
@@ -228,7 +232,7 @@ export const ColorsForm = ({
             name="product_price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cor do Nome do Produto</FormLabel>
+                <FormLabel>Preço do Produto</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"
@@ -263,6 +267,23 @@ export const ColorsForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Fonte dos Adicionais</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="cart"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ícone do Carrinho</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"
