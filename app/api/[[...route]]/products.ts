@@ -9,7 +9,7 @@ import {
   categoryAdditionalGroups,
   products,
 } from "@/db/schema";
-import { and, count, eq, inArray, sql } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 import { deleteFromS3 } from "@/lib/s3-upload";
 
