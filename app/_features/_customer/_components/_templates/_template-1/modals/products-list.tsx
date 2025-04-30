@@ -173,7 +173,7 @@ export const ProductsList = ({
             {/*  */}
             {selectedProduct.additionalGroups.length > 0 && (
               <div className="mt-4 space-y-4">
-                {selectedProduct.additionalGroups.map((group: any) => (
+                {selectedProduct.additionalGroups.map((group) => (
                   <div
                     key={group.id}
                     style={{
@@ -210,7 +210,7 @@ export const ProductsList = ({
                           value={selectedValues[group.id] || ""}
                           onValueChange={(val) => handleChange(group.id, val)}
                           className="space-y-2">
-                          {group.additionals.map((additional: any) => (
+                          {group.additionals.map((additional) => (
                             <div
                               key={additional.id}
                               className="flex items-center space-x-2">

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { SignUpForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-up-form";
-import { ArrowLeft, ShoppingCart, X } from "lucide-react";
+import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useModalStore } from "@/hooks/template-1/use-modal-store";
 import { SignInForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-in-form";
