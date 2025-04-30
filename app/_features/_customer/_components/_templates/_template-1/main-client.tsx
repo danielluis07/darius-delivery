@@ -2,15 +2,7 @@
 
 import Image from "next/image";
 import { SignUpForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-up-form";
-import {
-  ClipboardList,
-  Key,
-  Sandwich,
-  ShoppingBasket,
-  ShoppingCart,
-  UtensilsCrossed,
-  X,
-} from "lucide-react";
+import { ShoppingCart, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useModalStore } from "@/hooks/template-1/use-modal-store";
 import { SignInForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-in-form";
@@ -118,7 +110,7 @@ export const MainClient = () => {
           )}
         </AnimatePresence>
 
-        <div className="relative size-44 mx-auto mb-4">
+        <div className="relative size-52 mx-auto mb-4">
           <Image
             src={data?.customization.logo || placeholder}
             alt="logo"
@@ -162,8 +154,7 @@ export const MainClient = () => {
                 }}
                 className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
                 onClick={() => onOpen("menu")}>
-                <UtensilsCrossed className="size-8" />
-                <span className="font-semibold text-sm">Menu</span>
+                <span className="font-semibold text-sm py-3">Menu</span>
               </div>
             </div>
           ) : (
@@ -177,10 +168,11 @@ export const MainClient = () => {
                         : "rgba(255, 255, 255, 0.7)",
                       color: data?.colors.font || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-2xl"
                     onClick={() => onOpen("categories")}>
-                    <Sandwich className="size-8" />
-                    <span className="font-semibold text-sm">Categorias</span>
+                    <span className="font-semibold text-sm py-3">
+                      Categorias
+                    </span>
                   </div>
                   <div
                     style={{
@@ -189,10 +181,11 @@ export const MainClient = () => {
                         : "rgba(255, 255, 255, 0.7)",
                       color: data?.colors.font || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-2xl"
                     onClick={() => onOpen("cart")}>
-                    <ShoppingCart className="size-8" />
-                    <span className="font-semibold text-sm">Meu Carrinho</span>
+                    <span className="font-semibold text-sm py-3">
+                      Meu Carrinho
+                    </span>
                   </div>
                   <div
                     style={{
@@ -201,10 +194,9 @@ export const MainClient = () => {
                         : "rgba(255, 255, 255, 0.7)",
                       color: data?.colors.font || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-2xl"
                     onClick={() => onOpen("combos")}>
-                    <ShoppingBasket className="size-8" />
-                    <span className="font-semibold text-sm">Combos</span>
+                    <span className="font-semibold text-sm py-3">Combos</span>
                   </div>
                 </div>
               ) : (
@@ -216,10 +208,11 @@ export const MainClient = () => {
                         : "rgba(255, 255, 255, 0.7)",
                       color: data?.colors.font || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-2xl"
                     onClick={() => onOpen("signUp")}>
-                    <ClipboardList className="size-8" />
-                    <span className="font-semibold text-sm">Registrar</span>
+                    <span className="font-semibold text-sm py-3">
+                      Registrar
+                    </span>
                   </div>
                   <div
                     style={{
@@ -228,10 +221,9 @@ export const MainClient = () => {
                         : "rgba(255, 255, 255, 0.7)",
                       color: data?.colors.font || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-2xl"
                     onClick={() => onOpen("signIn")}>
-                    <Key className="size-8" />
-                    <span className="font-semibold text-sm">Entrar</span>
+                    <span className="font-semibold text-sm py-3">Entrar</span>
                   </div>
                   <div
                     style={{
@@ -240,10 +232,9 @@ export const MainClient = () => {
                         : "rgba(255, 255, 255, 0.7)",
                       color: data?.colors.font || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-2xl"
                     onClick={() => onOpen("menu")}>
-                    <UtensilsCrossed className="size-8" />
-                    <span className="font-semibold text-sm">Menu</span>
+                    <span className="font-semibold text-sm py-3">Menu</span>
                   </div>
                   <div
                     style={{
@@ -252,10 +243,11 @@ export const MainClient = () => {
                         : "rgba(255, 255, 255, 0.7)",
                       color: data?.colors.font || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-2xl"
                     onClick={() => onOpen("cart")}>
-                    <ShoppingCart className="size-8" />
-                    <span className="font-semibold text-sm">Meu Carrinho</span>
+                    <span className="font-semibold text-sm py-3">
+                      Meu Carrinho
+                    </span>
                   </div>
                   <div
                     style={{
@@ -264,10 +256,9 @@ export const MainClient = () => {
                         : "rgba(255, 255, 255, 0.7)",
                       color: data?.colors.font || "black",
                     }}
-                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-lg"
+                    className="flex flex-col items-center min-w-28 cursor-pointer rounded-2xl"
                     onClick={() => onOpen("combos")}>
-                    <ShoppingBasket className="size-8" />
-                    <span className="font-semibold text-sm">Combos</span>
+                    <span className="font-semibold text-sm py-3">Combos</span>
                   </div>
                 </div>
               )}
