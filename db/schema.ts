@@ -379,6 +379,11 @@ export const colors = pgTable("colors", {
   footer_button: varchar("footer_button", { length: 7 }).default("#ffffff"),
   product_name: varchar("product_name", { length: 7 }).default("#000000"),
   product_price: varchar("product_price", { length: 7 }).default("#000000"),
+  product_details: varchar("product_details", { length: 7 }).default("#000000"),
+  additionals: varchar("additionals", { length: 7 }).default("#000000"),
+  additionals_font: varchar("additionals_font", { length: 7 }).default(
+    "#000000"
+  ),
   cart: varchar("cart", { length: 7 }).default("#000000"),
 });
 

@@ -103,13 +103,13 @@ export const ColorsForm = ({
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-3 gap-4 mt-8">
+        <div className="grid grid-cols-4 gap-3 mt-8">
           <FormField
             control={form.control}
             name="background"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cor de Fundo</FormLabel>
+                <FormLabel>Fundo</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"
@@ -126,7 +126,7 @@ export const ColorsForm = ({
             name="header"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cor do Header</FormLabel>
+                <FormLabel>Header</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"
@@ -143,7 +143,7 @@ export const ColorsForm = ({
             name="button"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cor do botão</FormLabel>
+                <FormLabel>Botões</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"
@@ -160,7 +160,7 @@ export const ColorsForm = ({
             name="font"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cor da Fonte</FormLabel>
+                <FormLabel>Fonte (geral)</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"
@@ -177,7 +177,92 @@ export const ColorsForm = ({
             name="footer"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cor do Footer</FormLabel>
+                <FormLabel>Footer</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="footer_button"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Botão do Footer</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="product_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome do Produto</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="product_price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cor do Nome do Produto</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="additionals"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Adicionais</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="additionals_font"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fonte dos Adicionais</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"
