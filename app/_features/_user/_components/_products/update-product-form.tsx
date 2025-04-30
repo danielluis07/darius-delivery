@@ -103,16 +103,8 @@ export const UpdateProductForm = ({
       allowHalfOption: product.allowHalfOption,
       sizes: product.sizes ?? [],
       price: product.price,
-      additionalGroupIds: product.additionalGroupIds ?? [],
     },
   });
-
-  const selectedNames =
-    additionals
-      ?.filter((additional) =>
-        form.watch("additionalGroupIds")?.includes(additional.id)
-      )
-      .map((additional) => additional.name) || [];
 
   const dropZoneConfig = {
     maxFiles: 1,
@@ -189,35 +181,6 @@ export const UpdateProductForm = ({
             </FormItem>
           )}
         />
-        {additionals && additionals.length > 0 && (
-          <FormField
-            control={form.control}
-            name="additionalGroupIds"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Adicionais</FormLabel>
-                <FormControl>
-                  <MultiSelector
-                    onValuesChange={field.onChange}
-                    values={field.value}
-                    loop={false}>
-                    <MultiSelectorTrigger selectedNames={selectedNames} />
-                    <MultiSelectorContent>
-                      <MultiSelectorList>
-                        {additionals.map((additional, i) => (
-                          <MultiSelectorItem key={i} value={additional.id}>
-                            {additional.name}
-                          </MultiSelectorItem>
-                        ))}
-                      </MultiSelectorList>
-                    </MultiSelectorContent>
-                  </MultiSelector>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
         <FormField
           control={form.control}
           name="sizes"
