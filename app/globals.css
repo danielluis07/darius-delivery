@@ -128,6 +128,15 @@ body,
   background-color: transparent;
 }
 
+.custom-scroll-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scroll-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -136,8 +145,6 @@ body,
     @apply bg-background text-foreground;
   }
 }
-
-
 
 @layer base {
   * {

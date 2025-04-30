@@ -6,15 +6,14 @@ import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
 import { useGetProducts } from "@/app/_features/_customer/_queries/use-get-products";
 import { Product } from "@/types";
-import { MoveLeft } from "lucide-react";
-import { formatCurrencyFromCents } from "@/lib/utils";
+import { ChevronRight, MoveLeft } from "lucide-react";
+import { cn, formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
 import { useCartStore } from "@/hooks/template-1/use-cart-store";
 import { toast } from "sonner";
 import { useFooterSheet } from "@/hooks/template-1/use-template-footer";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const ProductsList = ({
   categoryId,
@@ -22,14 +21,17 @@ export const ProductsList = ({
   categoryId: string | null | undefined;
 }) => {
   const { data } = useStore();
-  const [additionalValue, setAdditionalValue] = useState<string | undefined>(
-    undefined
+  const [selectedValues, setSelectedValues] = useState<Record<string, string>>(
+    {}
   );
   const addToCart = useCartStore((state) => state.addToCart);
   const { onOpenSheet } = useFooterSheet();
   const [halfOption, setHalfOption] = useState<"Inteira" | "Meio a Meio">(
     "Inteira"
   );
+  const [openAdditionalsAccordion, setOpenAdditionalsAccordion] = useState<
+    string | null
+  >(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data: products, isLoading: isProductsLoading } = useGetProducts(
@@ -37,7 +39,13 @@ export const ProductsList = ({
     categoryId
   );
 
-  console.log("products", products);
+  const handleChange = (groupId: string, value: string) => {
+    setSelectedValues((prev) => ({ ...prev, [groupId]: value }));
+  };
+
+  const toggleAccordion = (groupId: string) => {
+    setOpenAdditionalsAccordion((prev) => (prev === groupId ? null : groupId));
+  };
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -70,7 +78,7 @@ export const ProductsList = ({
           exit={{ x: "100%" }}
           transition={{ duration: 0.5 }}
           className="absolute inset-0 z-10">
-          <ScrollArea className="h-[450px] px-3">
+          <div className="h-[450px] px-3 custom-scroll-hide overflow-auto">
             <div className="flex justify-end mb-4">
               <div
                 style={{
@@ -89,7 +97,13 @@ export const ProductsList = ({
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
               />
             </div>
-            <h2 className="text-2xl font-bold mt-2">{selectedProduct.name}</h2>
+            <h2
+              style={{
+                color: data?.colors.product_name || "black",
+              }}
+              className="text-2xl font-bold mt-2">
+              {selectedProduct.name}
+            </h2>
             <p
               style={{
                 color: data?.colors.font || "black",
@@ -97,73 +111,131 @@ export const ProductsList = ({
               className="text-xs">
               {selectedProduct.description}
             </p>
-            {selectedProduct.allowHalfOption && (
-              <div className="mt-2">
-                <RadioGroup
-                  defaultValue={halfOption}
-                  onValueChange={(value) =>
-                    setHalfOption(value as "Inteira" | "Meio a Meio")
-                  }>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      colorClass={data?.colors.font || "black"}
-                      value="Inteira"
-                      id="inteira"
-                    />
-                    <Label htmlFor="inteira">Inteira</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      colorClass={data?.colors.font || "black"}
-                      value="Meio a Meio"
-                      id="meio-a-meio"
-                    />
-                    <Label htmlFor="meio-a-meio">Meio a Meio</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            )}
-            {selectedProduct.additionalGroups.length > 0 && (
-              <div className="mt-4 border p-3 rounded-md">
-                {selectedProduct.additionalGroups.map((item) => (
-                  <div key={item.id}>
-                    <span
-                      style={{
-                        color: data?.colors.font || "black",
-                      }}
-                      className="font-semibold text-gray-500">
-                      {item.name}
-                    </span>
-                    <div className="mt-3">
-                      {item.additionals.map((additional) => (
-                        <div
-                          key={additional.id}
-                          className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            id={additional.name}
-                            name="additional"
-                            value={additional.name}
-                            checked={additionalValue === additional.name}
-                            onChange={() => setAdditionalValue(additional.name)}
-                          />
-                          <label htmlFor={additional.name}>
-                            {additional.name}
-                          </label>
-                        </div>
-                      ))}
+            {/*  */}
+            <div
+              style={{
+                backgroundColor: data?.colors?.product_details || "white",
+              }}
+              className="flex items-center justify-between mt-4 p-4 rounded-lg">
+              <p
+                style={{
+                  color: data?.colors.product_price || "black",
+                }}
+                className="text-lg font-semibold mt-2">
+                {formatCurrencyFromCents(selectedProduct.price)}
+              </p>
+              {selectedProduct.allowHalfOption && (
+                <div
+                  style={{
+                    color: data?.colors.font || "black",
+                  }}>
+                  <RadioGroup
+                    value={halfOption}
+                    onValueChange={(value) =>
+                      setHalfOption(value as "Inteira" | "Meio a Meio")
+                    }>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value="Inteira"
+                        id="inteira"
+                        colorClass={data?.colors?.font || "black"}
+                        className="size-3.5"
+                      />
+                      <Label htmlFor="inteira">Inteira</Label>
                     </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value="Meio a Meio"
+                        id="meio-a-meio"
+                        colorClass={data?.colors?.font || "black"}
+                        className="size-3.5"
+                      />
+                      <Label htmlFor="meio-a-meio">Meio a Meio</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              )}
+            </div>
+            {/*  */}
+            <div
+              style={{
+                backgroundColor: data?.colors.additionals || "white",
+                color: data?.colors.additionals_font || "black",
+              }}
+              className="my-4 py-4">
+              <p className="text-xs text-center font-semibold">
+                Personalize seu produto:
+              </p>
+              <p className="text-xs text-center font-semibold">
+                Toque para abrir/fechar as opções abaixo
+              </p>
+            </div>
+            {/*  */}
+            {selectedProduct.additionalGroups.length > 0 && (
+              <div className="mt-4 space-y-4">
+                {selectedProduct.additionalGroups.map((group: any) => (
+                  <div
+                    key={group.id}
+                    style={{
+                      backgroundColor: data?.colors.additionals || "white",
+                      color: data?.colors.additionals_font || "black",
+                    }}
+                    className="rounded-lg">
+                    <button
+                      onClick={() => toggleAccordion(group.id)}
+                      className="flex items-center gap-1 w-full px-4 py-3 text-left text-lg font-medium rounded-t-lg">
+                      <ChevronRight
+                        style={{
+                          color: data?.colors.additionals_font || "black",
+                        }}
+                        className={cn(
+                          openAdditionalsAccordion === group.id
+                            ? "rotate-90"
+                            : "",
+                          "size-4 transition-transform duration-200"
+                        )}
+                      />
+                      <span
+                        style={{
+                          color: data?.colors?.additionals_font || "black",
+                        }}
+                        className="text-xs">
+                        {group.name}
+                      </span>
+                    </button>
+
+                    {openAdditionalsAccordion === group.id && (
+                      <div className="px-4 py-3 space-y-2">
+                        <RadioGroup
+                          value={selectedValues[group.id] || ""}
+                          onValueChange={(val) => handleChange(group.id, val)}
+                          className="space-y-2">
+                          {group.additionals.map((additional: any) => (
+                            <div
+                              key={additional.id}
+                              className="flex items-center space-x-2">
+                              <RadioGroupItem
+                                colorClass={
+                                  data?.colors.additionals_font || "black"
+                                }
+                                className="size-3.5"
+                                value={additional.name}
+                                id={`additional-${group.id}-${additional.id}`}
+                              />
+                              <Label
+                                htmlFor={`additional-${group.id}-${additional.id}`}>
+                                {additional.name}
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             )}
-            <p
-              style={{
-                color: data?.colors.font || "black",
-              }}
-              className="text-lg font-semibold mt-2">
-              {formatCurrencyFromCents(selectedProduct.price)}
-            </p>
+            {/*  */}
             <button
               style={{
                 backgroundColor: data?.colors.button || "white",
@@ -184,7 +256,7 @@ export const ProductsList = ({
               }}>
               Adicionar ao carrinho
             </button>
-          </ScrollArea>
+          </div>
         </motion.div>
       ) : (
         <motion.div

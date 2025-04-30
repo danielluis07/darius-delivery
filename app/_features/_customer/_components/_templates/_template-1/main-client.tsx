@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { SignUpForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-up-form";
-import { ShoppingCart, X } from "lucide-react";
+import { ArrowLeft, ShoppingCart, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useModalStore } from "@/hooks/template-1/use-modal-store";
 import { SignInForm } from "@/app/_features/_customer/_components/_templates/_template-1/_auth/sign-in-form";
@@ -89,7 +89,11 @@ export const MainClient = () => {
                         <span className="absolute flex justify-center items-center top-0 right-0 text-xs bg-destructive size-4 rounded-full text-white font-semibold">
                           {cart.length}
                         </span>
-                        <ShoppingCart />
+                        <ShoppingCart
+                          style={{
+                            color: data?.colors.cart || "black",
+                          }}
+                        />
                       </div>
                     </div>
                   )}
@@ -98,8 +102,8 @@ export const MainClient = () => {
                     color: data?.colors.font || "black",
                   }}
                   onClick={onClose}
-                  className="cursor-pointer">
-                  <X />
+                  className="flex items-center cursor-pointer">
+                  <ArrowLeft className="size-4" /> Menu
                 </div>
               </div>
               <ModalContent
