@@ -92,7 +92,8 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
     (item) => item.order.status === "IN_TRANSIT"
   );
   const finishedOrders = ordersData.filter(
-    (item) => item.order.status === "FINISHED"
+    (item) =>
+      item.order.status === "FINISHED" || item.order.status === "DELIVERED"
   );
 
   const { confirm } = useConfirmContext();
@@ -356,7 +357,9 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
 
           {/* Finished Orders */}
           <Card className="p-4">
-            <h3 className="text-lg font-semibold mb-3">Finalizados</h3>
+            <h3 className="text-lg font-semibold mb-3">
+              Finalizados/Entregues
+            </h3>
             <ScrollArea className="h-96">
               {finishedOrders.length > 0 ? (
                 finishedOrders.map((item) => (

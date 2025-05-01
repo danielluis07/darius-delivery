@@ -193,7 +193,19 @@ export const updateOrderSchema = z.object({
   delivery_deadline: z.number().optional(),
   pickup_deadline: z.number().optional(),
   obs: z.string().optional(),
+  total_price: z.number().optional(),
   street: z.string().optional(),
+  customer_id: z.string().optional(),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().nonempty(),
+        quantity: z.number().min(1),
+        price: z.number().min(0),
+        name: z.string().nullable(),
+      })
+    )
+    .nonempty(),
   street_number: z.string().optional(),
   neighborhood: z.string().optional(),
   city: z.string().optional(),

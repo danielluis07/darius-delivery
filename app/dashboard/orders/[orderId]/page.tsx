@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { OrderDetails } from "@/app/_features/_user/_components/_orders/order-details";
+import { getProducts } from "@/app/_features/_user/_queries/_products/get-products";
 
 const OrderDetailsPage = async ({
   params,
@@ -23,7 +24,11 @@ const OrderDetailsPage = async ({
     return <div>Usuário não encontrado</div>;
   }
 
-  return <OrderDetails userId={id} orderId={orderId} />;
+  const products = await getProducts(id);
+
+  return (
+    <OrderDetails userId={id} orderId={orderId} products={products || []} />
+  );
 };
 
 export default OrderDetailsPage;

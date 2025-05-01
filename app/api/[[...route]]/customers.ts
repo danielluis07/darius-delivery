@@ -72,6 +72,7 @@ const app = new Hono()
           neighborhood: customers.neighborhood,
           city: customers.city,
           state: customers.state,
+          postalCode: customers.postalCode,
           createdAt: users.createdAt,
         })
         .from(users)

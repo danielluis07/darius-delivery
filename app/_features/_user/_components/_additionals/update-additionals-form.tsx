@@ -175,7 +175,6 @@ export const UpdateAdditionalsForm = ({
                             : 0;
                           field.onChange(numericValue);
                         }}
-                        required
                       />
                     </FormControl>
                     <FormMessage />

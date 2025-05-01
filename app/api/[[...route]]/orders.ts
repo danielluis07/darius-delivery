@@ -36,12 +36,11 @@ import { formatAddress, getGeoCode } from "@/lib/google-geocode";
 import { ExtendedAuthUser } from "@/types";
 
 type Products = {
-  id: number;
+  productId: string;
   name: string;
   price: number;
   quantity: number;
-  description: string;
-  image: string;
+  type: "PRODUCT" | "COMBO";
 };
 
 type Combos = {
@@ -58,6 +57,20 @@ type OrderItem = {
   productName: string;
   quantity: number;
   price: number;
+};
+
+type UpdateStatus = {
+  status:
+    | "ACCEPTED"
+    | "PREPARING"
+    | "FINISHED"
+    | "IN_TRANSIT"
+    | "DELIVERED"
+    | "CANCELLED"
+    | "WITHDRAWN"
+    | "CONSUME_ON_SITE";
+  payment_status?: "PENDING" | "PAID" | "CANCELLED";
+  updatedAt: Date;
 };
 
 const app = new Hono()
@@ -232,12 +245,10 @@ const app = new Hono()
             COALESCE(
               json_agg(
                 json_build_object(
-                  'id', ${products.id},
+                  'productId', ${products.id},
                   'name', ${products.name},
                   'price', ${products.price},
                   'quantity', ${orderItems.quantity},
-                  'description', ${products.description},
-                  'image', ${products.image},
                   'type', 'PRODUCT' -- Definimos explicitamente como produto
                 )
               ) FILTER (WHERE ${products.id} IS NOT NULL), '[]'
@@ -1160,7 +1171,18 @@ const app = new Hono()
         payment_status: z.enum(["PENDING", "PAID", "CANCELLED"]),
         delivery_deadline: z.number().optional(),
         pickup_deadline: z.number().optional(),
+        total_price: z.number().optional(),
         obs: z.string().optional(),
+        items: z
+          .array(
+            z.object({
+              productId: z.string().nonempty(),
+              quantity: z.number().min(1),
+              price: z.number().min(0),
+              name: z.string().nullable(),
+            })
+          )
+          .nonempty(),
         street: z.string().optional(),
         street_number: z.string().optional(),
         neighborhood: z.string().optional(),
@@ -1183,7 +1205,9 @@ const app = new Hono()
         state,
         neighborhood,
         obs,
+        items,
         street,
+        total_price,
         street_number,
         postalCode,
       } = c.req.valid("json");
@@ -1209,6 +1233,7 @@ const app = new Hono()
         !city ||
         !state ||
         !neighborhood ||
+        !items ||
         !street ||
         !street_number ||
         !postalCode
@@ -1241,7 +1266,7 @@ const app = new Hono()
         return c.json({ error: message }, 500);
       }
 
-      const [data] = await db
+      const [updatedOrder] = await db
         .update(orders)
         .set({
           delivererId,
@@ -1250,6 +1275,7 @@ const app = new Hono()
           type,
           latitude,
           longitude,
+          total_price,
           city,
           state,
           placeId,
@@ -1263,27 +1289,44 @@ const app = new Hono()
           updatedAt: new Date(),
         })
         .where(eq(orders.id, orderId))
-        .returning({ totalPrice: orders.total_price });
+        .returning({ id: orders.id, totalPrice: orders.total_price });
 
-      if (!data) {
+      if (!updatedOrder) {
         return c.json({ error: "Failed to update order" }, 500);
       }
 
+      // Deletar os itens antigos
+      await db
+        .delete(orderItems)
+        .where(eq(orderItems.order_id, updatedOrder.id));
+
+      await db.insert(orderItems).values(
+        items.map((item) => ({
+          order_id: updatedOrder.id,
+          product_id: item.productId,
+          price: item.price,
+          quantity: item.quantity,
+        }))
+      );
+
       if (payment_status === "PAID") {
-        const transaction = await db.insert(transactions).values({
-          amount: data.totalPrice,
-          status: "COMPLETED",
-          order_id: orderId,
-          user_id: id,
-          type: "PAYMENT",
-        });
+        // find transaction by orderId
+        const [transaction] = await db
+          .select({ id: transactions.id })
+          .from(transactions)
+          .where(eq(transactions.order_id, updatedOrder.id));
 
         if (!transaction) {
           return c.json({ error: "Failed to create transaction" }, 500);
         }
+
+        await db
+          .update(transactions)
+          .set({ status: "COMPLETED" })
+          .where(eq(transactions.id, transaction.id));
       }
 
-      return c.json({ data });
+      return c.json({ updatedOrder });
     }
   )
   .patch(
@@ -1318,13 +1361,38 @@ const app = new Hono()
         return c.json({ error: "Missing order id or status" }, 400);
       }
 
+      const updateData: UpdateStatus = {
+        status,
+        updatedAt: new Date(),
+      };
+
+      if (status === "FINISHED") {
+        updateData.payment_status = "PAID";
+      }
+
       const data = await db
         .update(orders)
-        .set({ status: status, updatedAt: new Date() })
+        .set(updateData)
         .where(eq(orders.id, orderId));
 
       if (!data) {
         return c.json({ error: "Failed to update order" }, 500);
+      }
+
+      if (status === "FINISHED") {
+        const [transaction] = await db
+          .select({ id: transactions.id })
+          .from(transactions)
+          .where(eq(transactions.order_id, orderId));
+
+        if (!transaction) {
+          return c.json({ error: "Failed to create transaction" }, 500);
+        }
+
+        await db
+          .update(transactions)
+          .set({ status: "COMPLETED" })
+          .where(eq(transactions.id, transaction.id));
       }
 
       return c.json({ data });

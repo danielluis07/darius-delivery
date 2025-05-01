@@ -160,7 +160,6 @@ export const CreateAdditionalsForm = ({
                             : 0;
                           field.onChange(numericValue);
                         }}
-                        required
                       />
                     </FormControl>
                     <FormMessage />

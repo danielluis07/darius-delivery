@@ -10,10 +10,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm, FieldErrors } from "react-hook-form";
-import { cn, formatCurrencyFromCents, formatPhoneNumber } from "@/lib/utils";
+import { useForm, FieldErrors, useFieldArray } from "react-hook-form";
+import {
+  cn,
+  formatCurrency,
+  formatCurrencyFromCents,
+  formatPhoneNumber,
+} from "@/lib/utils";
 import { format } from "date-fns";
-import { Check, CheckCircle, ChevronsUpDown, Clock } from "lucide-react";
+import {
+  Check,
+  CheckCircle,
+  ChevronsUpDown,
+  Clock,
+  Trash2,
+} from "lucide-react";
 import { updateOrderSchema } from "@/db/schemas";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -46,23 +57,53 @@ import {
 } from "@/components/ui/select";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useUpdateOrder } from "@/app/_features/_user/_queries/_orders/use-update-order";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useGetCustomers } from "../../_queries/_customers/use-get-customers";
+import { client } from "@/lib/hono";
+import { InferResponseType } from "hono";
+
+type Products = InferResponseType<
+  (typeof client.api.products.user)[":userId"]["$get"],
+  200
+>["data"];
+
+type Customer =
+  | {
+      id: string | null;
+      name: string | null;
+      email: string | null;
+      phone: string | null;
+      street: string | null;
+      street_number: string | null;
+      complement: string | null;
+      neighborhood: string | null;
+      city: string | null;
+      state: string | null;
+      createdAt?: string;
+    }
+  | undefined;
 
 type FormData = z.infer<typeof updateOrderSchema>;
 
 export const OrderDetails = ({
   userId,
   orderId,
+  products,
 }: {
   userId: string;
   orderId: string;
+  products: Products;
 }) => {
   const { data, isLoading } = useGetOrder(orderId);
   const { data: deliverersData, isLoading: isDeliverersLoading } =
     useGetDeliverers(userId);
-  const { mutate, isPending } = useUpdateOrder(orderId);
+  const { data: customers, isLoading: isCustomersLoading } =
+    useGetCustomers(userId);
+  const { mutate, isPending } = useUpdateOrder(orderId, userId);
+  const [changeCustomer, setChangeCustomer] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer>(undefined);
   const form = useForm<FormData>({
     resolver: zodResolver(updateOrderSchema),
     defaultValues: {
@@ -70,8 +111,17 @@ export const OrderDetails = ({
       delivererId: "",
       payment_status: undefined,
       type: undefined,
+      customer_id: "",
       delivery_deadline: 0,
       pickup_deadline: 0,
+      items: [
+        {
+          productId: "",
+          quantity: 1,
+          price: 0,
+          name: "",
+        },
+      ],
       obs: "",
       city: "",
       state: "",
@@ -86,6 +136,8 @@ export const OrderDetails = ({
 
   const deliverers = deliverersData || [];
 
+  const customersData = customers || [];
+
   useEffect(() => {
     if (data) {
       reset({
@@ -95,6 +147,7 @@ export const OrderDetails = ({
         type: data.order.type,
         delivery_deadline: data.order.delivery_deadline || 0,
         pickup_deadline: data.order.pickup_deadline || 0,
+        items: data.products,
         obs: data.order.obs || "",
         city: data.order.city || "",
         state: data.order.state || "",
@@ -105,6 +158,19 @@ export const OrderDetails = ({
       });
     }
   }, [data, reset]);
+
+  const items = form.watch("items");
+
+  const totalPrice = items.reduce((total, item) => {
+    return total + item.quantity * item.price;
+  }, 0);
+
+  const selectedProductIds = form.watch("items").map((item) => item.productId);
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "items",
+  });
 
   const statusColors: Record<string, string> = {
     ACCEPTED: "bg-blue-500 text-white",
@@ -152,18 +218,28 @@ export const OrderDetails = ({
   };
 
   const onSubmit = (values: FormData) => {
-    mutate(values);
+    mutate({ ...values, total_price: totalPrice });
   };
 
-  if (isLoading || isDeliverersLoading) {
+  useEffect(() => {
+    if (customersData && data) {
+      const customer = customersData.find(
+        (customer) => customer.id === data.customer.id
+      );
+      if (customer) {
+        setSelectedCustomer(customer);
+        form.setValue("customer_id", customer.id);
+      }
+    }
+  }, [customersData, data, form]);
+
+  if (isLoading || isDeliverersLoading || isCustomersLoading) {
     return <div>Carregando...</div>;
   }
 
   if (!data) {
     return <div>Pedido não encontrado</div>;
   }
-
-  console.log(data);
 
   return (
     <div className="w-full">
@@ -199,7 +275,7 @@ export const OrderDetails = ({
               </p>
               <p className="text-sm text-gray-500">
                 <span className="font-semibold">Total:</span>{" "}
-                {formatCurrencyFromCents(data.order.totalPrice)}
+                {formatCurrencyFromCents(totalPrice)}
               </p>
               {data.order.change_value && (
                 <p className="text-sm text-gray-500">
@@ -235,89 +311,302 @@ export const OrderDetails = ({
             <div>
               <h3 className="text-lg font-semibold">Produtos</h3>
               <Separator className="my-2" />
-              <div className="space-y-4">
-                {data.products.length > 0 ? (
-                  data.products.map((product, index) => (
-                    <div key={index} className="flex items-center gap-4">
-                      <div className="relative w-28 h-20 rounded-lg overflow-hidden">
-                        <Image
-                          src={product.image || placeholder}
-                          alt={product.name || "Product Image"}
-                          fill
-                          sizes="(max-width: 640px) 50px, (max-width: 1024px) 80px, 100px"
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="font-semibold">{product.name}</p>
-                        <p className="text-sm text-gray-500">
-                          {product.description || "Sem descrição"}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          <span className="font-semibold">Quantidade:</span>{" "}
-                          {product.quantity || 1}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          <span className="font-semibold">Preço:</span>{" "}
-                          {formatCurrencyFromCents(product.price)}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">Nenhum produto encontrado.</p>
-                )}
+              <div className="mt-5 space-y-3">
+                {fields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="flex gap-4 items-center border p-3 rounded">
+                    {/* Produto */}
+                    <FormField
+                      control={form.control}
+                      name={`items.${index}.productId`}
+                      render={({ field }) => (
+                        <FormItem className="w-[300px]">
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              const selectedProduct = products.find(
+                                (product) => product.id === value
+                              );
+                              form.setValue(
+                                `items.${index}.price`,
+                                selectedProduct ? selectedProduct.price : 0
+                              );
+                            }}
+                            value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione um produto" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {products
+                                .filter(
+                                  (product) =>
+                                    !selectedProductIds.includes(product.id) ||
+                                    product.id === field.value
+                                )
+                                .map((product) => (
+                                  <SelectItem
+                                    key={product.id}
+                                    value={product.id}>
+                                    {product.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Quantidade */}
+                    <FormField
+                      control={form.control}
+                      name={`items.${index}.quantity`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              className="border p-2 w-16 text-center"
+                              min={1}
+                              max={999}
+                              readOnly={!form.watch(`items.${index}.productId`)}
+                              onChange={(e) => {
+                                const quantity =
+                                  parseInt(e.target.value, 10) || 1;
+                                const productId = form.getValues(
+                                  `items.${index}.productId`
+                                );
+                                const selectedProduct = products.find(
+                                  (product) => product.id === productId
+                                );
+
+                                // Store only the unit price, not total price
+                                const unitPrice = selectedProduct
+                                  ? selectedProduct.price
+                                  : 0;
+                                form.setValue(
+                                  `items.${index}.price`,
+                                  unitPrice
+                                );
+
+                                field.onChange(quantity);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Preço */}
+                    <FormField
+                      control={form.control}
+                      name={`items.${index}.price`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              className="border p-2 w-24 text-center"
+                              readOnly
+                              value={formatCurrency(field.value)}
+                              placeholder="R$ 0,00"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Remover Produto */}
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      disabled={fields.length === 1}
+                      onClick={() => remove(index)}>
+                      <Trash2 />
+                    </Button>
+                  </div>
+                ))}
+                {/* Botão para Adicionar Produto */}
+                <Button
+                  type="button"
+                  onClick={() =>
+                    append({ productId: "", quantity: 1, price: 0, name: "" })
+                  }
+                  disabled={
+                    selectedProductIds.length >= products.length || isPending
+                  }
+                  variant="secondary">
+                  Adicionar Produto
+                </Button>
               </div>
+              {/*  */}
               <div className="space-y-4 mt-2">
-                {data.combos.length > 0 ? (
-                  data.combos.map((product, index) => (
-                    <div key={index} className="flex items-center gap-4">
-                      <div className="relative w-28 h-20 rounded-lg overflow-hidden">
-                        <Image
-                          src={product.image || placeholder}
-                          alt={product.name || "Product Image"}
-                          fill
-                          sizes="(max-width: 640px) 50px, (max-width: 1024px) 80px, 100px"
-                          className="object-cover"
-                        />
+                {data.combos.length > 0
+                  ? data.combos.map((product, index) => (
+                      <div key={index} className="flex items-center gap-4">
+                        <div className="relative w-28 h-20 rounded-lg overflow-hidden">
+                          <Image
+                            src={product.image || placeholder}
+                            alt={product.name || "Product Image"}
+                            fill
+                            sizes="(max-width: 640px) 50px, (max-width: 1024px) 80px, 100px"
+                            className="object-cover"
+                          />
+                        </div>
+                        <div>
+                          <p className="font-semibold">{product.name}</p>
+                          <p className="text-sm text-gray-500">
+                            {product.description || "Sem descrição"}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            <span className="font-semibold">Quantidade:</span>{" "}
+                            {product.quantity || 1}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            <span className="font-semibold">Preço:</span>{" "}
+                            {formatCurrencyFromCents(product.price)}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold">{product.name}</p>
-                        <p className="text-sm text-gray-500">
-                          {product.description || "Sem descrição"}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          <span className="font-semibold">Quantidade:</span>{" "}
-                          {product.quantity || 1}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          <span className="font-semibold">Preço:</span>{" "}
-                          {formatCurrencyFromCents(product.price)}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">Nenhum produto encontrado.</p>
-                )}
+                    ))
+                  : null}
               </div>
             </div>
 
             <div className="w-full">
-              <h3 className="text-lg font-semibold">Informações do Cliente</h3>
+              <div className="flex items-center gap-x-2">
+                <h3 className="text-lg font-semibold">
+                  Informações do Cliente
+                </h3>
+                <Button
+                  type="button"
+                  className="text-xs"
+                  variant="outline"
+                  onClick={() => setChangeCustomer(!changeCustomer)}>
+                  {changeCustomer ? "Cancelar" : "Alterar Cliente"}
+                </Button>
+              </div>
               <Separator className="my-2" />
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold">Nome:</span>{" "}
-                {data.customer.name}
-              </p>
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold">Email:</span>{" "}
-                {data.customer.email}
-              </p>
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold">Telefone:</span>{" "}
-                {formatPhoneNumber(data.customer.phone || "")}
-              </p>
+              <div>
+                {changeCustomer && (
+                  <FormField
+                    control={form.control}
+                    name="customer_id"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-[300px] justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}>
+                                {field.value
+                                  ? customersData.find(
+                                      (customer) => customer.id === field.value
+                                    )?.name
+                                  : "Selecione um cliente"}
+                                <ChevronsUpDown className="opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[300px] p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Procurar cliente por nome ou telefone..."
+                                className="h-9"
+                              />
+                              <CommandList>
+                                <CommandEmpty>
+                                  Nenhum cliente encontrado.
+                                </CommandEmpty>
+                                <CommandGroup>
+                                  {customersData.map((customer) => (
+                                    <CommandItem
+                                      value={`${customer.name} ${customer.phone}`} // Inclui nome e telefone no filtro
+                                      key={customer.id}
+                                      onSelect={() => {
+                                        form.setValue(
+                                          "customer_id",
+                                          customer.id
+                                        );
+                                        form.setValue(
+                                          "city",
+                                          customer.city || ""
+                                        );
+                                        form.setValue(
+                                          "state",
+                                          customer.state || ""
+                                        );
+                                        form.setValue(
+                                          "neighborhood",
+                                          customer.neighborhood || ""
+                                        );
+                                        form.setValue(
+                                          "street",
+                                          customer.street || ""
+                                        );
+                                        form.setValue(
+                                          "street_number",
+                                          customer.street_number || ""
+                                        );
+                                        form.setValue(
+                                          "postalCode",
+                                          customer.postalCode || ""
+                                        );
+                                        setSelectedCustomer(customer);
+                                      }}>
+                                      {/* Exibe nome e telefone na lista */}
+                                      <div>
+                                        <span>{customer.name}</span>
+                                        <span className="text-muted-foreground text-sm ml-2">
+                                          {customer.phone}
+                                        </span>
+                                      </div>
+                                      <Check
+                                        className={cn(
+                                          "ml-auto",
+                                          customer.id === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                <div className="mt-3 pl-1">
+                  <p className="text-sm text-gray-500">
+                    <span className="font-semibold">Nome:</span>{" "}
+                    {selectedCustomer?.name}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    <span className="font-semibold">Email:</span>{" "}
+                    {selectedCustomer?.email}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    <span className="font-semibold">Telefone:</span>{" "}
+                    {formatPhoneNumber(selectedCustomer?.phone || "")}
+                  </p>
+                </div>
+              </div>
               <div className="grid grid-cols-2 mt-5 gap-3">
                 <FormField
                   control={form.control}
