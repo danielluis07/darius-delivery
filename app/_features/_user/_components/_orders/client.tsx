@@ -105,6 +105,8 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
     DELIVERED: "bg-green-500 text-white",
     FINISHED: "bg-gray-500 text-white",
     CANCELLED: "bg-red-500 text-white",
+    WITHDRAWN: "bg-purple-500 text-white",
+    CONSUME_ON_SITE: "bg-teal-500 text-white",
   };
 
   const statusIcons: Record<string, React.ReactNode> = {
