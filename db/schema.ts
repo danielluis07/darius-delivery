@@ -243,6 +243,7 @@ export const products = pgTable("products", {
   description: text("description"),
   price: integer("price").notNull(),
   allowHalfOption: boolean("allow_half_option").default(false).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
   image: text("image"),
   type: text("type").notNull().default("PRODUCT"),
   sizes: text("sizes").array().default([]),

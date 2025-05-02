@@ -129,7 +129,8 @@ const app = new Hono()
             and(
               eq(products.userId, userId),
               eq(products.category_id, categoryId),
-              eq(categories.userId, userId) // Ensure category belongs to user
+              eq(categories.userId, userId), // Ensure category belongs to user
+              eq(products.isActive, true) // Ensure product is active
             )
           );
 
@@ -280,6 +281,41 @@ const app = new Hono()
 
       if (!data) {
         return c.json({ error: "Falha ao deletar produtos" }, 500);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .patch(
+    "/activate/:id",
+    verifyAuth(),
+    zValidator("param", z.object({ id: z.string().optional() })),
+    zValidator(
+      "json",
+      z.object({
+        isActive: z.boolean(),
+      })
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { id } = c.req.valid("param");
+      const { isActive } = c.req.valid("json");
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!id) {
+        return c.json({ error: "Missing product id" }, 400);
+      }
+
+      const data = await db
+        .update(products)
+        .set({ isActive })
+        .where(and(eq(products.id, id), eq(products.userId, auth.token.sub)));
+
+      if (!data) {
+        return c.json({ error: "Failed to update product" }, 500);
       }
 
       return c.json({ data });

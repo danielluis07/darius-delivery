@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
 import { insertProductSchema } from "@/db/schemas";
-import { CloudUpload, Trash2 } from "lucide-react";
+import { Check, ChevronDown, CloudUpload, Trash2 } from "lucide-react";
 import { useState } from "react";
 import {
   FileInput,
@@ -27,20 +27,27 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { createProduct } from "@/app/_features/_user/_actions/create-product";
 import Image from "next/image";
 import { TagsInput } from "@/components/ui/tags-input";
 import { Switch } from "@/components/ui/switch";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
 
 type Categories = InferResponseType<
   (typeof client.api.categories.user)[":userId"]["$get"],
@@ -123,22 +130,59 @@ export const CreateProductForm = ({
           control={form.control}
           name="category_id"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categorias</FormLabel>
-              <Select onValueChange={field.onChange} required>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <FormItem className="flex flex-col">
+              <FormLabel>Categoria</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "w-[400px] justify-between",
+                        !field.value && "text-muted-foreground"
+                      )}>
+                      {field.value
+                        ? categories.find(
+                            (category) => category.id === field.value
+                          )?.name
+                        : "Selecione uma categoria"}
+                      <ChevronDown className="opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Procurar categoria..."
+                      className="h-9"
+                    />
+                    <CommandList>
+                      <CommandEmpty>Nenhuma categoria encontrada.</CommandEmpty>
+                      <CommandGroup>
+                        {categories.map((category) => (
+                          <CommandItem
+                            value={category.name}
+                            key={category.id}
+                            onSelect={() => {
+                              form.setValue("category_id", category.id);
+                            }}>
+                            {category.name}
+                            <Check
+                              className={cn(
+                                "ml-auto",
+                                category.id === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
