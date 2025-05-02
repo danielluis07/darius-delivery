@@ -59,9 +59,14 @@ export const ColorsForm = ({
       button: colors?.button,
       font: colors?.font,
       footer: colors?.footer,
+      footer_font: colors?.footer_font,
       footer_button: colors?.footer_button,
       product_name: colors?.product_name,
+      product_description: colors?.product_description,
       product_price: colors?.product_price,
+      product_card_name: colors?.product_card_name,
+      product_card_price: colors?.product_card_price,
+      product_card_description: colors?.product_card_description,
       additionals: colors?.additionals,
       additionals_font: colors?.additionals_font,
       cart: colors?.cart,
@@ -89,7 +94,10 @@ export const ColorsForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Template</FormLabel>
-              <Select onValueChange={field.onChange} required>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                required>
                 <FormControl>
                   <SelectTrigger className="w-1/2">
                     <SelectValue placeholder="Selecione um template" />
@@ -181,7 +189,24 @@ export const ColorsForm = ({
             name="footer"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Footer</FormLabel>
+                <FormLabel>Rodapé</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="footer_font"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fonte do Rodapé</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"
@@ -216,6 +241,23 @@ export const ColorsForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Nome do Produto</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="product_description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descrição do Produto</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"
@@ -284,6 +326,57 @@ export const ColorsForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Ícone do Carrinho</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="product_card_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Título do botão do produto</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="product_card_price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Preço do botão do produto</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="product_card_description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descrição do botão do produto</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"

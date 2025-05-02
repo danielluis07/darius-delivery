@@ -55,6 +55,10 @@ export const FooterSheet = () => {
         "z-20 transition-all duration-300 ease-in-out bg-white"
       )}>
       <div
+        style={{
+          backgroundColor: data?.colors.footer || "white",
+          color: data?.colors.footer_font || "black",
+        }}
         className={cn(
           "flex justify-between items-center px-4 h-full transition-all duration-300 ease-in-out"
         )}>
@@ -64,8 +68,8 @@ export const FooterSheet = () => {
         </div>
         <button
           style={{
-            backgroundColor: data?.colors.button || "white",
-            color: data?.colors.font || "black",
+            backgroundColor: data?.colors.footer_button || "white",
+            color: data?.colors.footer_font || "black",
           }}
           className="py-1 px-3 rounded-md text-sm font-medium"
           onClick={() => {

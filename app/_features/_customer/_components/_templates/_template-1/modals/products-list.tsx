@@ -81,7 +81,7 @@ export const ProductsList = ({
           exit={{ x: "100%" }}
           transition={{ duration: 0.5 }}
           className="absolute inset-0 z-10">
-          <div className="h-[430px] px-3 custom-scroll-hide overflow-auto">
+          <div className="h-[500px] sm:h-[430px] px-3 custom-scroll-hide overflow-auto">
             <div className="flex justify-end mb-4">
               <div
                 style={{
@@ -109,7 +109,7 @@ export const ProductsList = ({
             </h2>
             <p
               style={{
-                color: data?.colors.font || "black",
+                color: data?.colors.product_description || "black",
               }}
               className="text-xs">
               {selectedProduct.description}
@@ -305,21 +305,21 @@ export const ProductsList = ({
                   <div className="space-y-2">
                     <h2
                       style={{
-                        color: data?.colors.font || "black",
+                        color: data?.colors.product_card_name || "black",
                       }}
                       className="text-md font-semibold text-xl">
                       {product.name}
                     </h2>
                     <p
                       style={{
-                        color: data?.colors.font || "black",
+                        color: data?.colors.product_card_description || "black",
                       }}
                       className="text-sm max-w-52 line-clamp-2">
                       {product.description}
                     </p>
                     <p
                       style={{
-                        color: data?.colors.font || "black",
+                        color: data?.colors.product_card_price || "black",
                       }}
                       className="text-sm font-semibold">
                       {formatCurrencyFromCents(product.price)}

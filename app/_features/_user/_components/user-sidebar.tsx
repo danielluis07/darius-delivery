@@ -52,6 +52,7 @@ import { RiMotorbikeFill } from "react-icons/ri";
 import { TbCircleLetterD } from "react-icons/tb";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { StoresComboBox } from "./multi-store-combobox";
 
 type User = {
   id: string;
@@ -226,6 +227,16 @@ export function UserSidebar({ user }: { user: User }) {
         )}
       </SidebarHeader>
       <SidebarContent className="custom-sidebar">
+        {/* multi lojas */}
+        <div
+          className={cn(
+            open
+              ? "flex items-center justify-center w-full h-10 px-2 py-1 mt-2 mb-2 rounded-md shadow-sm"
+              : "hidden"
+          )}>
+          <StoresComboBox />
+        </div>
+        {/*  */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>

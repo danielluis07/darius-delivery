@@ -377,10 +377,23 @@ export const colors = pgTable("colors", {
   header: varchar("header", { length: 7 }).default("#ffffff"),
   font: varchar("font", { length: 7 }).default("#000000"),
   footer: varchar("footer", { length: 7 }).default("#ffffff"),
+  footer_font: varchar("footer_font", { length: 7 }).default("#000000"),
   footer_button: varchar("footer_button", { length: 7 }).default("#ffffff"),
+  product_card_name: varchar("product_card_name", { length: 7 }).default(
+    "#000000"
+  ),
+  product_card_price: varchar("product_card_price", { length: 7 }).default(
+    "#000000"
+  ),
+  product_card_description: varchar("product_card_description", {
+    length: 7,
+  }).default("#000000"),
   product_name: varchar("product_name", { length: 7 }).default("#000000"),
   product_price: varchar("product_price", { length: 7 }).default("#000000"),
   product_details: varchar("product_details", { length: 7 }).default("#000000"),
+  product_description: varchar("product_description", { length: 7 }).default(
+    "#000000"
+  ),
   additionals: varchar("additionals", { length: 7 }).default("#000000"),
   additionals_font: varchar("additionals_font", { length: 7 }).default(
     "#000000"
