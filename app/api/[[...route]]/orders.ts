@@ -1139,7 +1139,11 @@ const app = new Hono()
 
       const data = await db
         .update(orders)
-        .set({ delivererId: delivererId, updatedAt: new Date() })
+        .set({
+          delivererId: delivererId,
+          status: "IN_TRANSIT",
+          updatedAt: new Date(),
+        })
         .where(inArray(orders.id, ordersIds));
 
       if (!data) {

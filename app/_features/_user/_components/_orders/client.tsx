@@ -86,7 +86,10 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
 
   const orders = ordersData.filter(
     (item) =>
-      item.order.status !== "FINISHED" && item.order.status !== "IN_TRANSIT"
+      item.order.status !== "FINISHED" &&
+      item.order.status !== "IN_TRANSIT" &&
+      item.order.status !== "DELIVERED" &&
+      item.order.status !== "CANCELLED"
   );
   const ordersInTransit = ordersData.filter(
     (item) => item.order.status === "IN_TRANSIT"
