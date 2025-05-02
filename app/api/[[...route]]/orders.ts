@@ -1370,7 +1370,7 @@ const app = new Hono()
         updatedAt: new Date(),
       };
 
-      if (status === "FINISHED") {
+      if (status === "FINISHED" || status === "DELIVERED") {
         updateData.payment_status = "PAID";
       }
 
