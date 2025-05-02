@@ -78,7 +78,7 @@ export const OrderRoutingClient = ({
   console.log("latitude", latitude);
   console.log("longitude", longitude);
 
-  const orders = ordersData || [];
+  const orders = ordersData?.filter((order) => order.is_closed !== true) || [];
   const deliverers = deliverersData || [];
 
   useEffect(() => {
