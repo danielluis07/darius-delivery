@@ -115,7 +115,7 @@ const app = new Hono()
           receipt: {
             id: receipts.id,
             number: receipts.receipt_number,
-            orderNumber: orders.number,
+            orderNumber: orders.daily_number,
             createdAt: receipts.createdAt,
             customerName: customersUser.name, // Get the actual customer name
             customerEmail: customersUser.email,

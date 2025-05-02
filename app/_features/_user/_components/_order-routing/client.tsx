@@ -174,7 +174,7 @@ export const OrderRoutingClient = ({
                             ? "bg-green-500"
                             : "bg-red-500"
                         )}>
-                        {order.number}
+                        {order.daily_number}
                       </div>
                       <div
                         className={cn(

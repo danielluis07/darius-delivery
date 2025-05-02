@@ -475,7 +475,7 @@ const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
         <View style={styles.flexRow}>
           <Text style={[styles.boldText, { fontSize: 12 }]}>Pedido</Text>
           <Text style={[styles.boldText, { fontSize: 12 }]}>
-            nº {receipt.number}
+            nº {receipt.orderNumber}
           </Text>
         </View>
         <Text>Origem: Online</Text>
