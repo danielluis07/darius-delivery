@@ -107,7 +107,7 @@ const app = new Hono()
         // Check specifically if product data exists and is meaningful (e.g., has an id)
         if (row.product && row.product.id != null) {
           // Add the product to the products array of the existing category entry
-          //@ts-ignore
+          //@ts-expect-error
           groupedDataMap.get(categoryId).products.push(row.product);
         }
       }
