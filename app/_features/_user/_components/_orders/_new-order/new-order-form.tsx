@@ -265,42 +265,82 @@ export const NewOrderForm = ({
                         control={form.control}
                         name={`items.${index}.productId`}
                         render={({ field }) => (
-                          <FormItem className="w-[300px]">
-                            <Select
-                              onValueChange={(value) => {
-                                field.onChange(value);
-                                const selectedProduct = products.find(
-                                  (product) => product.id === value
-                                );
-                                form.setValue(
-                                  `items.${index}.price`,
-                                  selectedProduct ? selectedProduct.price : 0
-                                );
-                              }}
-                              value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione um produto" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {products
-                                  .filter(
-                                    (product) =>
-                                      !selectedProductIds.includes(
-                                        product.id
-                                      ) || product.id === field.value
-                                  )
-                                  .map((product) => (
-                                    <SelectItem
-                                      key={product.id}
-                                      value={product.id}>
-                                      {product.name}
-                                    </SelectItem>
-                                  ))}
-                              </SelectContent>
-                            </Select>
-
+                          <FormItem className="flex flex-col w-[300px]">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    className={cn(
+                                      "w-full justify-between",
+                                      !field.value && "text-muted-foreground"
+                                    )}>
+                                    {field.value
+                                      ? products.find(
+                                          (product) =>
+                                            product.id === field.value
+                                        )?.name
+                                      : "Selecione um produto"}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[300px] p-0">
+                                <Command>
+                                  <CommandInput
+                                    placeholder="Buscar produto..."
+                                    className="h-9"
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>
+                                      Nenhum produto encontrado.
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {products
+                                        .filter(
+                                          (product) =>
+                                            !selectedProductIds.includes(
+                                              product.id
+                                            ) || product.id === field.value
+                                        )
+                                        .map((product) => (
+                                          <CommandItem
+                                            value={product.name}
+                                            key={product.id}
+                                            onSelect={() => {
+                                              field.onChange(product.id);
+                                              const selectedProduct =
+                                                products.find(
+                                                  (p) => p.id === product.id
+                                                );
+                                              form.setValue(
+                                                `items.${index}.price`,
+                                                selectedProduct
+                                                  ? selectedProduct.price
+                                                  : 0,
+                                                {
+                                                  shouldValidate: true,
+                                                  shouldDirty: true,
+                                                }
+                                              );
+                                            }}>
+                                            {product.name}
+                                            <Check
+                                              className={cn(
+                                                "ml-auto h-4 w-4",
+                                                product.id === field.value
+                                                  ? "opacity-100"
+                                                  : "opacity-0"
+                                              )}
+                                            />
+                                          </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
                             <FormMessage />
                           </FormItem>
                         )}
