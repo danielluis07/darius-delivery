@@ -7,6 +7,7 @@ import { client } from "@/lib/hono";
 import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
 import { CombosCellAction } from "@/app/_features/_user/_components/_combos/cell-action";
+import { cn } from "@/lib/utils";
 
 export type ResponseType = InferResponseType<
   (typeof client.api.combos.user)[":userId"]["$get"],
@@ -56,7 +57,25 @@ export const columns: ColumnDef<ResponseType>[] = [
     ),
   },
   {
+    accessorKey: "isActive",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.original.isActive;
+      return (
+        <span
+          className={cn(
+            status === true ? "text-success" : "text-error",
+            "font-semibold"
+          )}>
+          {status === true ? "Ativo" : "Inativo"}
+        </span>
+      );
+    },
+  },
+  {
     id: "actions",
-    cell: ({ row }) => <CombosCellAction id={row.original.id} />,
+    cell: ({ row }) => (
+      <CombosCellAction id={row.original.id} status={row.original.isActive} />
+    ),
   },
 ];

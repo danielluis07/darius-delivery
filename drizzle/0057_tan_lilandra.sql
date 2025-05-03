@@ -1,0 +1,1 @@
+DROP TABLE "combo_products" CASCADE;

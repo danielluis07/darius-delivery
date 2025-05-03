@@ -10,16 +10,14 @@ import { formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
 import { useCartStore } from "@/hooks/template-1/use-cart-store";
 import { toast } from "sonner";
-import { useGetCombos } from "@/app/_features/_user/_queries/_combos/use-get-combos";
+import { useGetTemplateCombos } from "@/app/_features/_user/_queries/_combos/use-get-template-combos";
 
 export const Combos = () => {
   const { data } = useStore();
   const addToCart = useCartStore((state) => state.addToCart);
   const [selectedCombo, setSelectedCombo] = useState<Combo | null>(null);
   const [showComboDetails, setShowComboDetails] = useState(false);
-  const { data: combos, isLoading } = useGetCombos(data?.userId);
-
-  console.log(combos, "combos");
+  const { data: combos, isLoading } = useGetTemplateCombos(data?.userId);
 
   const handleComboClick = (combo: Combo) => {
     setSelectedCombo(combo);

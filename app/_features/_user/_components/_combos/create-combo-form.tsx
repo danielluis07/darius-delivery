@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { useEffect, useTransition } from "react";
+import { useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -22,39 +22,30 @@ import {
   FileUploaderContent,
   FileUploaderItem,
 } from "@/components/ui/file-upload";
-import {
-  MultiSelector,
-  MultiSelectorTrigger,
-  MultiSelectorContent,
-  MultiSelectorList,
-  MultiSelectorItem,
-} from "@/components/ui/multi-select";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/utils";
-import placeholder from "@/public/placeholder-image.jpg";
-import { Card } from "@/components/ui/card";
 import { createCombo } from "@/app/_features/_user/_actions/create-combo";
+import { ProductsDialog } from "./products-dialog";
 
-type Products = InferResponseType<
-  (typeof client.api.products.user)[":userId"]["$get"],
+type CategoriesWithProducts = InferResponseType<
+  (typeof client.api.categories)["with-products"]["user"][":userId"]["$get"],
   200
 >["data"];
 
 type FormData = z.infer<typeof insertComboSchema>;
 
-export const CreateComboForm = ({ products }: { products: Products }) => {
+export const CreateComboForm = ({
+  categories,
+}: {
+  categories: CategoriesWithProducts;
+}) => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [selectedProductNames, setSelectedProductNames] = useState<string[]>(
-    []
-  );
   const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(insertComboSchema),
@@ -73,19 +64,39 @@ export const CreateComboForm = ({ products }: { products: Products }) => {
     multiple: false,
   };
 
-  const formProductIds = form.watch("product_ids");
+  // Function to be passed down to handle updates from any ProductsDialog
+  const handleProductSelectionChange = (
+    productId: string,
+    isSelected: boolean
+  ) => {
+    const currentIds = form.getValues("product_ids");
+    let newIds: string[];
 
-  useEffect(() => {
-    const selectedNames = products
-      .filter((product) => form.watch("product_ids")?.includes(product.id))
-      .map((product) => product.name);
+    if (isSelected) {
+      // Add the ID if it's not already present (using Set for uniqueness)
+      newIds = [...new Set([...currentIds, productId])];
+    } else {
+      // Remove the ID
+      newIds = currentIds.filter((id) => id !== productId);
+    }
 
-    setSelectedProductNames(selectedNames);
-  }, [formProductIds, products, form]);
+    // Update the react-hook-form state
+    // 'shouldValidate: true' optionally triggers validation on change
+    // 'shouldDirty: true' marks the form as changed
+    form.setValue("product_ids", newIds, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  // Watch the 'product_ids' field to get the current value reactively
+  // This ensures ProductsDialog gets the updated list for its 'checked' state
+  const selectedProductIds = form.watch("product_ids");
 
   const onInvalid = (errors: FieldErrors) => {
     console.log(errors);
   };
+
   const onSubmit = (values: FormData) => {
     startTransition(() => {
       createCombo(values)
@@ -105,25 +116,49 @@ export const CreateComboForm = ({ products }: { products: Products }) => {
         });
     });
   };
+
   return (
     <div className="w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
-          <div className="max-w-md">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Nome do combo" required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="w-1/2">
+                <FormLabel>Nome</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Nome do combo" required />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem className="w-1/2">
+                <FormLabel>Preço</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    value={formatCurrency(field.value)}
+                    placeholder="R$ 0,00"
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/\D/g, "");
+                      const numericValue = rawValue
+                        ? parseInt(rawValue, 10)
+                        : 0;
+                      field.onChange(numericValue);
+                    }}
+                    required
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="grid grid-cols-2 gap-4 mt-5">
             <div>
               <FormField
@@ -163,11 +198,9 @@ export const CreateComboForm = ({ products }: { products: Products }) => {
                             const newPreviewUrl =
                               URL.createObjectURL(selectedFile);
                             setFiles([selectedFile]); // Update local state for UI
-                            setImagePreview(newPreviewUrl);
                           } else {
                             field.onChange(null);
                             setFiles([]);
-                            setImagePreview(null);
                           }
                         }}
                         dropzoneOptions={dropZoneConfig}
@@ -206,65 +239,37 @@ export const CreateComboForm = ({ products }: { products: Products }) => {
             </div>
           </div>
 
-          <div className="flex justify-between items-center gap-5 mt-4">
-            <div className="w-full">
-              <FormField
-                control={form.control}
-                name="product_ids"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Produtos</FormLabel>
-                    <FormControl>
-                      <MultiSelector
-                        onValuesChange={field.onChange}
-                        values={field.value}
-                        loop={false}>
-                        <MultiSelectorTrigger
-                          selectedNames={selectedProductNames}
-                        />
-                        <MultiSelectorContent>
-                          <MultiSelectorList>
-                            {products.map((product, i) => (
-                              <MultiSelectorItem key={i} value={product.id}>
-                                {product.name}
-                              </MultiSelectorItem>
-                            ))}
-                          </MultiSelectorList>
-                        </MultiSelectorContent>
-                      </MultiSelector>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+          {/* Categories and Product Selection Section */}
+          <div className="mb-4">
+            <FormLabel>Produtos do Combo</FormLabel>
+            <p className="text-sm text-muted-foreground mb-3">
+              Clique em "Selecionar Produtos" em cada categoria desejada e
+              marque os itens.
+            </p>
+            {/* Display validation errors for the product_ids array */}
+            <FormMessage />
 
-            <div className="w-full">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Preço</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        value={formatCurrency(field.value)}
-                        placeholder="R$ 0,00"
-                        onChange={(e) => {
-                          const rawValue = e.target.value.replace(/\D/g, "");
-                          const numericValue = rawValue
-                            ? parseInt(rawValue, 10)
-                            : 0;
-                          field.onChange(numericValue);
-                        }}
-                        required
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="space-y-3 mt-2">
+              {categories.map((category) => (
+                <div
+                  key={category.id}
+                  className="p-3 border rounded-md bg-card">
+                  {" "}
+                  {/* Added background */}
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-card-foreground">
+                      {category.name}
+                    </span>
+                    {/* Pass required data and the handler down to the dialog */}
+                    <ProductsDialog
+                      categoryName={category.name}
+                      products={category.products}
+                      selectedProductIds={selectedProductIds} // Pass the watched value
+                      onProductSelectionChange={handleProductSelectionChange} // Pass the handler function
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -278,24 +283,6 @@ export const CreateComboForm = ({ products }: { products: Products }) => {
           />
         </form>
       </Form>
-      <Card className="flex gap-4 mt-4">
-        <div className="relative min-w-44 h-44 rounded-lg overflow-hidden">
-          <Image
-            src={imagePreview || placeholder}
-            alt="preview"
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
-          />
-        </div>
-        <div className="flex flex-col gap-5 text-gray-500">
-          <p className="text-lg">{form.watch("name")}</p>
-          <p>{form.watch("description")}</p>
-          {selectedProductNames.length > 0 && (
-            <p>{selectedProductNames.join(" + ")}</p>
-          )}
-        </div>
-      </Card>
     </div>
   );
 };

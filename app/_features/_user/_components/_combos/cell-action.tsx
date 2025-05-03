@@ -7,14 +7,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Pencil, Trash2 } from "lucide-react";
+import {
+  Ellipsis,
+  LockKeyhole,
+  LockKeyholeOpen,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { useDeleteCombo } from "../../_queries/_combos/use-delete-combo";
 import { useConfirmContext } from "@/context/confirm-context";
+import { useUpdateComboStatus } from "../../_queries/_combos/use-update-status";
 
-export const CombosCellAction = ({ id }: { id: string }) => {
+export const CombosCellAction = ({
+  id,
+  status,
+}: {
+  id: string;
+  status: boolean;
+}) => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const session = useSession();
 
@@ -26,6 +39,8 @@ export const CombosCellAction = ({ id }: { id: string }) => {
   const deleteMutation = useDeleteCombo(id, userId);
 
   const router = useRouter();
+
+  const { mutate, isPending } = useUpdateComboStatus(id, userId);
 
   const { confirm } = useConfirmContext();
 
@@ -48,6 +63,29 @@ export const CombosCellAction = ({ id }: { id: string }) => {
           onClick={() => router.push(`/dashboard/combos/${id}`)}>
           <Pencil className="mr-2 size-5" />
           Editar
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={async () => {
+            setOpenDropdownId(null);
+            const ok = await confirm({
+              title: "Alterar status do combo",
+              message: `Você tem certeza que deseja ${
+                status ? "desativar" : "ativar"
+              } este combo?`,
+            });
+
+            if (ok) {
+              mutate({ isActive: !status });
+            }
+          }}
+          disabled={isPending}>
+          {status ? (
+            <LockKeyhole className="size-4 mr-2" />
+          ) : (
+            <LockKeyholeOpen className="size-4 mr-2" />
+          )}
+          {status ? "Desativar" : "Ativar"}
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={deleteMutation.isPending}

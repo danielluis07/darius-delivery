@@ -5,18 +5,8 @@ import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { combos, comboProducts } from "@/db/schema";
 import { insertComboSchema } from "@/db/schemas";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { revalidatePath } from "next/cache";
-import crypto from "crypto";
-
-const s3 = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+import { uploadImageToS3 } from "@/lib/s3-upload";
 
 export const createCombo = async (
   values: z.infer<typeof insertComboSchema>
@@ -24,8 +14,6 @@ export const createCombo = async (
   try {
     const session = await auth();
     const validatedValues = insertComboSchema.safeParse(values);
-    const generateFileName = (bytes = 32) =>
-      crypto.randomBytes(bytes).toString("hex");
 
     if (!session) {
       return { success: false, message: "Not authenticated" };
@@ -62,54 +50,13 @@ export const createCombo = async (
       };
     }
 
-    const arrayBuffer = await imageFile.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const hash = crypto.createHash("sha256");
-    hash.update(buffer);
-    const hashHex = hash.digest("hex");
-
-    const putObjectCommand = new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME!,
-      Key: generateFileName(),
-      ContentType: imageFile.type,
-      ContentLength: imageFile.size,
-      ChecksumSHA256: hashHex,
-      Metadata: {
-        userId: id,
-      },
-    });
-
-    const signedURL = await getSignedUrl(s3, putObjectCommand, {
-      expiresIn: 3600,
-    });
-
-    if (!signedURL) {
-      return {
-        success: false,
-        message: "Falha ao criar a URL de upload",
-      };
-    }
-
-    const res = await fetch(signedURL, {
-      method: "PUT",
-      body: imageFile,
-      headers: {
-        "Content-Type": imageFile.type,
-      },
-    });
-
-    if (!res.ok) {
-      return {
-        success: false,
-        message: "Falha ao realizar o upload da imagem",
-      };
-    }
+    const imageUrl = await uploadImageToS3(imageFile);
 
     const [combo] = await db
       .insert(combos)
       .values({
         name,
-        image: signedURL.split("?")[0],
+        image: imageUrl,
         userId: id,
         description,
         price,

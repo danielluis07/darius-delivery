@@ -215,54 +215,66 @@ const MultiSelector = ({
 
 const MultiSelectorTrigger = forwardRef<
   HTMLDivElement,
-  { selectedNames: string[] } & React.HTMLAttributes<HTMLDivElement>
->(({ className, selectedNames, ...props }, ref) => {
-  const { value, onValueChange, activeIndex } = useMultiSelect();
+  {
+    selectedNames: string[];
+    placeholder?: string;
+  } & React.HTMLAttributes<HTMLDivElement>
+>(
+  (
+    {
+      className,
+      selectedNames,
+      placeholder = "Selecione as categorias",
+      ...props
+    },
+    ref
+  ) => {
+    const { value, onValueChange, activeIndex } = useMultiSelect();
 
-  const mousePreventDefault = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
+    const mousePreventDefault = useCallback((e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }, []);
 
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "flex flex-wrap items-center gap-2 p-2 ring-1 ring-muted rounded-lg bg-background min-h-[40px]", // Ensures minimum height for alignment
-        {
-          "ring-1 focus-within:ring-ring": activeIndex === -1,
-        },
-        className
-      )}
-      {...props}>
-      {selectedNames.map((name, index) => (
-        <Badge
-          key={name}
-          className={cn(
-            "px-2 py-1 rounded-md flex items-center gap-1 bg-gray-100 hover:bg-gray-200 cursor-pointer",
-            activeIndex === index && "ring-2 ring-muted-foreground "
-          )}>
-          <span className="text-xs">{name}</span>
-          <button
-            aria-label={`Remove ${name} option`}
-            type="button"
-            onMouseDown={mousePreventDefault}
-            onClick={() => onValueChange(value[index])}>
-            <RemoveIcon className="h-4 w-4 hover:stroke-destructive" />
-          </button>
-        </Badge>
-      ))}
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "flex flex-wrap items-center gap-2 p-2 ring-1 ring-muted rounded-lg bg-background min-h-[40px]",
+          {
+            "ring-1 focus-within:ring-ring": activeIndex === -1,
+          },
+          className
+        )}
+        {...props}>
+        {selectedNames.map((name, index) => (
+          <Badge
+            key={name}
+            className={cn(
+              "px-2 py-1 rounded-md flex items-center gap-1 bg-gray-100 hover:bg-gray-200 cursor-pointer",
+              activeIndex === index && "ring-2 ring-muted-foreground "
+            )}>
+            <span className="text-xs">{name}</span>
+            <button
+              aria-label={`Remove ${name} option`}
+              type="button"
+              onMouseDown={mousePreventDefault}
+              onClick={() => onValueChange(value[index])}>
+              <RemoveIcon className="h-4 w-4 hover:stroke-destructive" />
+            </button>
+          </Badge>
+        ))}
 
-      {/* Ensure input field aligns correctly */}
-      <div className="flex-1 min-w-[150px]">
-        <MultiSelectorInput
-          placeholder="Selecione os produtos"
-          className="w-full bg-transparent outline-none"
-        />
+        <div className="flex-1 min-w-[150px]">
+          <MultiSelectorInput
+            placeholder={placeholder}
+            className="w-full bg-transparent outline-none"
+          />
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
 

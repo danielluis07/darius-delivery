@@ -260,23 +260,13 @@ export const combos = pgTable("combos", {
   price: integer("price").notNull(),
   userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   type: text("type").notNull().default("COMBO"),
+  isActive: boolean("is_active").default(true).notNull(),
   image: text("image"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
 // Tabela Intermediária: Relaciona Produtos com Combos (Muitos-para-Muitos)
-export const comboProducts = pgTable("combo_products", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  combo_id: text("combo_id")
-    .notNull()
-    .references(() => combos.id, { onDelete: "cascade" }),
-  product_id: text("product_id")
-    .notNull()
-    .references(() => products.id, { onDelete: "cascade" }),
-});
 
 export const templates = pgTable("templates", {
   id: text("id")
@@ -697,3 +687,16 @@ export const categoryAdditionalGroups = pgTable(
   },
   (t) => [primaryKey({ columns: [t.productId, t.additionalGroupId] })]
 ); */
+export const comboProducts = pgTable(
+  "combo_products",
+  {
+    combo_id: text("combo_id")
+      .notNull()
+      .references(() => combos.id, { onDelete: "cascade" }),
+    product_id: text("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.combo_id, t.product_id] })]
+);
