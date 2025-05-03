@@ -85,7 +85,7 @@ const app = new Hono()
 
       // 2. Initialize Map for grouping
       // Assuming category has an 'id' property of type string or number
-      const groupedDataMap = new Map<string | number, any>();
+      const groupedDataMap = new Map<string | number, CategoryWithProducts>();
 
       // 3. & 4. Iterate and group
       for (const row of flatData) {
@@ -107,6 +107,7 @@ const app = new Hono()
         // Check specifically if product data exists and is meaningful (e.g., has an id)
         if (row.product && row.product.id != null) {
           // Add the product to the products array of the existing category entry
+          //@ts-ignore
           groupedDataMap.get(categoryId).products.push(row.product);
         }
       }
