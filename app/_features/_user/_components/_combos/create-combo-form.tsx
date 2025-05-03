@@ -195,8 +195,6 @@ export const CreateComboForm = ({
                           if (newFiles && newFiles.length > 0) {
                             const selectedFile = newFiles[0]; // Keep only one file
                             field.onChange([selectedFile]); // Update form state
-                            const newPreviewUrl =
-                              URL.createObjectURL(selectedFile);
                             setFiles([selectedFile]); // Update local state for UI
                           } else {
                             field.onChange(null);
@@ -243,7 +241,7 @@ export const CreateComboForm = ({
           <div className="mb-4">
             <FormLabel>Produtos do Combo</FormLabel>
             <p className="text-sm text-muted-foreground mb-3">
-              Clique em "Selecionar Produtos" em cada categoria desejada e
+              Clique em {"Selecionar Produtos"} em cada categoria desejada e
               marque os itens.
             </p>
             {/* Display validation errors for the product_ids array */}
@@ -254,7 +252,6 @@ export const CreateComboForm = ({
                 <div
                   key={category.id}
                   className="p-3 border rounded-md bg-card">
-                  {" "}
                   {/* Added background */}
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-card-foreground">

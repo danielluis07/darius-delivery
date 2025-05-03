@@ -249,7 +249,7 @@ export const UpdateComboForm = ({
           <div className="mb-4">
             <FormLabel>Produtos do Combo</FormLabel>
             <p className="text-sm text-muted-foreground mb-3">
-              Clique em "Selecionar Produtos" em cada categoria desejada e
+              Clique em {"Selecionar Produtos"} em cada categoria desejada e
               marque os itens.
             </p>
             {/* Display validation errors for the product_ids array */}
@@ -260,8 +260,6 @@ export const UpdateComboForm = ({
                 <div
                   key={category.id}
                   className="p-3 border rounded-md bg-card">
-                  {" "}
-                  {/* Added background */}
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-card-foreground">
                       {category.name}
