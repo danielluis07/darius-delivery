@@ -2,11 +2,12 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import { comboProducts, combos } from "@/db/schema";
+import { comboProducts, combos, products } from "@/db/schema";
 import { insertComboSchema } from "@/db/schemas";
 import { and, eq, inArray } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 import { deleteFromS3 } from "@/lib/s3-upload";
+import { Combo } from "@/types";
 
 const app = new Hono()
   .get(
@@ -84,16 +85,62 @@ const app = new Hono()
         return c.json({ error: "Missing user id" }, 400);
       }
 
-      const data = await db
-        .select()
+      const combosWithProducts = await db
+        .select({
+          comboId: combos.id,
+          name: combos.name,
+          image: combos.image,
+          userId: combos.userId,
+          description: combos.description,
+          price: combos.price,
+          isActive: combos.isActive,
+          type: combos.type,
+          productId: products.id,
+          productName: products.name,
+          productImage: products.image,
+          productPrice: products.price,
+          createdAt: combos.createdAt,
+          updatedAt: combos.updatedAt,
+        })
         .from(combos)
+        .leftJoin(comboProducts, eq(combos.id, comboProducts.combo_id))
+        .leftJoin(products, eq(comboProducts.product_id, products.id))
         .where(and(eq(combos.userId, userId), eq(combos.isActive, true)));
 
-      if (!data || data.length === 0) {
+      // Group by comboId
+      const grouped = new Map();
+
+      for (const row of combosWithProducts) {
+        if (!grouped.has(row.comboId)) {
+          grouped.set(row.comboId, {
+            id: row.comboId,
+            name: row.name,
+            image: row.image,
+            description: row.description,
+            price: row.price,
+            isActive: row.isActive,
+            type: row.type,
+            products: [],
+          });
+        }
+
+        if (row.productId) {
+          grouped.get(row.comboId).products.push({
+            id: row.productId,
+            name: row.productName,
+            image: row.productImage,
+            price: row.productPrice,
+          });
+        }
+      }
+
+      const result: Combo[] = Array.from(grouped.values());
+
+      if (result.length === 0) {
         return c.json({ error: "No combos found" }, 404);
       }
 
-      return c.json({ data });
+      return c.json({ data: result });
     }
   )
   .post("/", verifyAuth(), zValidator("json", insertComboSchema), async (c) => {

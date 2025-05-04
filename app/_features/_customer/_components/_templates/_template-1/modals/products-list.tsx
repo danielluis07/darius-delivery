@@ -25,7 +25,6 @@ export const ProductsList = ({
     {}
   );
   const addToCart = useCartStore((state) => state.addToCart);
-  const { cart } = useCartStore();
   const { onOpenSheet } = useFooterSheet();
   const [halfOption, setHalfOption] = useState<"Inteira" | "Meio a Meio">(
     "Inteira"
@@ -39,8 +38,6 @@ export const ProductsList = ({
     data?.userId,
     categoryId
   );
-
-  console.log("cart", cart);
 
   const handleChange = (groupId: string, value: string) => {
     setSelectedValues((prev) => ({ ...prev, [groupId]: value }));

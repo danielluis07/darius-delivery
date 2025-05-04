@@ -114,16 +114,30 @@ export type Product = {
   }[];
 };
 
+export type ComboProduct = {
+  id: string;
+  name: string;
+  image: string | null;
+  price: number;
+};
+
 export type Combo = {
   id: string;
   name: string;
+  image: string | null;
   userId: string | null;
   description: string;
   price: number;
-  image: string | null;
-  type: string;
+  isActive: boolean;
   createdAt: Date | null;
   updatedAt: Date | null;
+  type: string;
+  products: {
+    id: string;
+    name: string;
+    image: string | null;
+    price: number;
+  }[];
 };
 
 export type PendingDocuments = {

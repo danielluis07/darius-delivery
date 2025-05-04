@@ -5,18 +5,20 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
 import { Combo } from "@/types";
-import { MoveLeft } from "lucide-react";
+import { MoveLeft, Plus } from "lucide-react";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { useStore } from "@/context/store-context";
 import { useCartStore } from "@/hooks/template-1/use-cart-store";
 import { toast } from "sonner";
 import { useGetTemplateCombos } from "@/app/_features/_user/_queries/_combos/use-get-template-combos";
+import { useFooterSheet } from "@/hooks/template-1/use-template-footer";
 
 export const Combos = () => {
   const { data } = useStore();
   const addToCart = useCartStore((state) => state.addToCart);
   const [selectedCombo, setSelectedCombo] = useState<Combo | null>(null);
   const [showComboDetails, setShowComboDetails] = useState(false);
+  const { onOpenSheet } = useFooterSheet();
   const { data: combos, isLoading } = useGetTemplateCombos(data?.userId);
 
   const handleComboClick = (combo: Combo) => {
@@ -50,7 +52,7 @@ export const Combos = () => {
           exit={{ x: "100%" }}
           transition={{ duration: 0.5 }}
           className="absolute inset-0 p-6 z-10">
-          <div className="pb-5">
+          <div className="h-[500px] sm:h-[430px] px-3 custom-scroll-hide overflow-auto pb-5">
             <div className="flex justify-end mb-4">
               <div
                 style={{
@@ -85,22 +87,31 @@ export const Combos = () => {
               className="text-lg font-semibold mb-4">
               {formatCurrencyFromCents(selectedCombo.price)}
             </p>
-            <button
-              style={{
-                backgroundColor: data?.colors.button || "white",
-                color: data?.colors.font || "black",
-              }}
-              className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 w-full whitespace-nowrap rounded-md mt-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
-              onClick={() => {
-                const wasAdded = addToCart(selectedCombo, data?.userId || "");
-                if (wasAdded) {
-                  toast.success("Produto adicionado ao carrinho");
-                } else {
-                  toast.error("Esse Produto já está no carrinho");
-                }
-              }}>
-              Adicionar ao carrinho
-            </button>
+            {selectedCombo.products.map((product) => (
+              <div
+                key={product.id}
+                style={{
+                  color: data?.colors.font || "black",
+                }}
+                className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold mb-2">
+                  {product.name}
+                </span>
+                <div
+                  className="cursor-pointer"
+                  onClick={() => {
+                    onOpenSheet();
+                    const wasAdded = addToCart(product, data?.userId || "");
+                    if (wasAdded) {
+                      toast.success("Produto adicionado ao carrinho");
+                    } else {
+                      toast.error("Esse Produto já está no carrinho");
+                    }
+                  }}>
+                  <Plus className="size-5" />
+                </div>
+              </div>
+            ))}
           </div>
         </motion.div>
       ) : (
