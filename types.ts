@@ -101,7 +101,7 @@ export type Product = {
   type: string;
   price: number;
   sizes: string[] | null;
-  additionalGroups: {
+  additionalGroups?: {
     id: string;
     name: string;
     selectionType: "single" | "multiple";
@@ -136,7 +136,15 @@ export type Combo = {
     id: string;
     name: string;
     image: string | null;
+    category_id: string | null | undefined;
+    description: string | null;
+    type: string;
     price: number;
+    sizes: string[] | null;
+    allowHalfOption: boolean;
+    userId: string | null;
+    createdAt: Date | null;
+    updatedAt: Date | null;
   }[];
 };
 

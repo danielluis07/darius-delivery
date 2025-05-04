@@ -171,77 +171,81 @@ export const ProductsList = ({
               </p>
             </div>
             {/*  */}
-            {selectedProduct.additionalGroups.length > 0 && (
-              <div className="mt-4 space-y-4">
-                {selectedProduct.additionalGroups.map((group) => (
-                  <div
-                    key={group.id}
-                    style={{
-                      backgroundColor: data?.colors.additionals || "white",
-                      color: data?.colors.additionals_font || "black",
-                    }}
-                    className="rounded-lg">
-                    <button
-                      onClick={() => toggleAccordion(group.id)}
-                      className="flex items-center gap-1 w-full px-4 py-3 text-left text-lg font-medium rounded-t-lg">
-                      <ChevronRight
+            {selectedProduct.additionalGroups &&
+              selectedProduct?.additionalGroups.length > 0 && (
+                <div className="mt-4 space-y-4">
+                  {selectedProduct.additionalGroups &&
+                    selectedProduct?.additionalGroups.map((group) => (
+                      <div
+                        key={group.id}
                         style={{
+                          backgroundColor: data?.colors.additionals || "white",
                           color: data?.colors.additionals_font || "black",
                         }}
-                        className={cn(
-                          openAdditionalsAccordion === group.id
-                            ? "rotate-90"
-                            : "",
-                          "size-4 transition-transform duration-200"
-                        )}
-                      />
-                      <span
-                        style={{
-                          color: data?.colors?.additionals_font || "black",
-                        }}
-                        className="text-xs">
-                        {group.name}
-                      </span>
-                    </button>
+                        className="rounded-lg">
+                        <button
+                          onClick={() => toggleAccordion(group.id)}
+                          className="flex items-center gap-1 w-full px-4 py-3 text-left text-lg font-medium rounded-t-lg">
+                          <ChevronRight
+                            style={{
+                              color: data?.colors.additionals_font || "black",
+                            }}
+                            className={cn(
+                              openAdditionalsAccordion === group.id
+                                ? "rotate-90"
+                                : "",
+                              "size-4 transition-transform duration-200"
+                            )}
+                          />
+                          <span
+                            style={{
+                              color: data?.colors?.additionals_font || "black",
+                            }}
+                            className="text-xs">
+                            {group.name}
+                          </span>
+                        </button>
 
-                    {openAdditionalsAccordion === group.id && (
-                      <div className="px-4 py-3 space-y-2">
-                        <RadioGroup
-                          value={selectedValues[group.id] || ""}
-                          onValueChange={(val) => handleChange(group.id, val)}
-                          className="space-y-2">
-                          {group.additionals.map((additional) => (
-                            <div
-                              key={additional.id}
-                              className="flex items-center justify-between">
-                              <div className="space-x-2">
-                                <RadioGroupItem
-                                  colorClass={
-                                    data?.colors.additionals_font || "black"
-                                  }
-                                  className="size-3.5"
-                                  value={additional.name}
-                                  id={`additional-${group.id}-${additional.id}`}
-                                />
-                                <Label
-                                  htmlFor={`additional-${group.id}-${additional.id}`}>
-                                  {additional.name}
-                                </Label>
-                              </div>
-                              <div className="text-xs font-semibold">
-                                {formatCurrencyFromCents(
-                                  additional.priceAdjustment
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </RadioGroup>
+                        {openAdditionalsAccordion === group.id && (
+                          <div className="px-4 py-3 space-y-2">
+                            <RadioGroup
+                              value={selectedValues[group.id] || ""}
+                              onValueChange={(val) =>
+                                handleChange(group.id, val)
+                              }
+                              className="space-y-2">
+                              {group.additionals.map((additional) => (
+                                <div
+                                  key={additional.id}
+                                  className="flex items-center justify-between">
+                                  <div className="space-x-2">
+                                    <RadioGroupItem
+                                      colorClass={
+                                        data?.colors.additionals_font || "black"
+                                      }
+                                      className="size-3.5"
+                                      value={additional.name}
+                                      id={`additional-${group.id}-${additional.id}`}
+                                    />
+                                    <Label
+                                      htmlFor={`additional-${group.id}-${additional.id}`}>
+                                      {additional.name}
+                                    </Label>
+                                  </div>
+                                  <div className="text-xs font-semibold">
+                                    {formatCurrencyFromCents(
+                                      additional.priceAdjustment
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </RadioGroup>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                    ))}
+                </div>
+              )}
             {/*  */}
             <button
               style={{

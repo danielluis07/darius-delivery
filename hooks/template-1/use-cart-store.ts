@@ -6,7 +6,7 @@ type Pizza = Product & {
 };
 
 // 1. Modify CartItem Type
-type CartItem = (Product | ComboProduct | Pizza) & {
+type CartItem = (Product | Pizza) & {
   quantity: number;
   selectedAdditionals?: Record<string, string>;
   effectivePriceInCents?: number;
@@ -16,7 +16,7 @@ type CartItem = (Product | ComboProduct | Pizza) & {
 type CartState = {
   cart: CartItem[]; // This now uses the updated CartItem definition
   addToCart: (
-    product: Product | ComboProduct | Pizza, // Ensure this product includes priceInCents and additionalGroups
+    product: Product | Pizza, // Ensure this product includes priceInCents and additionalGroups
     userId: string,
     selectedAdditionals?: Record<string, string>
   ) => boolean;
