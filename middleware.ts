@@ -11,7 +11,6 @@ export default auth(async (req) => {
   const isLoggedIn = !!req.auth;
 
   const secret = process.env.AUTH_SECRET!;
-
   const isProd = process.env.NODE_ENV === "production";
 
   const token = await getToken({
@@ -21,7 +20,6 @@ export default auth(async (req) => {
   });
 
   const role = token?.role as string;
-
   const isSubscribed = token?.isSubscribed as boolean;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
@@ -35,17 +33,25 @@ export default auth(async (req) => {
   );
 
   if (!hostname) {
-    return NextResponse.next();
+    // Added safety check for missing hostname
+    console.error("Middleware: Hostname is missing");
+    return new Response(null, { status: 400 }); // Bad Request
   }
 
   // Skip middleware for webhook routes
   if (isWebhookRoute) {
-    return NextResponse.next(); // Let the request pass through unchanged
+    return NextResponse.next();
   }
 
-  // Protect dashboard and admin routes on the main domain
+  // *** MODIFICATION START ***
+  // Determine if the request is for the main domain or a Vercel deployment URL
+  const isMainDomainOrVercel =
+    hostname === mainDomain || hostname.endsWith(".vercel.app");
+  // *** MODIFICATION END ***
+
+  // --- Logic for Main Domain and Vercel Deployments ---
   if (
-    hostname === mainDomain &&
+    isMainDomainOrVercel && // Use the new combined check
     (nextUrl.pathname.startsWith("/dashboard") ||
       nextUrl.pathname.startsWith("/admin"))
   ) {
@@ -60,30 +66,53 @@ export default auth(async (req) => {
       );
     }
 
+    // Apply subscription check only if user is not an EMPLOYEE
     if (!isSubscribed && role !== "EMPLOYEE") {
+      console.log(
+        `Redirecting to subscription: user role=${role}, isSubscribed=${isSubscribed}`
+      ); // Optional: Debug log
       return NextResponse.redirect(new URL("/subscription", nextUrl));
     }
 
+    // If logged in and authorized (either subscribed or an employee), allow access
     return NextResponse.next();
   }
 
-  // Rewrite only for custom domains (excluding main domain)
-  if (hostname !== mainDomain) {
+  // --- Logic for Custom Tenant Domains ---
+  // Rewrite only for actual custom domains (i.e., NOT the main domain and NOT Vercel)
+  if (!isMainDomainOrVercel) {
+    // Use the inverse of the combined check
     const domain = hostname.replace(/^www\./, "");
-    if (!nextUrl.pathname.startsWith(`/${domain}`)) {
-      nextUrl.pathname = `/${domain}`;
+
+    // Avoid rewriting if the path already starts with the domain segment
+    // or if it's an API route (unless you specifically want to rewrite API routes too)
+    if (
+      !nextUrl.pathname.startsWith(`/${domain}`) &&
+      !nextUrl.pathname.startsWith("/api/")
+    ) {
+      // Construct the new path, handling the root path case ('/')
+      const newPathname = `/${domain}${
+        nextUrl.pathname === "/" ? "" : nextUrl.pathname
+      }`;
+      console.log(
+        `Rewriting ${hostname}${req.nextUrl.pathname} to ${newPathname}`
+      ); // Optional: Debug log
+      nextUrl.pathname = newPathname;
       return NextResponse.rewrite(nextUrl);
     }
   }
 
+  // --- Default Handling ---
   if (isApiAuthRoute) {
+    // Let NextAuth.js handle API authentication routes
     return undefined;
   }
 
-  return NextResponse.next(); // Default case: let the request proceed
+  // Allow other requests (e.g., static files, public pages on main/Vercel domain)
+  return NextResponse.next();
 });
 
 // Ensure Middleware does not interfere with static assets or API requests
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/(api|trpc)(.*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.[\\w]+$).*)"],
 };
