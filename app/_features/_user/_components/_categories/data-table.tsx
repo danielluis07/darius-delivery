@@ -37,6 +37,7 @@ type CategoriesDataTableProps<TData, TValue> = {
   onDelete: (rows: Row<TData>[]) => void;
   isLoading?: boolean;
   disabled?: boolean;
+  storeId: string;
   searchKey: string;
 };
 
@@ -46,6 +47,7 @@ export function CategoriesDataTable<TData, TValue>({
   isLoading,
   onDelete,
   searchKey,
+  storeId,
 }: CategoriesDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -91,7 +93,7 @@ export function CategoriesDataTable<TData, TValue>({
           className="w-1/2"
         />
         <div className="flex items-center gap-x-2">
-          <Link href="/dashboard/categories/new">
+          <Link href={`/dashboard/${storeId}/categories/new`}>
             <Button>
               Adicionar Categoria
               <Plus />

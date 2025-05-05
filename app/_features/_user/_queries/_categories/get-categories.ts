@@ -2,22 +2,22 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type Categories = InferResponseType<
-  (typeof client.api.categories.user)[":userId"]["$get"],
+  (typeof client.api.categories.store)[":storeId"]["$get"],
   200
 >["data"];
 
 type CategoriesWithProducts = InferResponseType<
-  (typeof client.api.categories)["with-products"]["user"][":userId"]["$get"],
+  (typeof client.api.categories)["with-products"]["store"][":storeId"]["$get"],
   200
 >["data"];
 
-const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/categories/user`;
+const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/categories/store`;
 
 export const getCategories = async (
-  userId: string
+  storeId: string
 ): Promise<Categories | null> => {
   try {
-    const res = await fetch(`${URL}/${userId}`);
+    const res = await fetch(`${URL}/${storeId}`);
 
     if (!res.ok) {
       return null;
@@ -32,11 +32,11 @@ export const getCategories = async (
 };
 
 export const getCategoriesWithProducts = async (
-  userId: string
+  storeId: string
 ): Promise<CategoriesWithProducts | null> => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/categories/with-products/user/${userId}`
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/categories/with-products/store/${storeId}`
     );
 
     if (!res.ok) {

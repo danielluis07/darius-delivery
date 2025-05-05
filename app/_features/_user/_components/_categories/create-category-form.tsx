@@ -30,7 +30,7 @@ import Image from "next/image";
 
 type FormData = z.infer<typeof insertCategorySchema>;
 
-export const CreateCategoryForm = () => {
+export const CreateCategoryForm = ({ storeId }: { storeId: string }) => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -55,7 +55,7 @@ export const CreateCategoryForm = () => {
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      createCategory(values)
+      createCategory(values, storeId)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -63,7 +63,7 @@ export const CreateCategoryForm = () => {
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard/categories");
+            router.push(`/dashboard/${storeId}/categories`);
           }
         })
         .catch((error) => {

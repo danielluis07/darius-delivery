@@ -1,7 +1,12 @@
 import { CategoriesClient } from "@/app/_features/_user/_components/_categories/client";
 import { auth } from "@/auth";
 
-const CategoriesPage = async () => {
+const CategoriesPage = async ({
+  params,
+}: {
+  params: Promise<{ storeId: string }>;
+}) => {
+  const { storeId } = await params;
   const session = await auth();
 
   if (!session || !session.user.id) {
@@ -17,7 +22,7 @@ const CategoriesPage = async () => {
     return <div>Usuário não encontrado</div>;
   }
 
-  return <CategoriesClient userId={id} />;
+  return <CategoriesClient storeId={storeId} />;
 };
 
 export default CategoriesPage;

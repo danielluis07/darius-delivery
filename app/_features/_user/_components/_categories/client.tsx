@@ -6,9 +6,9 @@ import { Card } from "@/components/ui/card";
 import { useGetCategories } from "../../_queries/_categories/use-get-categories";
 import { useDeleteCategories } from "../../_queries/_categories/use-delete-categories";
 
-export const CategoriesClient = ({ userId }: { userId: string }) => {
-  const { data, isLoading } = useGetCategories(userId);
-  const deleteCategories = useDeleteCategories(userId);
+export const CategoriesClient = ({ storeId }: { storeId: string }) => {
+  const { data, isLoading } = useGetCategories(storeId);
+  const deleteCategories = useDeleteCategories(storeId);
 
   return (
     <Card className="w-full">
@@ -17,6 +17,7 @@ export const CategoriesClient = ({ userId }: { userId: string }) => {
         columns={columns}
         data={data || []}
         isLoading={isLoading}
+        storeId={storeId}
         onDelete={(row) => {
           const ids = row.map((r) => r.original.id);
           deleteCategories.mutate(ids);

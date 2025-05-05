@@ -11,13 +11,6 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
-  {
-    rules: Object.fromEntries(
-      Object.keys(require("eslint/conf/eslint-recommended.json").rules).map(
-        (rule) => [rule, "off"]
-      )
-    ),
-  },
 ];
 
 export default eslintConfig;

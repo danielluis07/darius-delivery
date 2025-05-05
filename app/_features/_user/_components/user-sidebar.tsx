@@ -81,6 +81,7 @@ type User = {
 export function UserSidebar({
   user,
   stores,
+  storeId,
 }: {
   user: User;
   stores:
@@ -90,6 +91,7 @@ export function UserSidebar({
         name: string;
       }[]
     | undefined;
+  storeId: string;
 }) {
   const { open, setOpen } = useSidebar();
   const router = useRouter();
@@ -102,7 +104,7 @@ export function UserSidebar({
       allowed: true,
     },
     {
-      url: "/dashboard/categories",
+      url: `/dashboard/${storeId}/categories`,
       icon: FolderClosed,
       label: "Categorias",
       allowed: true,

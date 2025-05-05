@@ -2,8 +2,8 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import { categories, products } from "@/db/schema";
-import { count, eq, inArray } from "drizzle-orm";
+import { categories, products, stores } from "@/db/schema";
+import { and, count, eq, inArray } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 import { deleteFromS3 } from "@/lib/s3-upload";
 
@@ -38,19 +38,34 @@ const app = new Hono()
     }
   )
   .get(
-    "/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/store/:storeId",
+    verifyAuth(),
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
+      const auth = c.get("authUser");
 
-      if (!userId) {
-        return c.json({ error: "Missing user id" }, 400);
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!storeId) {
+        return c.json({ error: "Missing store id" }, 400);
+      }
+
+      const [store] = await db
+        .select({ id: stores.id })
+        .from(stores)
+        .where(and(eq(stores.id, storeId), eq(stores.userId, auth.token?.sub)));
+
+      if (!store) {
+        return c.json({ error: "Store not found" }, 404);
       }
 
       const data = await db
         .select()
         .from(categories)
-        .where(eq(categories.userId, userId));
+        .where(eq(categories.storeId, storeId));
 
       if (!data || data.length === 0) {
         return c.json({ error: "No categories found" }, 404);
@@ -60,13 +75,13 @@ const app = new Hono()
     }
   )
   .get(
-    "/with-products/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/with-products/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
-        return c.json({ error: "Missing user id" }, 400);
+      if (!storeId) {
+        return c.json({ error: "Missing store id" }, 400);
       }
 
       // 1. Fetch the potentially flat data
@@ -77,7 +92,7 @@ const app = new Hono()
         })
         .from(categories)
         .leftJoin(products, eq(products.category_id, categories.id))
-        .where(eq(categories.userId, userId));
+        .where(eq(categories.storeId, storeId));
 
       if (!flatData || flatData.length === 0) {
         return c.json({ error: "No categories found for this user" }, 404);
@@ -119,19 +134,19 @@ const app = new Hono()
     }
   )
   .get(
-    "/count/:userId",
-    zValidator("param", z.object({ userId: z.string() })),
+    "/count/:storeId",
+    zValidator("param", z.object({ storeId: z.string() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
-        return c.json({ error: "Missing user ID" }, 400);
+      if (!storeId) {
+        return c.json({ error: "Missing store ID" }, 400);
       }
 
       const [data] = await db
         .select({ count: count() })
         .from(categories)
-        .where(eq(categories.userId, userId));
+        .where(eq(categories.storeId, storeId));
 
       if (!data) {
         return c.json({ error: "No orders found" }, 404);
