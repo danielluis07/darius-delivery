@@ -52,16 +52,18 @@ const permissions = [
 ];
 
 type Employee = InferResponseType<
-  (typeof client.api.users.employee)[":employeeId"]["$get"],
+  (typeof client.api.users.employee)[":userId"]["$get"],
   200
 >["data"];
 
 export const UpdateEmployeeForm = ({
   userId,
   data,
+  storeId,
 }: {
   userId: string;
   data: Employee;
+  storeId: string;
 }) => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
@@ -83,10 +85,14 @@ export const UpdateEmployeeForm = ({
 
   const onSubmit = async (values: FormData) => {
     startTransition(() => {
-      updateEmployee(userId, {
-        ...values,
-        phone: removeFormatting(values.phone),
-      })
+      updateEmployee(
+        userId,
+        {
+          ...values,
+          phone: removeFormatting(values.phone),
+        },
+        storeId
+      )
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);

@@ -49,7 +49,7 @@ const permissions = [
   "Darius Pay",
 ];
 
-export const NewEmployeeForm = () => {
+export const NewEmployeeForm = ({ storeId }: { storeId: string }) => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
     resolver: zodResolver(createEmployeeSchema),
@@ -70,7 +70,13 @@ export const NewEmployeeForm = () => {
 
   const onSubmit = async (values: FormData) => {
     startTransition(() => {
-      createEmployee({ ...values, phone: removeFormatting(values.phone) })
+      createEmployee(
+        {
+          ...values,
+          phone: removeFormatting(values.phone),
+        },
+        storeId
+      )
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);

@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
-export const EmployeesClient = ({ userId }: { userId: string }) => {
-  const { data, isPending } = useGetEmployees(userId);
+export const EmployeesClient = ({ storeId }: { storeId: string }) => {
+  const { data, isPending } = useGetEmployees(storeId);
   return (
     <Card>
       <CardHeader>

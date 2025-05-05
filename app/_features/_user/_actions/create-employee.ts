@@ -16,7 +16,8 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 export const createEmployee = async (
-  values: z.infer<typeof createEmployeeSchema>
+  values: z.infer<typeof createEmployeeSchema>,
+  storeId: string
 ) => {
   try {
     const session = await auth();
@@ -69,7 +70,7 @@ export const createEmployee = async (
 
     const employee = await db.insert(employees).values({
       userId: newUser.id,
-      restaurantOwnerId: session.user.id,
+      storeId,
       permissions,
     });
 

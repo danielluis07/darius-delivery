@@ -4,9 +4,9 @@ import { getEmployee } from "@/app/_features/_user/_queries/_employees/get-emplo
 const EmployeePage = async ({
   params,
 }: {
-  params: Promise<{ userId: string }>;
+  params: Promise<{ storeId: string; userId: string }>;
 }) => {
-  const { userId } = await params;
+  const { storeId, userId } = await params;
 
   const data = await getEmployee(userId);
 
@@ -14,7 +14,7 @@ const EmployeePage = async ({
     return <div>Employee not found</div>;
   }
 
-  return <UpdateEmployeeForm userId={userId} data={data} />;
+  return <UpdateEmployeeForm storeId={storeId} userId={userId} data={data} />;
 };
 
 export default EmployeePage;

@@ -17,8 +17,10 @@ async function hashPassword(password: string): Promise<string> {
 
 export const updateEmployee = async (
   userId: string,
-  values: z.infer<typeof updateEmployeeSchema>
+  values: z.infer<typeof updateEmployeeSchema>,
+  storeId: string
 ) => {
+  console.log(storeId);
   try {
     const session = await auth();
 
