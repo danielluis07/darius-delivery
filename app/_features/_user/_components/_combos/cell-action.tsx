@@ -14,8 +14,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDeleteCombo } from "../../_queries/_combos/use-delete-combo";
 import { useConfirmContext } from "@/context/confirm-context";
@@ -29,18 +28,13 @@ export const CombosCellAction = ({
   status: boolean;
 }) => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const session = useSession();
+  const { storeId } = useParams<{ storeId: string }>();
 
-  const userId =
-    session.data?.user.role === "EMPLOYEE"
-      ? session.data.user.restaurantOwnerId
-      : session?.data?.user.id;
-
-  const deleteMutation = useDeleteCombo(id, userId);
+  const deleteMutation = useDeleteCombo(id, storeId);
 
   const router = useRouter();
 
-  const { mutate, isPending } = useUpdateComboStatus(id, userId);
+  const { mutate, isPending } = useUpdateComboStatus(id, storeId);
 
   const { confirm } = useConfirmContext();
 
@@ -60,7 +54,7 @@ export const CombosCellAction = ({
         <DropdownMenuItem
           disabled={deleteMutation.isPending}
           className="cursor-pointer"
-          onClick={() => router.push(`/dashboard/combos/${id}`)}>
+          onClick={() => router.push(`/dashboard/${storeId}/combos/${id}`)}>
           <Pencil className="mr-2 size-5" />
           Editar
         </DropdownMenuItem>

@@ -9,22 +9,14 @@ import { revalidatePath } from "next/cache";
 import { uploadImageToS3 } from "@/lib/s3-upload";
 
 export const createCombo = async (
-  values: z.infer<typeof insertComboSchema>
+  values: z.infer<typeof insertComboSchema>,
+  storeId: string
 ) => {
   try {
     const session = await auth();
     const validatedValues = insertComboSchema.safeParse(values);
 
     if (!session) {
-      return { success: false, message: "Not authenticated" };
-    }
-
-    const id =
-      session.user.role === "EMPLOYEE"
-        ? session.user.restaurantOwnerId
-        : session.user.id;
-
-    if (!id) {
       return { success: false, message: "Not authenticated" };
     }
 
@@ -57,7 +49,7 @@ export const createCombo = async (
       .values({
         name,
         image: imageUrl,
-        userId: id,
+        storeId,
         description,
         price,
       })

@@ -18,22 +18,14 @@ type UpdatedData = {
 };
 
 export const updateCombo = async (
-  values: z.infer<typeof updateComboSchema>
+  values: z.infer<typeof updateComboSchema>,
+  storeId: string
 ) => {
   try {
     const session = await auth();
     const validatedValues = updateComboSchema.safeParse(values);
 
     if (!session) {
-      return { success: false, message: "Not authenticated" };
-    }
-
-    const id =
-      session.user.role === "EMPLOYEE"
-        ? session.user.restaurantOwnerId
-        : session.user.id;
-
-    if (!id) {
       return { success: false, message: "Not authenticated" };
     }
 
@@ -66,7 +58,7 @@ export const updateCombo = async (
           image: combos.image,
         })
         .from(combos)
-        .where(and(eq(combos.id, combo_id), eq(combos.userId, id)));
+        .where(and(eq(combos.id, combo_id), eq(combos.storeId, storeId)));
 
       if (!existingCategory.image) {
         return { success: false, message: "Combo não encontrado" };
@@ -107,7 +99,7 @@ export const updateCombo = async (
     const [combo] = await db
       .update(combos)
       .set(updateData)
-      .where(and(eq(combos.id, combo_id), eq(combos.userId, id)))
+      .where(and(eq(combos.id, combo_id), eq(combos.storeId, storeId)))
       .returning({ id: combos.id });
 
     if (!combo) {

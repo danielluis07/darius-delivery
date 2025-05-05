@@ -33,7 +33,7 @@ import { updateCombo } from "../../_actions/update-combo";
 import { ProductsDialog } from "./products-dialog";
 
 type CategoriesWithProducts = InferResponseType<
-  (typeof client.api.categories)["with-products"]["user"][":userId"]["$get"],
+  (typeof client.api.categories)["with-products"]["store"][":storeId"]["$get"],
   200
 >["data"];
 
@@ -47,9 +47,11 @@ type FormData = z.infer<typeof updateComboSchema>;
 export const UpdateComboForm = ({
   categories,
   combo,
+  storeId,
 }: {
   combo: Combo;
   categories: CategoriesWithProducts;
+  storeId: string;
 }) => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
@@ -107,7 +109,7 @@ export const UpdateComboForm = ({
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      updateCombo(values)
+      updateCombo(values, storeId)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -115,7 +117,7 @@ export const UpdateComboForm = ({
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard/combos");
+            router.push(`/dashboard/${storeId}/combos`);
           }
         })
         .catch((error) => {

@@ -33,7 +33,7 @@ import { createCombo } from "@/app/_features/_user/_actions/create-combo";
 import { ProductsDialog } from "./products-dialog";
 
 type CategoriesWithProducts = InferResponseType<
-  (typeof client.api.categories)["with-products"]["user"][":userId"]["$get"],
+  (typeof client.api.categories)["with-products"]["store"][":storeId"]["$get"],
   200
 >["data"];
 
@@ -41,8 +41,10 @@ type FormData = z.infer<typeof insertComboSchema>;
 
 export const CreateComboForm = ({
   categories,
+  storeId,
 }: {
   categories: CategoriesWithProducts;
+  storeId: string;
 }) => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
@@ -50,6 +52,7 @@ export const CreateComboForm = ({
   const form = useForm<FormData>({
     resolver: zodResolver(insertComboSchema),
     defaultValues: {
+      storeId: storeId,
       name: "",
       description: "",
       image: [],
@@ -99,7 +102,7 @@ export const CreateComboForm = ({
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      createCombo(values)
+      createCombo(values, storeId)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -107,7 +110,7 @@ export const CreateComboForm = ({
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard/combos");
+            router.push(`/dashboard/${storeId}/combos`);
           }
         })
         .catch((error) => {

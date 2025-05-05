@@ -67,7 +67,7 @@ const app = new Hono()
     }
   )
   .get(
-    "/user/:storeId",
+    "/store/:storeId",
     zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
       const { storeId } = c.req.valid("param");

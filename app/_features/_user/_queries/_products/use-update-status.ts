@@ -10,7 +10,7 @@ type RequestType = InferRequestType<
   (typeof client.api.products.activate)[":id"]["$patch"]
 >["json"];
 
-export const useUpdateProductStatus = (id: string, userId?: string) => {
+export const useUpdateProductStatus = (id: string, storeId?: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
@@ -23,7 +23,7 @@ export const useUpdateProductStatus = (id: string, userId?: string) => {
     },
     onSuccess: () => {
       toast.success("Produto atualizado com sucesso!");
-      queryClient.invalidateQueries({ queryKey: ["products", userId] });
+      queryClient.invalidateQueries({ queryKey: ["products", storeId] });
     },
     onError: () => {
       toast.error("Houve um erro mudar o status do produto!");

@@ -3,27 +3,22 @@ import { getCategoriesWithProducts } from "@/app/_features/_user/_queries/_categ
 import { getCombo } from "@/app/_features/_user/_queries/_combos/get-combo";
 import { auth } from "@/auth";
 
-const ComboPage = async ({ params }: { params: Promise<{ id: string }> }) => {
+const ComboPage = async ({
+  params,
+}: {
+  params: Promise<{ storeId: string; id: string }>;
+}) => {
   const session = await auth();
-  const { id } = await params;
+  const { storeId, id } = await params;
 
   if (!session) {
-    return <p>Not authenticated</p>;
-  }
-
-  const userId =
-    session.user.role === "EMPLOYEE"
-      ? session.user.restaurantOwnerId
-      : session.user.id;
-
-  if (!userId) {
     return <p>Not authenticated</p>;
   }
 
   // promise all
   const [combo, categories] = await Promise.all([
     getCombo(id),
-    getCategoriesWithProducts(userId),
+    getCategoriesWithProducts(storeId),
   ]);
 
   if (!combo) {
@@ -34,7 +29,9 @@ const ComboPage = async ({ params }: { params: Promise<{ id: string }> }) => {
     return <p>Você precisa cadastrar ao menos uma categoria</p>;
   }
 
-  return <UpdateComboForm combo={combo} categories={categories} />;
+  return (
+    <UpdateComboForm combo={combo} categories={categories} storeId={storeId} />
+  );
 };
 
 export default ComboPage;

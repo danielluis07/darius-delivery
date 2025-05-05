@@ -7,9 +7,9 @@ import { CombosDataTable } from "@/app/_features/_user/_components/_combos/data-
 import { useGetCombos } from "../../_queries/_combos/use-get-combos";
 import { useDeleteCombos } from "../../_queries/_combos/use-delete-combos";
 
-export const CombosClient = ({ userId }: { userId: string }) => {
-  const { data, isLoading } = useGetCombos(userId);
-  const deleteCombos = useDeleteCombos(userId);
+export const CombosClient = ({ storeId }: { storeId: string }) => {
+  const { data, isLoading } = useGetCombos(storeId);
+  const deleteCombos = useDeleteCombos(storeId);
 
   return (
     <Card className="w-full">
@@ -17,6 +17,7 @@ export const CombosClient = ({ userId }: { userId: string }) => {
       <CombosDataTable
         columns={columns}
         data={data || []}
+        storeId={storeId}
         isLoading={isLoading}
         onDelete={(row) => {
           const ids = row.map((r) => r.original.id);

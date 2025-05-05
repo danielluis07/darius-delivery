@@ -10,21 +10,14 @@ import { Button } from "@/components/ui/button";
 import { useDeleteCategory } from "@/app/_features/_user/_queries/_categories/use-delete-category";
 import { Ellipsis, Pencil, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { useConfirmContext } from "@/context/confirm-context";
 
 export const CategoriesCellAction = ({ id }: { id: string }) => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { storeId } = useParams<{ storeId: string }>();
-  const session = useSession();
 
-  const userId =
-    session.data?.user.role === "EMPLOYEE"
-      ? session.data.user.restaurantOwnerId
-      : session?.data?.user.id;
-
-  const deleteMutation = useDeleteCategory(id, userId);
+  const deleteMutation = useDeleteCategory(id, storeId);
 
   const router = useRouter();
 

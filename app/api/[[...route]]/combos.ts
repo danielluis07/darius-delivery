@@ -54,19 +54,19 @@ const app = new Hono()
     }
   )
   .get(
-    "/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
       const data = await db
         .select()
         .from(combos)
-        .where(eq(combos.userId, userId));
+        .where(eq(combos.storeId, storeId));
 
       if (!data || data.length === 0) {
         return c.json({ error: "No combos found" }, 404);
@@ -76,12 +76,12 @@ const app = new Hono()
     }
   )
   .get(
-    "/template/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/template/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
@@ -90,7 +90,7 @@ const app = new Hono()
           comboId: combos.id,
           name: combos.name,
           image: combos.image,
-          userId: combos.userId,
+          storeId: combos.storeId,
           description: combos.description,
           price: combos.price,
           isActive: combos.isActive,
@@ -105,7 +105,7 @@ const app = new Hono()
         .from(combos)
         .leftJoin(comboProducts, eq(combos.id, comboProducts.combo_id))
         .leftJoin(products, eq(comboProducts.product_id, products.id))
-        .where(and(eq(combos.userId, userId), eq(combos.isActive, true)));
+        .where(and(eq(combos.storeId, storeId), eq(combos.isActive, true)));
 
       // Group by comboId
       const grouped = new Map();
@@ -155,9 +155,7 @@ const app = new Hono()
       return c.json({ error: "Missing data" }, 400);
     }
 
-    const data = await db
-      .insert(combos)
-      .values({ ...values, userId: auth.token.sub });
+    const data = await db.insert(combos).values(values);
 
     if (!data) {
       return c.json({ error: "Failed to insert data" }, 500);
@@ -229,6 +227,7 @@ const app = new Hono()
       "json",
       z.object({
         isActive: z.boolean(),
+        storeId: z.string().optional(),
       })
     ),
     async (c) => {
@@ -247,7 +246,7 @@ const app = new Hono()
       const data = await db
         .update(combos)
         .set({ isActive })
-        .where(and(eq(combos.id, id), eq(combos.userId, auth.token.sub)));
+        .where(eq(combos.id, id));
 
       if (!data) {
         return c.json({ error: "Failed to update product" }, 500);

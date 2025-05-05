@@ -15,7 +15,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useDeleteProduct } from "../../_queries/_products/use-delete-product";
 import { useConfirmContext } from "@/context/confirm-context";
 import { useState } from "react";
@@ -30,15 +29,9 @@ export const ProductsCellAction = ({
 }) => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { storeId } = useParams<{ storeId: string }>();
-  const session = useSession();
 
-  const userId =
-    session.data?.user.role === "EMPLOYEE"
-      ? session.data.user.restaurantOwnerId
-      : session?.data?.user.id;
-
-  const deleteMutation = useDeleteProduct(id, userId);
-  const { mutate, isPending } = useUpdateProductStatus(id, userId);
+  const deleteMutation = useDeleteProduct(id, storeId);
+  const { mutate, isPending } = useUpdateProductStatus(id, storeId);
   const router = useRouter();
 
   const { confirm } = useConfirmContext();

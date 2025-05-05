@@ -38,6 +38,7 @@ type CombosDataTableProps<TData, TValue> = {
   disabled?: boolean;
   isLoading?: boolean;
   searchKey: string;
+  storeId: string;
 };
 
 export function CombosDataTable<TData, TValue>({
@@ -46,6 +47,7 @@ export function CombosDataTable<TData, TValue>({
   isLoading,
   onDelete,
   searchKey,
+  storeId,
 }: CombosDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -91,7 +93,7 @@ export function CombosDataTable<TData, TValue>({
           className="w-1/2"
         />
         <div className="flex items-center gap-x-2">
-          <Link href="/dashboard/combos/new">
+          <Link href={`/dashboard/${storeId}/combos/new`}>
             <Button>
               Adicionar Combo
               <Plus />

@@ -10,7 +10,7 @@ type RequestType = InferRequestType<
   (typeof client.api.combos.activate)[":id"]["$patch"]
 >["json"];
 
-export const useUpdateComboStatus = (id: string, userId?: string) => {
+export const useUpdateComboStatus = (id: string, storeId?: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
@@ -23,7 +23,7 @@ export const useUpdateComboStatus = (id: string, userId?: string) => {
     },
     onSuccess: () => {
       toast.success("Combo atualizado com sucesso!");
-      queryClient.invalidateQueries({ queryKey: ["combos", userId] });
+      queryClient.invalidateQueries({ queryKey: ["combos", storeId] });
     },
     onError: () => {
       toast.error("Houve um erro mudar o status do combo!");
