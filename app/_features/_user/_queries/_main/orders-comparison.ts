@@ -2,16 +2,16 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 export type OrdersComparisonType = InferResponseType<
-  (typeof client.api.orders.orderscomparison)[":userId"]["$get"],
+  (typeof client.api.orders.orderscomparison.store)[":storeId"]["$get"],
   200
 >["data"];
 
 export const getOrdersComparison = async (
-  userId: string
+  storeId: string
 ): Promise<OrdersComparisonType | null> => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/orders/orderscomparison/${userId}`
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/orders/orderscomparison/store/${storeId}`
     );
 
     if (!res.ok) {

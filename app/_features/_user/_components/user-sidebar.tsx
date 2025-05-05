@@ -157,12 +157,12 @@ export function UserSidebar({
       label: "Clientes",
       allowed: true,
     },
-    {
+    /*     {
       url: `/dashboard/${storeId}/finances`,
       icon: CircleDollarSign,
       label: "Financeiro",
       allowed: true,
-    },
+    }, */
     {
       url: `/dashboard/${storeId}/delivery-areas`,
       icon: MapPin,

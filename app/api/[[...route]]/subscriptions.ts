@@ -7,19 +7,19 @@ import { eq } from "drizzle-orm";
 
 const app = new Hono()
   .get(
-    "/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
       const [data] = await db
         .select()
         .from(subscriptions)
-        .where(eq(subscriptions.user_id, userId));
+        .where(eq(subscriptions.storeId, storeId));
 
       if (!data) {
         return c.json({ error: "No subscription found" }, 404);

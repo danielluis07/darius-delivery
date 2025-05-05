@@ -7,12 +7,12 @@ import { eq, sum, and, sql, count } from "drizzle-orm";
 
 const app = new Hono()
   .get(
-    "/totalrevenue/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/totalrevenue/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
@@ -23,7 +23,7 @@ const app = new Hono()
         .innerJoin(orders, eq(transactions.order_id, orders.id))
         .where(
           and(
-            eq(orders.user_id, userId),
+            eq(orders.storeId, storeId),
             eq(transactions.status, "COMPLETED") // Ensure we're only counting completed transactions
           )
         );
@@ -32,16 +32,16 @@ const app = new Hono()
     }
   )
   .get(
-    "/monthlyrevenue/:userId/:year",
+    "/monthlyrevenue/store/:storeId/:year",
     zValidator(
       "param",
       z.object({
-        userId: z.string(),
+        storeId: z.string(),
         year: z.string().regex(/^\d{4}$/), // Ano no formato YYYY
       })
     ),
     async (c) => {
-      const { userId, year } = c.req.valid("param");
+      const { storeId, year } = c.req.valid("param");
 
       // Buscar receita total agrupada por mês para o ano específico
       const revenuePerMonth = await db
@@ -52,7 +52,7 @@ const app = new Hono()
         .from(transactions)
         .where(
           and(
-            eq(transactions.user_id, userId), // Filtrar pelo usuário correto
+            eq(transactions.storeId, storeId), // Filtrar pelo usuário correto
             eq(transactions.status, "COMPLETED"), // Somente transações concluídas
             sql`TO_CHAR(${transactions.createdAt}, 'YYYY') = ${year}` // Filtrar pelo ano escolhido
           )
@@ -64,16 +64,16 @@ const app = new Hono()
     }
   )
   .get(
-    "/monthlyorders/:userId/:year",
+    "/monthlyorders/store/:storeId/:year",
     zValidator(
       "param",
       z.object({
-        userId: z.string(),
+        storeId: z.string(),
         year: z.string().regex(/^\d{4}$/), // Apenas 4 dígitos (ano)
       })
     ),
     async (c) => {
-      const { userId, year } = c.req.valid("param");
+      const { storeId, year } = c.req.valid("param");
 
       // Contar o número de pedidos por mês no ano especificado
       const ordersPerMonth = await db
@@ -84,7 +84,7 @@ const app = new Hono()
         .from(orders)
         .where(
           and(
-            eq(orders.user_id, userId),
+            eq(orders.storeId, storeId),
             sql`TO_CHAR(${orders.createdAt}, 'YYYY') = ${year}`
           )
         )
@@ -95,12 +95,12 @@ const app = new Hono()
     }
   )
   .get(
-    "/average-ticket/:userId",
-    zValidator("param", z.object({ userId: z.string() })),
+    "/average-ticket/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
@@ -113,7 +113,7 @@ const app = new Hono()
         .innerJoin(orders, eq(transactions.order_id, orders.id))
         .where(
           and(
-            eq(orders.user_id, userId),
+            eq(orders.storeId, storeId),
             eq(transactions.status, "COMPLETED") // Apenas pedidos finalizados
           )
         );
@@ -124,7 +124,7 @@ const app = new Hono()
           totalOrders: count().as("totalOrders"),
         })
         .from(orders)
-        .where(eq(orders.user_id, userId));
+        .where(eq(orders.storeId, storeId));
 
       // Forçar os valores para garantir que sejam números
       const totalRevenue: number = Number(revenue?.totalRevenue) || 0;

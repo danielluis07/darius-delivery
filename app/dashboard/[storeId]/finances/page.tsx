@@ -4,14 +4,19 @@ import { TotalRevenue } from "@/app/_features/_user/_components/_finances/total-
 import { TotalSales } from "@/app/_features/_user/_components/_finances/total-sales";
 import { getTotalRevenue } from "@/app/_features/_user/_queries/_finances/get-total-revenue";
 
-const FinancesPage = async () => {
+const FinancesPage = async ({
+  params,
+}: {
+  params: Promise<{ storeId: string }>;
+}) => {
+  const { storeId } = await params;
   const session = await auth();
 
   if (!session || !session.user.id) {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const totalRevenue = await getTotalRevenue(session.user.id);
+  const totalRevenue = await getTotalRevenue(storeId);
 
   return (
     <div className="w-full">

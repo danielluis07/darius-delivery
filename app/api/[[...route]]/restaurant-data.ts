@@ -7,15 +7,15 @@ import { eq, sql } from "drizzle-orm";
 
 const app = new Hono()
   .get(
-    "/user/:userId",
-    zValidator("param", z.object({ userId: z.string() })),
+    "/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
       const [data] = await db
         .select()
         .from(restaurantData)
-        .where(eq(restaurantData.userId, userId));
+        .where(eq(restaurantData.storeId, storeId));
 
       if (!data) {
         return c.json({ error: "Restaurante não encontrado" }, 404);
@@ -25,28 +25,28 @@ const app = new Hono()
     }
   )
   .post(
-    "/menu-views/user/:userId",
-    zValidator("param", z.object({ userId: z.string() })),
+    "/menu-views/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
       const [existingData] = await db
         .select()
         .from(restaurantData)
-        .where(eq(restaurantData.userId, userId));
+        .where(eq(restaurantData.storeId, storeId));
 
       if (!existingData) {
-        await db.insert(restaurantData).values({ userId, menuViews: 1 });
+        await db.insert(restaurantData).values({ storeId, menuViews: 1 });
         return c.json({
           message: "Visualização registrada com sucesso",
-          data: { userId, menuViews: 1 },
+          data: { storeId, menuViews: 1 },
         });
       }
 
       const updated = await db
         .update(restaurantData)
         .set({ menuViews: sql`${restaurantData.menuViews} + 1` })
-        .where(eq(restaurantData.userId, userId));
+        .where(eq(restaurantData.storeId, storeId));
 
       return c.json({
         message: "Visualização registrada com sucesso",
@@ -55,16 +55,16 @@ const app = new Hono()
     }
   )
   .post(
-    "/cart/user/:userId",
-    zValidator("param", z.object({ userId: z.string() })),
+    "/cart/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
       // Incrementa a contagem de itemsAddedToCart
       const updated = await db
         .update(restaurantData)
         .set({ itemsAddedToCart: sql`${restaurantData.itemsAddedToCart} + 1` }) // Incrementa 1
-        .where(eq(restaurantData.userId, userId))
+        .where(eq(restaurantData.storeId, storeId))
         .returning();
 
       if (!updated.length) {
@@ -78,15 +78,15 @@ const app = new Hono()
     }
   )
   .post(
-    "/purchased/user/:userId",
-    zValidator("param", z.object({ userId: z.string() })),
+    "/purchased/store/:userId",
+    zValidator("param", z.object({ storeId: z.string() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
       const updated = await db
         .update(restaurantData)
         .set({ itemsPurchased: sql`${restaurantData.itemsPurchased} + 1` }) // Incrementa 1
-        .where(eq(restaurantData.userId, userId))
+        .where(eq(restaurantData.storeId, storeId))
         .returning();
 
       if (!updated.length) {
@@ -99,15 +99,15 @@ const app = new Hono()
     }
   )
   .post(
-    "/withdrawal/user/:userId",
-    zValidator("param", z.object({ userId: z.string() })),
+    "/withdrawal/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
       const updated = await db
         .update(restaurantData)
         .set({ withdrawals: sql`${restaurantData.withdrawals} + 1` }) // Incrementa 1
-        .where(eq(restaurantData.userId, userId))
+        .where(eq(restaurantData.storeId, storeId))
         .returning();
 
       if (!updated.length) {

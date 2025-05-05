@@ -6,7 +6,12 @@ import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
 import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const SettingsPage = async () => {
+const SettingsPage = async ({
+  params,
+}: {
+  params: Promise<{ storeId: string }>;
+}) => {
+  const { storeId } = await params;
   const session = await auth();
 
   if (!session || !session.user.id) {
@@ -15,7 +20,7 @@ const SettingsPage = async () => {
 
   const [data, subscription] = await Promise.all([
     getUserData(session.user.id),
-    getSubscription(session.user.id),
+    getSubscription(storeId),
   ]);
 
   if (!data || !data.trialEndsAt) {

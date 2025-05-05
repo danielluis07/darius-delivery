@@ -2,16 +2,16 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.finances)["average-ticket"][":userId"]["$get"],
+  (typeof client.api.finances)["average-ticket"]["store"][":storeId"]["$get"],
   200
 >["data"];
 
 export const getAverageTicket = async (
-  userId: string
+  storeId: string
 ): Promise<ResponseType | null> => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/finances/average-ticket/${userId}`
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/finances/average-ticket/store/${storeId}`
     );
 
     if (!res.ok) {

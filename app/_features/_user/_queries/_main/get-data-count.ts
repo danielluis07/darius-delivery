@@ -2,26 +2,26 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type OrdersCountType = InferResponseType<
-  (typeof client.api.orders.count)[":userId"]["$get"],
+  (typeof client.api.orders.count.store)[":storeId"]["$get"],
   200
 >["data"];
 
 type CategoriesCountType = InferResponseType<
-  (typeof client.api.categories.count)[":userId"]["$get"],
+  (typeof client.api.categories.count.store)[":storeId"]["$get"],
   200
 >["data"];
 
 type ProductsCountType = InferResponseType<
-  (typeof client.api.products.count)[":userId"]["$get"],
+  (typeof client.api.products.count.store)[":storeId"]["$get"],
   200
 >["data"];
 
 export const getOrdersCount = async (
-  userId: string
+  storeId: string
 ): Promise<OrdersCountType | null> => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/orders/count/${userId}`
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/orders/count/store/${storeId}`
     );
 
     if (!res.ok) {
@@ -37,11 +37,11 @@ export const getOrdersCount = async (
 };
 
 export const getCategoriesCount = async (
-  userId: string
+  storeId: string
 ): Promise<CategoriesCountType | null> => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/categories/count/${userId}`
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/categories/count/store/${storeId}`
     );
 
     if (!res.ok) {
@@ -57,11 +57,11 @@ export const getCategoriesCount = async (
 };
 
 export const getProductsCount = async (
-  userId: string
+  storeId: string
 ): Promise<ProductsCountType | null> => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/count/${userId}`
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/count/store/${storeId}`
     );
 
     if (!res.ok) {

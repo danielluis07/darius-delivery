@@ -2,11 +2,11 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.subscriptions)["user"][":userId"]["$get"],
+  (typeof client.api.subscriptions)["store"][":storeId"]["$get"],
   200
 >["data"];
 
-const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/subscriptions/user`;
+const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/subscriptions/store`;
 
 export const getSubscription = async (
   userId: string

@@ -61,7 +61,7 @@ const DashboardPage = async ({
     redirect("/dashboard/categories");
   }
 
-  /*   const [
+  const [
     ordersCount,
     categoriesCount,
     productsCount,
@@ -73,21 +73,19 @@ const DashboardPage = async ({
     averageTicket,
     userData,
   ] = await Promise.all([
-    getOrdersCount(id),
-    getCategoriesCount(id),
-    getProductsCount(id),
-    getOrdersComparison(id),
-    getRestaurantStats(id),
-    getOrders(id),
-    getGoogleApiKey(id),
-    getTotalRevenue(id),
-    getAverageTicket(id),
+    getOrdersCount(storeId),
+    getCategoriesCount(storeId),
+    getProductsCount(storeId),
+    getOrdersComparison(storeId),
+    getRestaurantStats(storeId),
+    getOrders(storeId),
+    getGoogleApiKey(storeId),
+    getTotalRevenue(storeId),
+    getAverageTicket(storeId),
     getUserData(id),
-  ]); */
+  ]);
 
-  return <div>o id da loja é {storeId}</div>;
-
-  /*   return (
+  return (
     <div className="w-full">
       <TrialCountdown trialEndsAt={userData?.trialEndsAt} />
       <div className="flex justify-between gap-4 mt-10">
@@ -154,7 +152,7 @@ const DashboardPage = async ({
         </Card>
       </div>
     </div>
-  ); */
+  );
 };
 
 export default DashboardPage;
