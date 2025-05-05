@@ -8,11 +8,11 @@ type ResponseType = InferResponseType<
 >;
 
 type Additionals = InferResponseType<
-  (typeof client.api.additionals.user)[":userId"]["$get"],
+  (typeof client.api.additionals.store)[":storeId"]["$get"],
   200
 >["data"];
 
-export const useDeleteAdditionals = (userId: string | undefined) => {
+export const useDeleteAdditionals = (storeId: string | undefined) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, string[]>({
@@ -27,7 +27,7 @@ export const useDeleteAdditionals = (userId: string | undefined) => {
       toast.success("Adicionais deletados com sucesso!");
       // Atualiza o cache removendo os adicionais deletados
       queryClient.setQueryData(
-        ["additionals", userId],
+        ["additionals", storeId],
         (oldData: Additionals | undefined) => {
           return oldData
             ? oldData.filter((additional) => !ids.includes(additional.id))
@@ -35,7 +35,7 @@ export const useDeleteAdditionals = (userId: string | undefined) => {
         }
       );
       // Invalida a query para sincronizar com o backend
-      queryClient.invalidateQueries({ queryKey: ["additionals", userId] });
+      queryClient.invalidateQueries({ queryKey: ["additionals", storeId] });
     },
     onError: (error) => {
       toast.error("Houve um erro ao deletar os adicionais!");

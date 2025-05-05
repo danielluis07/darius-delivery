@@ -336,6 +336,7 @@ const additionalSchema = z.object({
 export const additionalGroupSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, "Group name cannot be empty"),
+  storeId: z.string(),
   selectionType: z.enum(["single", "multiple"]).default("multiple"),
   isRequired: z.boolean().default(false),
   category_id: z.string(),

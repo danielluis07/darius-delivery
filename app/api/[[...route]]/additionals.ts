@@ -61,13 +61,13 @@ const app = new Hono()
     }
   )
   .get(
-    "/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
-        return c.json({ error: "Missing user id" }, 400);
+      if (!storeId) {
+        return c.json({ error: "Missing store id" }, 400);
       }
 
       const data = await db
@@ -76,7 +76,7 @@ const app = new Hono()
           name: additionalGroups.name,
         })
         .from(additionalGroups)
-        .where(eq(additionalGroups.userId, userId));
+        .where(eq(additionalGroups.storeId, storeId));
 
       if (!data || data.length === 0) {
         return c.json({ error: "No additionals found" }, 404);
@@ -86,19 +86,19 @@ const app = new Hono()
     }
   )
   .get(
-    "/user/:userId/additional-group/:groupId",
+    "/store/:storeId/additional-group/:groupId",
     zValidator(
       "param",
       z.object({
-        userId: z.string().optional(),
+        storeId: z.string().optional(),
         groupId: z.string().optional(),
       })
     ),
     async (c) => {
-      const { userId, groupId } = c.req.valid("param");
+      const { storeId, groupId } = c.req.valid("param");
 
-      if (!userId || !groupId) {
-        return c.json({ error: "Missing user id or group id" }, 400);
+      if (!storeId || !groupId) {
+        return c.json({ error: "Missing store id or group id" }, 400);
       }
 
       const [data] = await db
@@ -131,7 +131,7 @@ const app = new Hono()
         const [newGroup] = await db
           .insert(additionalGroups)
           .values({
-            userId: auth.token.sub,
+            storeId: values.storeId,
             name: values.name,
             selectionType: values.selectionType,
             isRequired: values.isRequired,

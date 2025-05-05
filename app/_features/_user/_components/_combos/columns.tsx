@@ -10,7 +10,7 @@ import { CombosCellAction } from "@/app/_features/_user/_components/_combos/cell
 import { cn } from "@/lib/utils";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.combos.user)[":userId"]["$get"],
+  (typeof client.api.combos.store)[":storeId"]["$get"],
   200
 >["data"][0];
 

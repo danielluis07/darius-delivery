@@ -35,7 +35,7 @@ type ResponseType = InferResponseType<
 >["data"];
 
 type Categories = InferResponseType<
-  (typeof client.api.categories.user)[":userId"]["$get"],
+  (typeof client.api.categories.store)[":storeId"]["$get"],
   200
 >["data"];
 
@@ -46,16 +46,19 @@ export const UpdateAdditionalsForm = ({
   data,
   categories,
   categoryId,
+  storeId,
 }: {
   id: string;
   data: ResponseType;
   categories: Categories;
   categoryId: string;
+  storeId: string;
 }) => {
   const { mutate, isPending } = useUpdateAdditional(id);
   const form = useForm<FormData>({
     resolver: zodResolver(additionalGroupSchema),
     defaultValues: {
+      storeId,
       name: data.name ?? "",
       category_id: categoryId ?? "",
       additionals: data.additionals.map((a) => ({
@@ -80,7 +83,7 @@ export const UpdateAdditionalsForm = ({
   const onSubmit = (values: FormData) => {
     mutate(values, {
       onSuccess: () => {
-        router.push("/dashboard/additionals");
+        router.push(`/dashboard/${storeId}/additionals`);
       },
     });
   };

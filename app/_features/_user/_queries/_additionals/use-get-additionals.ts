@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
-export const useGetAdditionals = (userId: string) => {
+export const useGetAdditionals = (storeId: string) => {
   const query = useQuery({
-    enabled: !!userId,
-    queryKey: ["additionals", userId],
+    enabled: !!storeId,
+    queryKey: ["additionals", storeId],
     queryFn: async () => {
-      const res = await client.api.additionals.user[":userId"].$get({
-        param: { userId },
+      const res = await client.api.additionals.store[":storeId"].$get({
+        param: { storeId },
       });
 
       if (!res.ok) {

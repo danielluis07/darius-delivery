@@ -7,7 +7,7 @@ import { client } from "@/lib/hono";
 import { AdditionalsCellAction } from "@/app/_features/_user/_components/_additionals/cell-action";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.additionals.user)[":userId"]["$get"],
+  (typeof client.api.additionals.store)[":storeId"]["$get"],
   200
 >["data"][0];
 

@@ -9,10 +9,10 @@ import { auth } from "@/auth";
 const AdditionalPage = async ({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ storeId: string; id: string }>;
 }) => {
   const session = await auth();
-  const { id } = await params;
+  const { storeId, id } = await params;
 
   if (!session || !session.user.id) {
     return <p>Not authenticated</p>;
@@ -21,8 +21,8 @@ const AdditionalPage = async ({
   //promise all
   const [additional, categories, data] = await Promise.all([
     getAdditional(id),
-    getCategories(session.user.id),
-    getCategoryIdByAdditionalGroup(session.user.id, id),
+    getCategories(storeId),
+    getCategoryIdByAdditionalGroup(storeId, id),
   ]);
 
   if (!additional) {
@@ -45,6 +45,7 @@ const AdditionalPage = async ({
       data={additional}
       categories={categories}
       categoryId={data.categoryId}
+      storeId={storeId}
     />
   );
 };

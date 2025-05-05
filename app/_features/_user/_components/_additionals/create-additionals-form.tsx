@@ -30,7 +30,7 @@ import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 
 type Categories = InferResponseType<
-  (typeof client.api.categories.user)[":userId"]["$get"],
+  (typeof client.api.categories.store)[":storeId"]["$get"],
   200
 >["data"];
 
@@ -38,13 +38,16 @@ type FormData = z.infer<typeof additionalGroupSchema>;
 
 export const CreateAdditionalsForm = ({
   categories,
+  storeId,
 }: {
   categories: Categories;
+  storeId: string;
 }) => {
   const { mutate, isPending } = useCreateAdditional();
   const form = useForm<FormData>({
     resolver: zodResolver(additionalGroupSchema),
     defaultValues: {
+      storeId,
       additionals: [],
       isRequired: false,
       category_id: "",
@@ -68,7 +71,7 @@ export const CreateAdditionalsForm = ({
     console.log(values);
     mutate(values, {
       onSuccess: () => {
-        router.push("/dashboard/additionals");
+        router.push(`/dashboard/${storeId}/additionals`);
       },
     });
   };

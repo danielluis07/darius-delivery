@@ -5,9 +5,9 @@ import { useGetAdditionals } from "@/app/_features/_user/_queries/_additionals/u
 import { AdditionalsDataTable } from "@/app/_features/_user/_components/_additionals/data-table";
 import { useDeleteAdditionals } from "../../_queries/_additionals/use-delete-additionals";
 
-export const AdditionalsClient = ({ userId }: { userId: string }) => {
-  const { data, isLoading } = useGetAdditionals(userId);
-  const { mutate } = useDeleteAdditionals(userId);
+export const AdditionalsClient = ({ storeId }: { storeId: string }) => {
+  const { data, isLoading } = useGetAdditionals(storeId);
+  const { mutate } = useDeleteAdditionals(storeId);
 
   return (
     <div className="w-full">
@@ -16,6 +16,7 @@ export const AdditionalsClient = ({ userId }: { userId: string }) => {
         columns={columns}
         data={data || []}
         isLoading={isLoading}
+        storeId={storeId}
         onDelete={(row) => {
           const ids = row.map((r) => r.original.id);
           mutate(ids);

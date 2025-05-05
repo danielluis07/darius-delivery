@@ -38,6 +38,7 @@ type AdditionalsDataTableProps<TData, TValue> = {
   onDelete: (rows: Row<TData>[]) => void;
   disabled?: boolean;
   searchKey: string;
+  storeId: string;
 };
 
 export function AdditionalsDataTable<TData, TValue>({
@@ -46,6 +47,7 @@ export function AdditionalsDataTable<TData, TValue>({
   onDelete,
   isLoading,
   searchKey,
+  storeId,
 }: AdditionalsDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -91,7 +93,7 @@ export function AdditionalsDataTable<TData, TValue>({
           className="w-1/2"
         />
         <div className="flex items-center gap-x-2">
-          <Link href="/dashboard/additionals/new">
+          <Link href={`/dashboard/${storeId}/additionals/new`}>
             <Button>
               Criar Adicional
               <Plus />

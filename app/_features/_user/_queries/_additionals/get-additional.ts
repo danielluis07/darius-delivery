@@ -7,7 +7,7 @@ type ResponseType = InferResponseType<
 >["data"];
 
 type CategoryIdResponseType = InferResponseType<
-  (typeof client.api.additionals)["user"][":userId"]["additional-group"][":groupId"]["$get"],
+  (typeof client.api.additionals)["store"][":storeId"]["additional-group"][":groupId"]["$get"],
   200
 >["data"];
 
@@ -32,12 +32,12 @@ export const getAdditional = async (
 };
 
 export const getCategoryIdByAdditionalGroup = async (
-  userId: string,
+  storeId: string,
   groupId: string
 ): Promise<CategoryIdResponseType | null> => {
   try {
     const res = await fetch(
-      `${URL}/user/${userId}/additional-group/${groupId}`
+      `${URL}/store/${storeId}/additional-group/${groupId}`
     );
 
     if (!res.ok) {

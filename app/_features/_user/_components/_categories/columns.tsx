@@ -9,7 +9,7 @@ import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.categories.user)[":userId"]["$get"],
+  (typeof client.api.categories.store)[":storeId"]["$get"],
   200
 >["data"][0];
 
