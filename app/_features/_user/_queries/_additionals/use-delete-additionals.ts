@@ -12,7 +12,7 @@ type Additionals = InferResponseType<
   200
 >["data"];
 
-export const useDeleteAdditionals = (storeId: string | undefined) => {
+export const useDeleteAdditionals = (storeId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, string[]>({

@@ -8,7 +8,7 @@ import { DeliverersCellAction } from "@/app/_features/_user/_components/_deliver
 import { format } from "date-fns";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.deliverers.user)[":userId"]["$get"],
+  (typeof client.api.deliverers.store)[":storeId"]["$get"],
   200
 >["data"][0];
 

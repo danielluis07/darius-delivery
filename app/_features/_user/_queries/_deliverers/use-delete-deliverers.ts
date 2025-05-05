@@ -11,10 +11,10 @@ type RequestType = InferRequestType<
 >["json"];
 
 type Data = InferResponseType<
-  (typeof client.api.deliverers.user)[":userId"]["$get"],
+  (typeof client.api.deliverers.store)[":storeId"]["$get"],
   200
 >["data"];
-export const useDeleteDeliverers = () => {
+export const useDeleteDeliverers = (storeId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
@@ -24,17 +24,17 @@ export const useDeleteDeliverers = () => {
       });
       return await res.json();
     },
-    onSuccess: (response, variables) => {
+    onSuccess: (_data, variables) => {
       // Get current cache data
       const currentData = queryClient.getQueryData(["deliverers"]) as Data;
 
       // If the number of IDs being deleted matches the total number of items
       if (variables.ids?.length === currentData?.length) {
-        queryClient.setQueryData(["deliverers"], []);
+        queryClient.setQueryData(["deliverers", storeId], []);
       }
 
       toast.success("Entregadores deletados!");
-      queryClient.invalidateQueries({ queryKey: ["deliverers"] });
+      queryClient.invalidateQueries({ queryKey: ["deliverers", storeId] });
     },
     onError: () => {
       toast.error("Houve um erro ao deletar os entregadores!");

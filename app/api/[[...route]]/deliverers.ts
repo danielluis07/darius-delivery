@@ -10,18 +10,18 @@ import { ExtendedAuthUser } from "@/types";
 
 const app = new Hono()
   .get(
-    "/user/:userId",
+    "/store/:storeId",
     verifyAuth(),
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
       const auth = c.get("authUser");
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
@@ -39,7 +39,7 @@ const app = new Hono()
         })
         .from(deliverers)
         .leftJoin(orders, eq(deliverers.id, orders.delivererId))
-        .where(eq(deliverers.user_id, userId))
+        .where(eq(deliverers.storeId, storeId))
         .groupBy(deliverers.id);
 
       if (!data || data.length === 0) {
@@ -61,18 +61,11 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const id =
-        auth.token.role === "EMPLOYEE"
-          ? auth.token.restaurantOwnerId
-          : auth.token.sub;
-
       if (!values) {
         return c.json({ error: "Missing data" }, 400);
       }
 
-      const data = await db
-        .insert(deliverers)
-        .values({ ...values, user_id: id });
+      const data = await db.insert(deliverers).values(values);
 
       if (!data) {
         return c.json({ error: "Failed to insert data" }, 500);
@@ -104,6 +97,45 @@ const app = new Hono()
 
       if (!data) {
         return c.json({ error: "Failed to delete deliverers" }, 500);
+      }
+
+      return c.json({ data });
+    }
+  )
+  .patch(
+    "/:id",
+    verifyAuth(),
+    zValidator(
+      "param",
+      z.object({
+        id: z.string().optional(),
+      })
+    ),
+    zValidator("json", insertDeliverersSchema),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { id } = c.req.valid("param");
+      const values = c.req.valid("json");
+
+      if (!auth || !auth.token?.sub) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!id) {
+        return c.json({ error: "Missing id" }, 400);
+      }
+
+      if (!values) {
+        return c.json({ error: "Missing data" }, 400);
+      }
+
+      const data = await db
+        .update(deliverers)
+        .set(values)
+        .where(eq(deliverers.id, id));
+
+      if (!data) {
+        return c.json({ error: "Failed to update deliverer" }, 500);
       }
 
       return c.json({ data });

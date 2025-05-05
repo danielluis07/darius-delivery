@@ -7,7 +7,7 @@ type ResponseType = InferResponseType<
   (typeof client.api.deliverers)[":id"]["$delete"]
 >;
 
-export const useDeleteDeliverer = (id?: string) => {
+export const useDeleteDeliverer = (id: string, storeId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error>({
@@ -19,7 +19,7 @@ export const useDeleteDeliverer = (id?: string) => {
     },
     onSuccess: () => {
       toast.success("Entregador deletado!");
-      queryClient.invalidateQueries({ queryKey: ["deliverers"] });
+      queryClient.invalidateQueries({ queryKey: ["deliverers", storeId] });
     },
     onError: () => {
       toast.error("Houve um erro ao deletar o entregador!");

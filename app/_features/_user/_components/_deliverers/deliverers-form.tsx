@@ -18,11 +18,18 @@ import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
 
 type FormData = z.infer<typeof insertDeliverersSchema>;
 
-export const DeliverersForm = ({ isLoading }: { isLoading: boolean }) => {
-  const { mutate, isPending } = useCreateDeliverer();
+export const DeliverersForm = ({
+  isLoading,
+  storeId,
+}: {
+  isLoading: boolean;
+  storeId: string;
+}) => {
+  const { mutate, isPending } = useCreateDeliverer(storeId);
   const form = useForm<FormData>({
     resolver: zodResolver(insertDeliverersSchema),
     defaultValues: {
+      storeId,
       name: "",
       phone: "",
       vehicle: "",

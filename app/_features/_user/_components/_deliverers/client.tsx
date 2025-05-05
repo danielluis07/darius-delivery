@@ -6,14 +6,14 @@ import { useGetDeliverers } from "@/app/_features/_user/_queries/_deliverers/use
 import { useDeleteDeliverers } from "@/app/_features/_user/_queries/_deliverers/use-delete-deliverers";
 import { DeliverersForm } from "@/app/_features/_user/_components/_deliverers/deliverers-form";
 
-export const DeliverersClient = ({ userId }: { userId: string }) => {
-  const { data, isLoading } = useGetDeliverers(userId);
-  const { mutate } = useDeleteDeliverers();
+export const DeliverersClient = ({ storeId }: { storeId: string }) => {
+  const { data, isLoading } = useGetDeliverers(storeId);
+  const { mutate } = useDeleteDeliverers(storeId);
 
   return (
     <div className="w-full">
       <h1 className="text-xl font-bold mb-10">Entregadores</h1>
-      <DeliverersForm isLoading={isLoading} />
+      <DeliverersForm isLoading={isLoading} storeId={storeId} />
       <DeliverersDataTable
         columns={columns}
         data={data || []}
