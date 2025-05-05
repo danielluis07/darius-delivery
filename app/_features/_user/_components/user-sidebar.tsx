@@ -110,61 +110,61 @@ export function UserSidebar({
       allowed: true,
     },
     {
-      url: "/dashboard/products",
+      url: `/dashboard/${storeId}/products`,
       icon: Sandwich,
       label: "Produtos",
       allowed: true,
     },
     {
-      url: "/dashboard/domain-configuration",
+      url: `/dashboard/${storeId}/domain-configuration`,
       icon: Globe,
       label: "Configuração de Domínio",
       allowed: true,
     },
     {
-      url: "/dashboard/customization",
+      url: `/dashboard/${storeId}/customization`,
       icon: Paintbrush,
       label: "Personalização",
       allowed: true,
     },
     {
-      url: "/dashboard/deliverers",
+      url: `/dashboard/${storeId}/deliverers`,
       icon: RiMotorbikeFill,
       label: "Entregadores",
       allowed: true,
     },
     {
-      url: "/dashboard/orders",
+      url: `/dashboard/${storeId}/orders`,
       icon: NotebookText,
       label: "Pedidos",
       allowed: true,
     },
     {
-      url: "/dashboard/order-routing",
+      url: `/dashboard/${storeId}/order-routing`,
       icon: user.subscription?.plan === "PREMIUM" ? Route : Lock,
       label: "Roteirização de Pedidos",
       allowed: user.subscription?.plan === "PREMIUM",
     },
     {
-      url: "/dashboard/combos",
+      url: `/dashboard/${storeId}/combos`,
       icon: ShoppingBasket,
       label: "Combos",
       allowed: true,
     },
     {
-      url: "/dashboard/customers",
+      url: `/dashboard/${storeId}/customers`,
       icon: Users,
       label: "Clientes",
       allowed: true,
     },
     {
-      url: "/dashboard/finances",
+      url: `/dashboard/${storeId}/finances`,
       icon: CircleDollarSign,
       label: "Financeiro",
       allowed: true,
     },
     {
-      url: "/dashboard/delivery-areas",
+      url: `/dashboard/${storeId}/delivery-areas`,
       icon: MapPin,
       label: "Áreas de Entrega",
       allowed: true,
@@ -176,25 +176,25 @@ export function UserSidebar({
       allowed: true,
     }, */
     {
-      url: "/dashboard/pixels",
+      url: `/dashboard/${storeId}/pixels`,
       icon: ChartPie,
       label: "Pixels",
       allowed: true,
     },
     {
-      url: "/dashboard/darius-pay",
+      url: `/dashboard/${storeId}/darius-pay`,
       icon: TbCircleLetterD,
       label: "Darius Pay",
       allowed: true,
     },
     {
-      url: "/dashboard/employees",
+      url: `/dashboard/${storeId}/employees`,
       icon: UserRoundCog,
       label: "Funcionários",
       allowed: true,
     },
     {
-      url: "/dashboard/documents",
+      url: `/dashboard/${storeId}/documents`,
       icon: Files,
       label: "Documentos",
       allowed: true,
@@ -272,14 +272,18 @@ export function UserSidebar({
                           <SidebarMenuSub className="space-y-1">
                             <SidebarMenuSubItem
                               onClick={() =>
-                                router.push("/dashboard/delivery-areas")
+                                router.push(
+                                  `/dashboard/${storeId}/delivery-areas`
+                                )
                               }
                               className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
                               Por Endereço
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem
                               onClick={() =>
-                                router.push("/dashboard/delivery-areas-km")
+                                router.push(
+                                  `/dashboard/${storeId}/delivery-areas-km`
+                                )
                               }
                               className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
                               Por Km
@@ -307,13 +311,15 @@ export function UserSidebar({
                         <CollapsibleContent>
                           <SidebarMenuSub className="space-y-1">
                             <SidebarMenuSubItem
-                              onClick={() => router.push("/dashboard/products")}
+                              onClick={() =>
+                                router.push(`/dashboard/${storeId}/products`)
+                              }
                               className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
                               Todos os Produtos
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem
                               onClick={() =>
-                                router.push("/dashboard/additionals")
+                                router.push(`/dashboard/${storeId}/additionals`)
                               }
                               className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
                               Adicionais
@@ -342,13 +348,17 @@ export function UserSidebar({
                           <SidebarMenuSub className="space-y-1">
                             <SidebarMenuSubItem
                               onClick={() =>
-                                router.push("/dashboard/customization")
+                                router.push(
+                                  `/dashboard/${storeId}/customization`
+                                )
                               }
                               className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
                               Configurações
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem
-                              onClick={() => router.push("/dashboard/colors")}
+                              onClick={() =>
+                                router.push(`/dashboard/${storeId}/colors`)
+                              }
                               className="rounded-md p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
                               Cores
                             </SidebarMenuSubItem>

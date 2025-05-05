@@ -50,7 +50,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 type Categories = InferResponseType<
-  (typeof client.api.categories.user)[":userId"]["$get"],
+  (typeof client.api.categories.store)[":storeId"]["$get"],
   200
 >["data"];
 
@@ -58,8 +58,10 @@ type FormData = z.infer<typeof insertProductSchema>;
 
 export const CreateProductForm = ({
   categories,
+  storeId,
 }: {
   categories: Categories;
+  storeId: string;
 }) => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
@@ -90,7 +92,7 @@ export const CreateProductForm = ({
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      createProduct(values)
+      createProduct(values, storeId)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -98,7 +100,7 @@ export const CreateProductForm = ({
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard/products");
+            router.push(`/dashboard/${storeId}/products`);
           }
         })
         .catch((error) => {

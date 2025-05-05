@@ -37,7 +37,13 @@ type Category = InferResponseType<
 
 type FormData = z.infer<typeof updateCategorySchema>;
 
-export const UpdateCategoryForm = ({ category }: { category: Category }) => {
+export const UpdateCategoryForm = ({
+  category,
+  storeId,
+}: {
+  category: Category;
+  storeId: string;
+}) => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
@@ -65,7 +71,7 @@ export const UpdateCategoryForm = ({ category }: { category: Category }) => {
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      updateCategory(values)
+      updateCategory(values, storeId)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -73,7 +79,7 @@ export const UpdateCategoryForm = ({ category }: { category: Category }) => {
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard/categories");
+            router.push(`/dashboard/${storeId}/categories`);
           }
         })
         .catch((error) => {

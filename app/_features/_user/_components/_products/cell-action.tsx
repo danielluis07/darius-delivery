@@ -14,7 +14,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useDeleteProduct } from "../../_queries/_products/use-delete-product";
 import { useConfirmContext } from "@/context/confirm-context";
@@ -29,6 +29,7 @@ export const ProductsCellAction = ({
   status: boolean;
 }) => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const { storeId } = useParams<{ storeId: string }>();
   const session = useSession();
 
   const userId =
@@ -58,7 +59,7 @@ export const ProductsCellAction = ({
         <DropdownMenuItem
           disabled={deleteMutation.isPending}
           className="cursor-pointer"
-          onClick={() => router.push(`/dashboard/products/${id}`)}>
+          onClick={() => router.push(`/dashboard/${storeId}/products/${id}`)}>
           <Pencil className="mr-2 size-5" />
           Editar
         </DropdownMenuItem>

@@ -20,7 +20,8 @@ type UpdatedData = {
 };
 
 export const updateProduct = async (
-  values: z.infer<typeof updateProductSchema>
+  values: z.infer<typeof updateProductSchema>,
+  storeId: string
 ) => {
   try {
     const session = await auth();
@@ -68,7 +69,7 @@ export const updateProduct = async (
           image: products.image,
         })
         .from(products)
-        .where(and(eq(products.id, product_id), eq(products.userId, id)));
+        .where(and(eq(products.id, product_id), eq(products.storeId, storeId)));
 
       if (!existingProduct.image) {
         return { success: false, message: "Produto não encontrado" };
@@ -99,7 +100,7 @@ export const updateProduct = async (
     const [product] = await db
       .update(products)
       .set(updateData)
-      .where(and(eq(products.id, product_id), eq(products.userId, id)))
+      .where(and(eq(products.id, product_id), eq(products.storeId, storeId)))
       .returning({
         id: products.id,
       });

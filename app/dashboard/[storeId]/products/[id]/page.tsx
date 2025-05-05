@@ -3,9 +3,13 @@ import { getCategories } from "@/app/_features/_user/_queries/_categories/get-ca
 import { getProduct } from "@/app/_features/_user/_queries/_products/get-product";
 import { auth } from "@/auth";
 
-const ProductPage = async ({ params }: { params: Promise<{ id: string }> }) => {
+const ProductPage = async ({
+  params,
+}: {
+  params: Promise<{ storeId: string; id: string }>;
+}) => {
   const session = await auth();
-  const { id } = await params;
+  const { storeId, id } = await params;
 
   if (!session || !session.user.id) {
     return <p>Not authenticated</p>;
@@ -13,7 +17,7 @@ const ProductPage = async ({ params }: { params: Promise<{ id: string }> }) => {
 
   // primise all
   const [categories, product] = await Promise.all([
-    getCategories(session.user.id),
+    getCategories(storeId),
     getProduct(id),
   ]);
 
@@ -25,7 +29,13 @@ const ProductPage = async ({ params }: { params: Promise<{ id: string }> }) => {
     return <p>Product not found</p>;
   }
 
-  return <UpdateProductForm categories={categories} product={product} />;
+  return (
+    <UpdateProductForm
+      categories={categories}
+      product={product}
+      storeId={storeId}
+    />
+  );
 };
 
 export default ProductPage;

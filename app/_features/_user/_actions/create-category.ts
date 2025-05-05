@@ -5,7 +5,6 @@ import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { categories } from "@/db/schema";
 import { insertCategorySchema } from "@/db/schemas";
-import { revalidatePath } from "next/cache";
 import { uploadImageToS3 } from "@/lib/s3-upload";
 
 export const createCategory = async (

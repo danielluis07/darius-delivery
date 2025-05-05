@@ -5,11 +5,11 @@ import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { products } from "@/db/schema";
 import { insertProductSchema } from "@/db/schemas";
-import { revalidatePath } from "next/cache";
 import { uploadImageToS3 } from "@/lib/s3-upload";
 
 export const createProduct = async (
-  values: z.infer<typeof insertProductSchema>
+  values: z.infer<typeof insertProductSchema>,
+  storeId: string
 ) => {
   try {
     const session = await auth();
@@ -73,7 +73,7 @@ export const createProduct = async (
         category_id,
         description,
         allowHalfOption,
-        userId: id,
+        storeId,
       })
       .returning({
         id: products.id,
@@ -86,7 +86,6 @@ export const createProduct = async (
       };
     }
 
-    revalidatePath("/dashboard/products");
     return { success: true, message: "Produto criado com sucesso" };
   } catch (error) {
     console.error(error);

@@ -5,10 +5,10 @@ import { auth } from "@/auth";
 const CategoryPage = async ({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ storeId: string; id: string }>;
 }) => {
   const session = await auth();
-  const { id } = await params;
+  const { storeId, id } = await params;
 
   if (!session || !session.user.id) {
     return <p>Not authenticated</p>;
@@ -20,7 +20,7 @@ const CategoryPage = async ({
     return <p>Category not found</p>;
   }
 
-  return <UpdateCategoryForm category={category} />;
+  return <UpdateCategoryForm category={category} storeId={storeId} />;
 };
 
 export default CategoryPage;

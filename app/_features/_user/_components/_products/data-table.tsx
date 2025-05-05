@@ -38,6 +38,7 @@ type ProductsDataTableProps<TData, TValue> = {
   isLoading?: boolean;
   disabled?: boolean;
   searchKey: string;
+  storeId: string;
 };
 
 export function ProductsDataTable<TData, TValue>({
@@ -46,6 +47,7 @@ export function ProductsDataTable<TData, TValue>({
   isLoading,
   onDelete,
   searchKey,
+  storeId,
 }: ProductsDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -91,7 +93,7 @@ export function ProductsDataTable<TData, TValue>({
           className="w-1/2"
         />
         <div className="flex items-center gap-x-2">
-          <Link href="/dashboard/products/new">
+          <Link href={`/dashboard/${storeId}/products/new`}>
             <Button>
               Adicionar Produto
               <Plus />

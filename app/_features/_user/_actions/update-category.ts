@@ -15,7 +15,8 @@ type UpdatedData = {
 };
 
 export const updateCategory = async (
-  values: z.infer<typeof updateCategorySchema>
+  values: z.infer<typeof updateCategorySchema>,
+  storeId: string
 ) => {
   try {
     const session = await auth();
@@ -54,7 +55,9 @@ export const updateCategory = async (
           image: categories.image,
         })
         .from(categories)
-        .where(and(eq(categories.id, category_id), eq(categories.userId, id)));
+        .where(
+          and(eq(categories.id, category_id), eq(categories.storeId, storeId))
+        );
 
       if (!existingCategory.image) {
         return { success: false, message: "Categoria não encontrada" };
@@ -80,7 +83,9 @@ export const updateCategory = async (
     const category = await db
       .update(categories)
       .set(updateData)
-      .where(and(eq(categories.id, category_id), eq(categories.userId, id)));
+      .where(
+        and(eq(categories.id, category_id), eq(categories.storeId, storeId))
+      );
 
     if (!category) {
       return {

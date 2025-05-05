@@ -31,7 +31,7 @@ interface ProductWithAdditionals {
   id: string;
   name: string;
   allowHalfOption: boolean;
-  userId: string | null;
+  storeId: string | null;
   image: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -67,19 +67,19 @@ const app = new Hono()
     }
   )
   .get(
-    "/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/user/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
-        return c.json({ error: "Missing user id" }, 400);
+      if (!storeId) {
+        return c.json({ error: "Missing store id" }, 400);
       }
 
       const data = await db
         .select()
         .from(products)
-        .where(eq(products.userId, userId));
+        .where(eq(products.storeId, storeId));
 
       if (!data || data.length === 0) {
         return c.json({ error: "No products found" }, 404);
@@ -89,19 +89,19 @@ const app = new Hono()
     }
   )
   .get(
-    "/customer/:userId/:categoryId",
+    "/customer/:storeId/:categoryId",
     zValidator(
       "param",
       z.object({
-        userId: z.string().optional(),
+        storeId: z.string().optional(),
         categoryId: z.string().optional(),
       })
     ),
     async (c) => {
-      const { userId, categoryId } = c.req.valid("param");
+      const { storeId, categoryId } = c.req.valid("param");
 
-      if (!userId || !categoryId) {
-        return c.json({ error: "Missing userId or categoryId" }, 400);
+      if (!storeId || !categoryId) {
+        return c.json({ error: "Missing storeId or categoryId" }, 400);
       }
 
       try {
@@ -127,9 +127,9 @@ const app = new Hono()
           )
           .where(
             and(
-              eq(products.userId, userId),
+              eq(products.storeId, storeId),
               eq(products.category_id, categoryId),
-              eq(categories.userId, userId), // Ensure category belongs to user
+              eq(categories.storeId, storeId), // Ensure category belongs to user
               eq(products.isActive, true) // Ensure product is active
             )
           );
@@ -187,19 +187,19 @@ const app = new Hono()
     }
   )
   .get(
-    "/count/:userId",
-    zValidator("param", z.object({ userId: z.string() })),
+    "/count/:storeId",
+    zValidator("param", z.object({ storeId: z.string() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user ID" }, 400);
       }
 
       const [data] = await db
         .select({ count: count() })
         .from(products)
-        .where(eq(products.userId, userId));
+        .where(eq(products.storeId, storeId));
 
       if (!data) {
         return c.json({ error: "No orders found" }, 404);
@@ -312,7 +312,7 @@ const app = new Hono()
       const data = await db
         .update(products)
         .set({ isActive })
-        .where(and(eq(products.id, id), eq(products.userId, auth.token.sub)));
+        .where(eq(products.id, id));
 
       if (!data) {
         return c.json({ error: "Failed to update product" }, 500);

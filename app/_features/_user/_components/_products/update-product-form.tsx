@@ -51,7 +51,7 @@ import { updateProduct } from "../../_actions/update-product";
 import { Switch } from "@/components/ui/switch";
 
 type Categories = InferResponseType<
-  (typeof client.api.categories.user)[":userId"]["$get"],
+  (typeof client.api.categories.store)[":storeId"]["$get"],
   200
 >["data"];
 
@@ -65,9 +65,11 @@ type FormData = z.infer<typeof updateProductSchema>;
 export const UpdateProductForm = ({
   categories,
   product,
+  storeId,
 }: {
   categories: Categories;
   product: Product;
+  storeId: string;
 }) => {
   const [isPending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[] | null>(null);
@@ -101,7 +103,7 @@ export const UpdateProductForm = ({
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      updateProduct(values)
+      updateProduct(values, storeId)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -109,7 +111,7 @@ export const UpdateProductForm = ({
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard/products");
+            router.push(`/dashboard/${storeId}/products`);
           }
         })
         .catch((error) => {

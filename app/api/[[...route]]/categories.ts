@@ -3,7 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
 import { categories, products, stores } from "@/db/schema";
-import { and, count, eq, inArray } from "drizzle-orm";
+import { count, eq, inArray } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 import { deleteFromS3 } from "@/lib/s3-upload";
 
@@ -39,15 +39,9 @@ const app = new Hono()
   )
   .get(
     "/store/:storeId",
-    verifyAuth(),
     zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
       const { storeId } = c.req.valid("param");
-      const auth = c.get("authUser");
-
-      if (!auth || !auth.token?.sub) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
 
       if (!storeId) {
         return c.json({ error: "Missing store id" }, 400);
@@ -56,7 +50,7 @@ const app = new Hono()
       const [store] = await db
         .select({ id: stores.id })
         .from(stores)
-        .where(and(eq(stores.id, storeId), eq(stores.userId, auth.token?.sub)));
+        .where(eq(stores.id, storeId));
 
       if (!store) {
         return c.json({ error: "Store not found" }, 404);
