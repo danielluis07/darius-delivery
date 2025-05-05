@@ -2,17 +2,17 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.customizations)[":userId"]["$get"],
+  (typeof client.api.customizations.store)[":storeId"]["$get"],
   200
 >["data"];
 
-const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/customizations`;
+const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/customizations/store`;
 
 export const getCustomization = async (
-  userId: string
+  storeId: string
 ): Promise<ResponseType> => {
   try {
-    const res = await fetch(`${URL}/${userId}`);
+    const res = await fetch(`${URL}/${storeId}`);
 
     const { data } = await res.json();
     return data;

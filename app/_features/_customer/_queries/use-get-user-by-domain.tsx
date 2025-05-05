@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+/* import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
 export const useGetUserByDomain = (domain: string) => {
@@ -20,3 +20,4 @@ export const useGetUserByDomain = (domain: string) => {
   });
   return query;
 };
+ */

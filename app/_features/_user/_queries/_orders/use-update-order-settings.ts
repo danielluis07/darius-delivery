@@ -12,7 +12,7 @@ type RequestType = InferRequestType<
 
 export const useUpdateOrderSettings = (
   id: string | undefined,
-  userId: string
+  storeId: string
 ) => {
   const queryClient = useQueryClient();
 
@@ -26,7 +26,7 @@ export const useUpdateOrderSettings = (
     },
     onSuccess: () => {
       toast.success("Tempo atualizado!");
-      queryClient.invalidateQueries({ queryKey: ["orders-settings", userId] });
+      queryClient.invalidateQueries({ queryKey: ["orders-settings", storeId] });
     },
     onError: () => {
       toast.error("Houve um erro editar o pedido!");

@@ -60,7 +60,7 @@ type TemplatesResponseType = InferResponseType<
 >["data"];
 
 type CustomizationResponseType = InferResponseType<
-  (typeof client.api.customizations)[":userId"]["$get"],
+  (typeof client.api.customizations.store)[":storeId"]["$get"],
   200
 >["data"];
 
@@ -92,9 +92,11 @@ const paymentOptions = [
 export const CustomizationForm = ({
   templates,
   customization,
+  storeId,
 }: {
   templates: TemplatesResponseType;
   customization: CustomizationResponseType;
+  storeId: string;
 }) => {
   const [isPending, startTransition] = useTransition();
   const [bannerfiles, setBannerFiles] = useState<File[] | null>(null);
@@ -150,7 +152,7 @@ export const CustomizationForm = ({
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      createCustomization(values)
+      createCustomization(values, storeId)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);

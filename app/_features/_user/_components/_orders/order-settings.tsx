@@ -25,16 +25,17 @@ import { cn } from "@/lib/utils";
 
 type FormData = z.infer<typeof insertOrderSettingsSchema>;
 
-export const OrderSettings = ({ userId }: { userId: string }) => {
-  const { data, isLoading } = useGetOrdersSettings(userId);
+export const OrderSettings = ({ storeId }: { storeId: string }) => {
+  const { data, isLoading } = useGetOrdersSettings(storeId);
   const [edit, setEdit] = useState<boolean>(false);
   const { mutate: createOrderSettings, isPending: isPendingCreation } =
-    useCreateOrderSettings(userId);
+    useCreateOrderSettings(storeId);
   const { mutate: updateOrderSettings, isPending: isPendingUpdate } =
-    useUpdateOrderSettings(data?.id, userId);
+    useUpdateOrderSettings(data?.id, storeId);
   const form = useForm<FormData>({
     resolver: zodResolver(insertOrderSettingsSchema),
     defaultValues: {
+      storeId: storeId,
       delivery_deadline: 0,
       pickup_deadline: 0,
     },

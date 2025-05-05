@@ -3,32 +3,30 @@ import { getColors } from "@/app/_features/_user/_queries/_colors/get-colors";
 import { getTemplates } from "@/app/_features/_user/_queries/get-templates";
 import { auth } from "@/auth";
 
-const ColorsPage = async () => {
+const ColorsPage = async ({
+  params,
+}: {
+  params: Promise<{ storeId: string }>;
+}) => {
+  const { storeId } = await params;
   const session = await auth();
 
   if (!session || !session.user.id) {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const id =
-    session.user.role === "EMPLOYEE"
-      ? session.user.restaurantOwnerId
-      : session.user.id;
-
-  if (!id) {
-    return <div>Usuário não encontrado</div>;
-  }
-
   const [colors, templates] = await Promise.all([
-    getColors(id),
+    getColors(storeId),
     getTemplates(),
   ]);
+
+  console.log("colors", colors);
 
   if (!templates) {
     return <div>Templates não encontrados</div>;
   }
 
-  return <ColorsForm colors={colors} templates={templates} />;
+  return <ColorsForm colors={colors} templates={templates} storeId={storeId} />;
 };
 
 export default ColorsPage;

@@ -10,7 +10,8 @@ import { formatAddress, getGeoCode } from "@/lib/google-geocode";
 import { deleteFromS3, uploadImageToS3 } from "@/lib/s3-upload";
 
 export const createCustomization = async (
-  values: z.infer<typeof insertCustomizationSchema>
+  values: z.infer<typeof insertCustomizationSchema>,
+  storeId: string
 ) => {
   try {
     // 1. Authentication and Basic Validation
@@ -50,7 +51,7 @@ export const createCustomization = async (
     const [existingColors] = await db
       .select({ id: colors.id })
       .from(colors)
-      .where(eq(colors.user_id, userId));
+      .where(eq(colors.storeId, storeId));
 
     if (!existingColors) {
       return {
@@ -74,7 +75,7 @@ export const createCustomization = async (
     const [orderSettingsData] = await db
       .select({ id: orderSettings.id })
       .from(orderSettings)
-      .where(eq(orderSettings.user_id, userId));
+      .where(eq(orderSettings.storeId, storeId));
 
     if (!orderSettingsData) {
       return {
@@ -116,7 +117,7 @@ export const createCustomization = async (
         .select({ banner: customizations.banner, logo: customizations.logo })
         .from(customizations)
         .where(
-          and(eq(customizations.id, id), eq(customizations.user_id, userId))
+          and(eq(customizations.id, id), eq(customizations.storeId, storeId))
         ); // Match ID and User
 
       if (!fetchedData) {
@@ -300,7 +301,7 @@ export const createCustomization = async (
         isOpen,
         ...otherData, // Include other validated fields
         // Include required relationships and calculated data
-        user_id: userId,
+        storeId,
         latitude,
         longitude,
         placeId,

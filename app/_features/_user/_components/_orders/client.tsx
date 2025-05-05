@@ -75,10 +75,10 @@ const orderStatus: Array<
   "CONSUME_ON_SITE",
 ];
 
-export const OrdersClient = ({ userId }: { userId: string }) => {
+export const OrdersClient = ({ storeId }: { storeId: string }) => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const { data, isLoading } = useGetOrdersReceipts(userId);
-  const { mutate, isPending } = useUpdateOrderStatus(userId);
+  const { data, isLoading } = useGetOrdersReceipts(storeId);
+  const { mutate, isPending } = useUpdateOrderStatus(storeId);
   const { isOpen, receipt, openDialog, closeDialog } = useDialogStore();
   const router = useRouter();
 
@@ -169,7 +169,7 @@ export const OrdersClient = ({ userId }: { userId: string }) => {
                 Roteirização <Route />
               </Button>
             </Link>
-            <CloseCashRegister userId={userId} />
+            <CloseCashRegister storeId={storeId} />
           </div>
         </div>
         <div className="grid md:grid-cols-3 gap-4 mt-10">

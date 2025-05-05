@@ -10,12 +10,12 @@ import { ExtendedAuthUser } from "@/types";
 
 const app = new Hono()
   .get(
-    "/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
@@ -26,7 +26,7 @@ const app = new Hono()
           pickup_deadline: orderSettings.pickup_deadline,
         })
         .from(orderSettings)
-        .where(eq(orderSettings.user_id, userId));
+        .where(eq(orderSettings.storeId, storeId));
 
       if (!data) {
         return c.json({ error: "No order settings found" }, 404);
@@ -40,24 +40,20 @@ const app = new Hono()
     verifyAuth(),
     zValidator("json", insertOrderSettingsSchema),
     async (c) => {
-      const auth = c.get("authUser") as ExtendedAuthUser;
-      const { delivery_deadline, pickup_deadline } = c.req.valid("json");
+      const auth = c.get("authUser");
+      const { delivery_deadline, pickup_deadline, storeId } =
+        c.req.valid("json");
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-
-      const id =
-        auth.token.role === "EMPLOYEE"
-          ? auth.token.restaurantOwnerId
-          : auth.token.sub;
 
       if (!delivery_deadline || !pickup_deadline) {
         return c.json({ error: "Missing data" }, 400);
       }
 
       const data = await db.insert(orderSettings).values({
-        user_id: id,
+        storeId,
         delivery_deadline,
         pickup_deadline,
       });
@@ -77,19 +73,19 @@ const app = new Hono()
     async (c) => {
       const auth = c.get("authUser") as ExtendedAuthUser;
       const { id } = c.req.valid("param");
-      const { delivery_deadline, pickup_deadline } = c.req.valid("json");
+      const { delivery_deadline, pickup_deadline, storeId } =
+        c.req.valid("json");
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const userId =
-        auth.token.role === "EMPLOYEE"
-          ? auth.token.restaurantOwnerId
-          : auth.token.sub;
+      if (!storeId) {
+        return c.json({ error: "Missing store id" }, 400);
+      }
 
-      if (!id || !userId) {
-        return c.json({ error: "Missing user id" }, 400);
+      if (!id) {
+        return c.json({ error: "Missing id" }, 400);
       }
 
       const data = await db
@@ -98,7 +94,7 @@ const app = new Hono()
           delivery_deadline,
           pickup_deadline,
         })
-        .where(eq(orderSettings.id, userId));
+        .where(eq(orderSettings.id, storeId));
 
       if (!data) {
         return c.json({ error: "Failed to update order settings" }, 500);

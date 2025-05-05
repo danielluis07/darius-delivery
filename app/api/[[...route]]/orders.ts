@@ -386,7 +386,6 @@ const app = new Hono()
       return c.json({ data: chartData });
     }
   )
-
   .get(
     "/count/:userId",
     zValidator("param", z.object({ userId: z.string() })),

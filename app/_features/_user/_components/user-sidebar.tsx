@@ -404,7 +404,7 @@ export function UserSidebar({
                 className="w-[--radix-popper-anchor-width]">
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  onClick={() => router.push("/dashboard/settings")}>
+                  onClick={() => router.push(`/dashboard/${storeId}/settings`)}>
                   <Settings />
                   {open && <span>Configurações</span>}
                 </DropdownMenuItem>
