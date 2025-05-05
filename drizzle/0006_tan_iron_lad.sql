@@ -1,1 +1,0 @@
-ALTER TABLE "customizations" ADD COLUMN "background_color" varchar(7);

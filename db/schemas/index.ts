@@ -13,10 +13,18 @@ import {
   combos,
   pixels,
   colors,
+  stores,
 } from "@/db/schema";
 import { createInsertSchema } from "drizzle-zod";
+import { use } from "react";
 
 export const baseUserSchema = createInsertSchema(users);
+
+const baseStoreSchema = createInsertSchema(stores);
+
+export const insertStoreSchema = baseStoreSchema.extend({
+  userId: z.string().optional(),
+});
 
 export const insertColorsSchema = createInsertSchema(colors);
 

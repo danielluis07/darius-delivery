@@ -63,7 +63,7 @@ type User = {
   subscription: {
     id: string;
     asaas_sub_id: string | null;
-    user_id: string;
+    storeId: string | null;
     plan: "BASIC" | "PREMIUM" | null;
     status: string;
     end_date: Date | null;
@@ -73,12 +73,24 @@ type User = {
   employee: {
     id: string;
     userId: string | null;
-    restaurantOwnerId: string | null;
+    storeId: string | null;
     permissions: string[] | null;
   } | null;
 };
 
-export function UserSidebar({ user }: { user: User }) {
+export function UserSidebar({
+  user,
+  stores,
+}: {
+  user: User;
+  stores:
+    | {
+        id: string;
+        userId: string;
+        name: string;
+      }[]
+    | undefined;
+}) {
   const { open, setOpen } = useSidebar();
   const router = useRouter();
 
@@ -234,7 +246,7 @@ export function UserSidebar({ user }: { user: User }) {
               ? "flex items-center justify-center w-full h-10 px-2 py-1 mt-2 mb-2 rounded-md shadow-sm"
               : "hidden"
           )}>
-          <StoresComboBox />
+          <StoresComboBox stores={stores || []} />
         </div>
         {/*  */}
         <SidebarGroup>

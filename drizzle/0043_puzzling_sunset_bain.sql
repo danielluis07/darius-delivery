@@ -1,1 +1,0 @@
-ALTER TABLE "products" ADD COLUMN "allow_half_option" boolean DEFAULT false;

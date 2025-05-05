@@ -1,1 +1,0 @@
-ALTER TABLE "user" ALTER COLUMN "asaas_api_key" SET NOT NULL;

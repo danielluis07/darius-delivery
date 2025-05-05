@@ -1,1 +1,0 @@
-ALTER TABLE "customers" ADD COLUMN "postal_code" text NOT NULL;

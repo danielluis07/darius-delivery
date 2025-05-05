@@ -82,6 +82,22 @@ export const freeTestStatus = pgEnum("free_test_status", [
 
 // TABLES
 
+export const stores = pgTable("stores", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export const users = pgTable("user", {
   id: text("id")
     .primaryKey()
@@ -224,7 +240,9 @@ export const categories = pgTable("categories", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("userId").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   name: text("name").notNull(),
   image: text("image"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -235,7 +253,9 @@ export const products = pgTable("products", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("userId").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   category_id: text("category_id").references(() => categories.id, {
     onDelete: "cascade",
   }),
@@ -255,10 +275,12 @@ export const combos = pgTable("combos", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   name: text("name").notNull(),
   description: text("description").notNull(),
   price: integer("price").notNull(),
-  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   type: text("type").notNull().default("COMBO"),
   isActive: boolean("is_active").default(true).notNull(),
   image: text("image"),
@@ -287,7 +309,7 @@ export const customers = pgTable("customers", {
     .references(() => users.id, { onDelete: "cascade" })
     .unique(), // Ensures each customer has one record in customers
   asaasCustomerId: text("asaas_customer_id"),
-  restaurantOwnerId: text("restaurantOwnerId").references(() => users.id, {
+  storeId: text("store_id").references(() => stores.id, {
     onDelete: "cascade",
   }),
   city: text("city").notNull(),
@@ -306,7 +328,7 @@ export const employees = pgTable("employee", {
   userId: text("userId")
     .references(() => users.id, { onDelete: "cascade" })
     .unique(),
-  restaurantOwnerId: text("restaurantOwnerId").references(() => users.id, {
+  storeId: text("store_id").references(() => stores.id, {
     onDelete: "cascade",
   }),
   permissions: text("permissions").array().default([]),
@@ -316,7 +338,9 @@ export const deliverers = pgTable("deliverers", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   name: text("name").notNull(),
   phone: varchar("phone", { length: 20 }).notNull(),
   vehicle: varchar("vehicle", { length: 100 }).notNull(),
@@ -333,7 +357,9 @@ export const customizations = pgTable("customizations", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }), // Relacionado com usuário
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   template_id: text("template_id")
     .notNull()
     .references(() => templates.id, { onDelete: "cascade" }),
@@ -359,7 +385,9 @@ export const colors = pgTable("colors", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   template_id: text("template_id")
     .notNull()
     .references(() => templates.id, { onDelete: "cascade" }),
@@ -397,9 +425,9 @@ export const subscriptions = pgTable("subscriptions", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   asaas_sub_id: text("asaas_sub_id"),
-  user_id: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }), // Relacionamento com usuários
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   plan: subscriptionType("subscription_type"), // Planos de assinatura (ajustável conforme necessidade)
   status: text("status").notNull(), // Status da assinatura
   end_date: timestamp("end_date", { withTimezone: true }),
@@ -415,7 +443,9 @@ export const orders = pgTable("orders", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   delivererId: text("deliverer_id").references(() => deliverers.id, {
     onDelete: "set null",
   }),
@@ -459,7 +489,9 @@ export const orderSettings = pgTable("order_settings", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   delivery_deadline: integer("delivery_deadline").notNull().default(30),
   pickup_deadline: integer("pickup_deadline").notNull().default(15),
   updatedAt: timestamp("updated_at", { withTimezone: true })
@@ -488,7 +520,9 @@ export const transactions = pgTable("transactions", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   order_id: text("order_id")
     .notNull()
     .references(() => orders.id, { onDelete: "cascade" }),
@@ -508,10 +542,12 @@ export const receipts = pgTable("receipts", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   order_id: text("order_id")
     .notNull()
     .references(() => orders.id, { onDelete: "cascade" }),
-  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   receipt_number: serial("receipt_number").notNull().unique(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -525,7 +561,7 @@ export const deliveryAreas = pgTable("delivery_areas", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id").references(() => users.id, {
+  storeId: text("store_id").references(() => stores.id, {
     onDelete: "cascade",
   }),
   city: varchar("city", { length: 255 }).notNull(),
@@ -540,7 +576,9 @@ export const deliveryAreasKm = pgTable("delivery_areas_km", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   latitude: real("latitude"),
   longitude: real("longitude"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -565,7 +603,9 @@ export const pixels = pgTable("pixels", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   pixel_facebook: varchar("pixel_facebook", { length: 255 }),
   pixel_google: varchar("pixel_google", { length: 255 }),
   pixel_tiktok: varchar("pixel_tiktok", { length: 255 }),
@@ -586,7 +626,9 @@ export const restaurantData = pgTable("restaurant_data", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   menuViews: integer("menu_views").default(0),
   itemsAddedToCart: integer("items_added_to_cart").default(0),
   itemsPurchased: integer("items_purchased").default(0),
@@ -597,7 +639,9 @@ export const adminTransactions = pgTable("admin_transactions", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   type: adminTransactionType("type"),
   amount: integer("amount").notNull(),
   reference_id: text("reference_id"), // ID do pedido ou assinatura correspondente
@@ -637,7 +681,9 @@ export const additionalGroups = pgTable("additional_groups", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").references(() => stores.id, {
+    onDelete: "cascade",
+  }),
   name: text("name").notNull(),
   selectionType: text("selection_type", { enum: ["single", "multiple"] })
     .notNull()
@@ -674,19 +720,6 @@ export const categoryAdditionalGroups = pgTable(
   (t) => [primaryKey({ columns: [t.categoryId, t.additionalGroupId] })]
 );
 
-/* export const productAdditionalGroups = pgTable(
-  "product_additional_groups",
-  {
-    productId: text("product_id")
-      .notNull()
-      .references(() => products.id, { onDelete: "cascade" }),
-    additionalGroupId: text("additional_group_id")
-      .notNull()
-      .references(() => additionalGroups.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  },
-  (t) => [primaryKey({ columns: [t.productId, t.additionalGroupId] })]
-); */
 export const comboProducts = pgTable(
   "combo_products",
   {

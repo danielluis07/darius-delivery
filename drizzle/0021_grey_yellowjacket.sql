@@ -1,1 +1,0 @@
-ALTER TABLE "customizations" ADD COLUMN "place_id" text;

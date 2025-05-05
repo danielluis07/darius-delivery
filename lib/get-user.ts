@@ -1,8 +1,8 @@
 import { db } from "@/db/drizzle";
-import { employees, subscriptions, users } from "@/db/schema";
+import { employees, stores, subscriptions, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export const getUser = async (userId: string) => {
+export const getUser = async (userId: string, storeId: string) => {
   const [data] = await db
     .select({
       id: users.id,
@@ -14,8 +14,9 @@ export const getUser = async (userId: string) => {
       employee: employees,
     })
     .from(users)
-    .leftJoin(subscriptions, eq(users.id, subscriptions.user_id))
-    .leftJoin(employees, eq(users.id, employees.userId))
+    .leftJoin(stores, eq(stores.id, storeId))
+    .leftJoin(subscriptions, eq(subscriptions.storeId, stores.id))
+    .leftJoin(employees, eq(employees.storeId, storeId))
     .where(eq(users.id, userId));
 
   if (!data) {

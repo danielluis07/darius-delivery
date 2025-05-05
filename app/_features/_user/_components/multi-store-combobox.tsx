@@ -17,38 +17,43 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
-const stores = [
-  {
-    value: "Loja 1",
-    label: "Loja 1",
-  },
-  {
-    value: "Loja 2",
-    label: "Loja 2",
-  },
-  {
-    value: "Loja 3",
-    label: "Loja 3",
-  },
-  {
-    value: "Loja 4",
-    label: "Loja 4",
-  },
-  {
-    value: "Loja 5",
-    label: "Loja 5",
-  },
-  {
-    value: "Loja 6",
-    label: "Loja 6",
-  },
-];
-
-export function StoresComboBox() {
+export function StoresComboBox({
+  stores,
+}: {
+  stores: {
+    id: string;
+    userId: string;
+    name: string;
+  }[];
+}) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
+  const params = useParams();
+  const router = useRouter();
+
+  const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const currentStoreId = params.storeId as string | undefined;
+    if (currentStoreId && stores.find((store) => store.id === currentStoreId)) {
+      setSelectedStoreId(currentStoreId);
+    } else if (stores.length > 0 && !currentStoreId) {
+      setSelectedStoreId(null);
+    } else {
+      setSelectedStoreId(null);
+    }
+  }, [params.storeId, stores]);
+
+  const selectedStore = stores.find((store) => store.id === selectedStoreId);
+
+  const handleSelect = (storeId: string) => {
+    setSelectedStoreId(storeId);
+    setOpen(false);
+
+    router.push(`/dashboard/${storeId}/`);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -57,34 +62,32 @@ export function StoresComboBox() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-label="Selecionar loja"
           className="w-[200px] justify-between bg-transparent">
-          {value
-            ? stores.find((store) => store.value === value)?.label
-            : "Selecione uma loja..."}
-          <ChevronsUpDown className="opacity-50" />
+          {selectedStore ? selectedStore.name : "Selecione uma loja..."}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Procurar Loja..." className="h-9" />
+          <CommandInput placeholder="Procurar Loja..." />
           <CommandList>
             <CommandEmpty>Nenhuma loja encontrada.</CommandEmpty>
             <CommandGroup>
               {stores.map((store) => (
                 <CommandItem
-                  key={store.value}
-                  value={store.value}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
-                    setOpen(false);
+                  key={store.id}
+                  value={store.id}
+                  onSelect={(currentId) => {
+                    handleSelect(currentId);
                   }}>
-                  {store.label}
                   <Check
                     className={cn(
-                      "ml-auto",
-                      value === store.value ? "opacity-100" : "opacity-0"
+                      "mr-2 h-4 w-4",
+                      selectedStoreId === store.id ? "opacity-100" : "opacity-0"
                     )}
                   />
+                  {store.name}
                 </CommandItem>
               ))}
             </CommandGroup>

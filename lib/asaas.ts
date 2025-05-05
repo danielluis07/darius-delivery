@@ -18,7 +18,7 @@ export const getAdminBalance = async () => {
     const data = await res.json();
 
     if (!res.ok) {
-      console.error("Failed to create user account:", data);
+      console.error("Failed to get balance", data);
 
       // Se houver erros, retorna um array de descrições
       if (data.errors) {

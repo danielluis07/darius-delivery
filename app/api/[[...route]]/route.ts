@@ -24,6 +24,7 @@ import restaurantData from "@/app/api/[[...route]]/restaurant-data";
 import subscriptions from "@/app/api/[[...route]]/subscriptions";
 import additionals from "@/app/api/[[...route]]/additionals";
 import colors from "@/app/api/[[...route]]/colors";
+import stores from "@/app/api/[[...route]]/stores";
 
 export const runtime = "nodejs";
 
@@ -61,7 +62,8 @@ const routes = app
   .route("/restaurant-data", restaurantData)
   .route("/subscriptions", subscriptions)
   .route("/additionals", additionals)
-  .route("/colors", colors);
+  .route("/colors", colors)
+  .route("/stores", stores);
 
 export const GET = handle(app);
 export const POST = handle(app);

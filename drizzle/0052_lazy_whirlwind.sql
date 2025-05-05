@@ -1,1 +1,0 @@
-ALTER TYPE "public"."order_payment_type" ADD VALUE 'DEBIT_CARD';

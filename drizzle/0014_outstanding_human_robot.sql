@@ -1,1 +1,0 @@
-ALTER TABLE "user" ADD COLUMN "asaas_api_key" text;

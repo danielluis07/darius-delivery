@@ -7,6 +7,7 @@ import { users } from "@/db/schema";
 import { credentialsSignInSchema } from "@/db/schemas";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { getStores } from "@/app/_features/_user/_queries/_stores/get-stores";
 
 // Helper function to hash a password using SHA-256
 async function hashPassword(password: string): Promise<string> {
@@ -34,7 +35,7 @@ export const credentialsSignIn = async (
     }
 
     const [existingUser] = await db
-      .select({ role: users.role, password: users.password })
+      .select({ id: users.id, role: users.role, password: users.password })
       .from(users)
       .where(eq(users.email, email));
 
@@ -49,7 +50,19 @@ export const credentialsSignIn = async (
       return { success: false, message: "Senha incorreta!" };
     }
 
-    const url = existingUser.role === "ADMIN" ? "/admin" : "/dashboard";
+    let url: string;
+
+    const { data: stores } = await getStores(existingUser.id);
+
+    if (existingUser.role === "ADMIN") {
+      url = "/admin";
+    } else {
+      if (stores && stores.length > 0) {
+        url = `/dashboard/${stores[0].id}`;
+      } else {
+        url = "/dashboard";
+      }
+    }
 
     await signIn("credentials", {
       email,

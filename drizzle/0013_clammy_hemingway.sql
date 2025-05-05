@@ -1,1 +1,0 @@
-ALTER TABLE "orders" ADD COLUMN "daily_number" integer NOT NULL;
