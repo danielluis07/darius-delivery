@@ -6,7 +6,7 @@ import { toast } from "sonner";
 type ResponseType = InferResponseType<typeof client.api.orders.$post>;
 type RequestType = InferRequestType<typeof client.api.orders.$post>["json"];
 
-export const useCreateOrder = (userId: string) => {
+export const useCreateOrder = (storeId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
@@ -17,7 +17,7 @@ export const useCreateOrder = (userId: string) => {
     onSuccess: () => {
       toast.success("Pedido criado com sucesso!");
       queryClient.invalidateQueries({
-        queryKey: ["orders", userId],
+        queryKey: ["orders", storeId],
       });
     },
     onError: () => {

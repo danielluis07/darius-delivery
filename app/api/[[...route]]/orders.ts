@@ -75,19 +75,19 @@ type UpdateStatus = {
 
 const app = new Hono()
   .get(
-    "/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
       const data = await db
         .select()
         .from(orders)
-        .where(eq(orders.user_id, userId))
+        .where(eq(orders.storeId, storeId))
         .orderBy(asc(orders.createdAt));
 
       if (!data || data.length === 0) {
@@ -98,95 +98,118 @@ const app = new Hono()
     }
   )
   .get(
-    "/ordersreceipts/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/ordersreceipts/store/:storeId",
+    zValidator(
+      "param",
+      z.object({
+        storeId: z.string().optional(),
+      })
+    ),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
-        return c.json({ error: "Missing user id" }, 400);
+      if (!storeId) {
+        return c.json({ error: "Missing store id" }, 400);
       }
 
+      // Alias for the users table specifically for customer information
       const customersUser = alias(users, "customersUser");
 
-      const data = await db
-        .select({
-          order: orders,
-          receipt: {
-            id: receipts.id,
-            number: receipts.receipt_number,
-            orderNumber: orders.daily_number,
-            createdAt: receipts.createdAt,
-            customerName: customersUser.name, // Get the actual customer name
-            customerEmail: customersUser.email,
-            customerPhone: customersUser.phone,
-            customerId: customers.id,
-            customerCity: customers.city,
-            customerState: customers.state,
-            customerNeighborhood: customers.neighborhood,
-            customerStreet: customers.street,
-            customerStreetNumber: customers.street_number,
-            customerComplement: customers.complement,
-            orderTotalPrice: orders.total_price,
-            orderDailyNumber: orders.daily_number,
-            orderPaymentType: orders.payment_type,
-            orderPaymentStatus: orders.payment_status,
-            orderStatus: orders.status,
-            orderItems: sql<OrderItem[]>`json_agg(json_build_object(
-                      'id', ${orderItems.id}, 
-                      'productName', ${products.name}, 
-                      'quantity', ${orderItems.quantity}, 
-                      'price', ${orderItems.price}
-                  ))`.as("orderItems"),
-          },
-        })
-        .from(orders)
-        .leftJoin(receipts, eq(receipts.order_id, orders.id))
-        .leftJoin(users, eq(orders.user_id, users.id)) // Ensure correct restaurant owner
-        .leftJoin(customers, eq(orders.customer_id, customers.userId))
-        .leftJoin(customersUser, eq(customers.userId, customersUser.id)) // Alias for customer users
-        .leftJoin(orderItems, eq(orders.id, orderItems.order_id))
-        .leftJoin(products, eq(orderItems.product_id, products.id))
-        .where(and(eq(orders.user_id, userId), eq(orders.is_closed, false)))
-        .groupBy(
-          orders.id,
-          receipts.id,
-          receipts.receipt_number,
-          receipts.createdAt,
-          customers.id,
-          customersUser.name,
-          customersUser.email,
-          customersUser.phone,
-          customers.city,
-          customers.state,
-          customers.neighborhood,
-          customers.street,
-          customers.street_number,
-          customers.complement
-        )
-        .orderBy(asc(orders.createdAt));
+      try {
+        const data = await db
+          .select({
+            order: orders,
+            receipt: {
+              id: receipts.id,
+              number: receipts.receipt_number,
+              orderNumber: orders.daily_number,
+              createdAt: receipts.createdAt,
+              customerName: customersUser.name, // Get the actual customer name
+              customerEmail: customersUser.email,
+              customerPhone: customersUser.phone,
+              customerId: customers.id,
+              customerCity: customers.city,
+              customerState: customers.state,
+              customerNeighborhood: customers.neighborhood,
+              customerStreet: customers.street,
+              customerStreetNumber: customers.street_number,
+              customerComplement: customers.complement,
+              orderTotalPrice: orders.total_price,
+              orderDailyNumber: orders.daily_number,
+              orderPaymentType: orders.payment_type,
+              orderPaymentStatus: orders.payment_status,
+              orderStatus: orders.status,
+              // Aggregate order items into a JSON array
+              orderItems: sql<OrderItem[]>`json_agg(json_build_object(
+                              'id', ${orderItems.id},
+                              'productName', ${products.name},
+                              'quantity', ${orderItems.quantity},
+                              'price', ${orderItems.price}
+                          ))`.as("orderItems"),
+            },
+          })
+          .from(orders)
+          // Join receipts to orders
+          .leftJoin(receipts, eq(receipts.order_id, orders.id))
+          // Join customers to orders
+          .leftJoin(customers, eq(orders.customer_id, customers.userId))
+          // Join the aliased users table (customersUser) to customers for customer details
+          .leftJoin(customersUser, eq(customers.userId, customersUser.id))
+          // Join orderItems to orders
+          .leftJoin(orderItems, eq(orders.id, orderItems.order_id))
+          // Join products to orderItems
+          .leftJoin(products, eq(orderItems.product_id, products.id))
+          // *** IMPORTANT: Filter by storeId from the orders table ***
+          // Assuming the foreign key column in 'orders' is named 'store_id'
+          .where(and(eq(orders.storeId, storeId), eq(orders.is_closed, false)))
+          // Group by necessary fields to handle the aggregation
+          .groupBy(
+            orders.id, // Group by order ID to aggregate items per order
+            receipts.id, // Include receipt fields used outside aggregation
+            receipts.receipt_number,
+            receipts.createdAt,
+            customers.id, // Include customer fields used outside aggregation
+            customersUser.name,
+            customersUser.email,
+            customersUser.phone,
+            customers.city,
+            customers.state,
+            customers.neighborhood,
+            customers.street,
+            customers.street_number,
+            customers.complement
+            // Note: No need to group by orderItems fields as they are aggregated
+          )
+          // Order the final results
+          .orderBy(asc(orders.createdAt));
 
-      if (!data || data.length === 0) {
-        return c.json({ error: "No orders found" }, 404);
+        if (!data || data.length === 0) {
+          // Use 404 for resource not found
+          return c.json({ error: "No open orders found for this store" }, 404);
+        }
+
+        // Return the structured data
+        return c.json({ data });
+      } catch (error) {
+        console.error("Error fetching orders and receipts:", error);
+        return c.json({ error: "Failed to fetch orders" }, 500);
       }
-
-      return c.json({ data });
     }
   )
   .get(
-    "/routing/user/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/routing/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
       const data = await db
         .select()
         .from(orders)
-        .where(and(eq(orders.user_id, userId), isNull(orders.delivererId)))
+        .where(and(eq(orders.storeId, storeId), isNull(orders.delivererId)))
         .orderBy(asc(orders.createdAt));
 
       if (!data || data.length === 0) {
@@ -299,8 +322,8 @@ const app = new Hono()
     }
   )
   .get(
-    "/ordersperday/:userId",
-    zValidator("param", z.object({ userId: z.string() })), // Validate userId
+    "/ordersperday/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string() })), // Validate userId
     zValidator(
       "query",
       z.object({
@@ -313,10 +336,10 @@ const app = new Hono()
       })
     ),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
       const { from, to } = c.req.valid("query");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user ID" }, 400);
       }
 
@@ -332,7 +355,7 @@ const app = new Hono()
         .from(orders)
         .where(
           and(
-            eq(orders.user_id, userId),
+            eq(orders.storeId, storeId),
             gte(orders.createdAt, new Date(from)), // Convert string to Date
             lte(orders.createdAt, new Date(to)) // Convert string to Date
           )
@@ -344,12 +367,12 @@ const app = new Hono()
     }
   )
   .get(
-    "/orderscomparison/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/orderscomparison/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user ID" }, 400);
       }
 
@@ -363,7 +386,7 @@ const app = new Hono()
           createdAt: orders.createdAt,
         })
         .from(orders)
-        .where(eq(orders.user_id, userId)); // Filtro pelo userId
+        .where(eq(orders.storeId, storeId)); // Filtro pelo userId
 
       const ordersByCategory = data.reduce(
         (acc, order) => {
@@ -387,19 +410,19 @@ const app = new Hono()
     }
   )
   .get(
-    "/count/:userId",
-    zValidator("param", z.object({ userId: z.string() })),
+    "/count/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user ID" }, 400);
       }
 
       const [data] = await db
         .select({ count: count() })
         .from(orders)
-        .where(eq(orders.user_id, userId));
+        .where(eq(orders.storeId, storeId));
 
       if (!data) {
         return c.json({ error: "No orders found" }, 404);
@@ -420,68 +443,82 @@ const app = new Hono()
     );
   })
   // Fechar caixa
-  .post("/cash-register/close", async (c) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  .post(
+    "/cash-register/close/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
+    async (c) => {
+      const { storeId } = c.req.valid("param");
 
-    const endOfDay = new Date(today);
-    endOfDay.setHours(23, 59, 59, 999);
+      if (!storeId) {
+        return c.json({ error: "Missing store id" }, 400);
+      }
 
-    // Buscar pedidos do dia atual que ainda não foram fechados
-    const dailyOrders = await db
-      .select({
-        id: orders.id,
-        total_price: orders.total_price,
-        status: orders.status,
-        payment_status: orders.payment_status,
-        createdAt: orders.createdAt,
-      })
-      .from(orders)
-      .where(
-        and(
-          gte(orders.createdAt, today),
-          lte(orders.createdAt, endOfDay),
-          eq(orders.is_closed, false) // Apenas pedidos ainda não fechados
-        )
-      );
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-    if (!dailyOrders || dailyOrders.length === 0) {
-      return c.json(
-        { error: "Nenhum pedido encontrado para fechar o caixa" },
-        404
-      );
+      const endOfDay = new Date(today);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      // Buscar pedidos do dia atual que ainda não foram fechados
+      const dailyOrders = await db
+        .select({
+          id: orders.id,
+          total_price: orders.total_price,
+          status: orders.status,
+          payment_status: orders.payment_status,
+          createdAt: orders.createdAt,
+        })
+        .from(orders)
+        .where(
+          and(
+            eq(orders.storeId, storeId),
+            gte(orders.createdAt, today),
+            lte(orders.createdAt, endOfDay),
+            eq(orders.is_closed, false) // Apenas pedidos ainda não fechados
+          )
+        );
+
+      if (!dailyOrders || dailyOrders.length === 0) {
+        return c.json(
+          { error: "Nenhum pedido encontrado para fechar o caixa" },
+          404
+        );
+      }
+
+      const totalRevenue = dailyOrders
+        .filter((order) => order.payment_status.trim().toUpperCase() === "PAID") // Agora pega qualquer pedido pago
+        .reduce((sum, order) => sum + (order.total_price || 0), 0);
+
+      const report = {
+        date: today.toISOString().split("T")[0],
+        totalRevenue,
+        orderCount: dailyOrders.length,
+        completedOrders: dailyOrders.filter(
+          (o) => o.status === "FINISHED" || o.status === "DELIVERED"
+        ).length,
+        pendingOrders: dailyOrders.filter((o) => o.status === "PREPARING")
+          .length,
+      };
+
+      // Atualizar os pedidos para marcar como fechados
+      await db
+        .update(orders)
+        .set({ is_closed: true })
+        .where(
+          and(
+            eq(orders.storeId, storeId),
+            gte(orders.createdAt, today),
+            lte(orders.createdAt, endOfDay),
+            eq(orders.is_closed, false)
+          )
+        );
+
+      return c.json({
+        message: "Caixa fechado com sucesso",
+        report,
+      });
     }
-
-    const totalRevenue = dailyOrders
-      .filter((order) => order.payment_status.trim().toUpperCase() === "PAID") // Agora pega qualquer pedido pago
-      .reduce((sum, order) => sum + (order.total_price || 0), 0);
-
-    const report = {
-      date: today.toISOString().split("T")[0],
-      totalRevenue,
-      orderCount: dailyOrders.length,
-      completedOrders: dailyOrders.filter((o) => o.status === "FINISHED")
-        .length,
-      pendingOrders: dailyOrders.filter((o) => o.status === "PREPARING").length,
-    };
-
-    // Atualizar os pedidos para marcar como fechados
-    await db
-      .update(orders)
-      .set({ is_closed: true })
-      .where(
-        and(
-          gte(orders.createdAt, today),
-          lte(orders.createdAt, endOfDay),
-          eq(orders.is_closed, false)
-        )
-      );
-
-    return c.json({
-      message: "Caixa fechado com sucesso",
-      report,
-    });
-  })
+  )
   .post("/", verifyAuth(), zValidator("json", insertOrderSchema), async (c) => {
     const auth = c.get("authUser") as ExtendedAuthUser;
     const {
@@ -493,10 +530,15 @@ const app = new Hono()
       payment_type,
       delivery_deadline,
       pickup_deadline,
+      storeId,
     } = c.req.valid("json");
 
     if (!auth || !auth.token) {
       return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    if (!storeId) {
+      return c.json({ error: "Missing store id" }, 400);
     }
 
     const id =
@@ -585,7 +627,13 @@ const app = new Hono()
         createdAt: orders.createdAt,
       })
       .from(orders)
-      .where(and(gte(orders.createdAt, today), lt(orders.createdAt, tomorrow)))
+      .where(
+        and(
+          eq(orders.storeId, storeId),
+          gte(orders.createdAt, today),
+          lt(orders.createdAt, tomorrow)
+        )
+      )
       .orderBy(desc(orders.createdAt))
       .limit(1);
 
@@ -599,7 +647,7 @@ const app = new Hono()
     const [order] = await db
       .insert(orders)
       .values({
-        user_id: id,
+        storeId,
         daily_number: nextDailyNumber,
         customer_id,
         total_price,
@@ -651,7 +699,7 @@ const app = new Hono()
         amount: total_price,
         status: transactionPaymentStatus,
         order_id: order.id,
-        user_id: id,
+        storeId,
         type: "PAYMENT",
       })
       .returning({
@@ -664,7 +712,7 @@ const app = new Hono()
 
     const receipt = await db.insert(receipts).values({
       order_id: order.id,
-      user_id: id,
+      storeId,
     });
 
     if (!receipt) {
@@ -702,6 +750,7 @@ const app = new Hono()
         fee: z.number().optional(),
         obs: z.string().optional(),
         restaurantOwnerId: z.string(),
+        storeId: z.string(),
         paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
       })
     ),
@@ -775,7 +824,11 @@ const app = new Hono()
         })
         .from(orders)
         .where(
-          and(gte(orders.createdAt, today), lt(orders.createdAt, tomorrow))
+          and(
+            eq(orders.storeId, values.storeId),
+            gte(orders.createdAt, today),
+            lt(orders.createdAt, tomorrow)
+          )
         )
         .orderBy(desc(orders.createdAt))
         .limit(1);
@@ -785,7 +838,7 @@ const app = new Hono()
       const [order] = await db
         .insert(orders)
         .values({
-          user_id: values.restaurantOwnerId,
+          storeId: values.storeId,
           customer_id: values.customerId,
           need_change: values.needChange,
           change_value: values.changeValue,
@@ -872,6 +925,7 @@ const app = new Hono()
         totalPrice: z.number(),
         customerId: z.string(),
         restaurantOwnerId: z.string(),
+        storeId: z.string(),
         deliveryDeadline: z.number().optional(),
         paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
         asaasCustomerId: z.string().optional(),
@@ -933,7 +987,7 @@ const app = new Hono()
         db
           .select({ id: users.id, walletId: users.walletId })
           .from(users)
-          .where(eq(users.id, "c46cec32-af9a-4725-af53-117dc343ce1b"))
+          .where(eq(users.id, process.env.ADMIN_ID!))
           .then(([result]) => result),
       ]);
 
@@ -987,7 +1041,11 @@ const app = new Hono()
         })
         .from(orders)
         .where(
-          and(gte(orders.createdAt, today), lt(orders.createdAt, tomorrow))
+          and(
+            eq(orders.storeId, values.storeId),
+            gte(orders.createdAt, today),
+            lt(orders.createdAt, tomorrow)
+          )
         )
         .orderBy(desc(orders.createdAt))
         .limit(1);
@@ -999,7 +1057,7 @@ const app = new Hono()
       const [order] = await db
         .insert(orders)
         .values({
-          user_id: values.restaurantOwnerId,
+          storeId: values.storeId,
           customer_id: values.customerId,
           daily_number: nextDailyNumber,
           total_price: values.totalPrice + fee,
@@ -1065,7 +1123,7 @@ const app = new Hono()
 
       const adminTransaction = await db.insert(adminTransactions).values({
         amount: commissionAmount,
-        user_id: admin.id,
+        userId: admin.id,
         reference_id: order.id,
         type: "COMISSION",
       });

@@ -639,7 +639,7 @@ export const adminTransactions = pgTable("admin_transactions", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  storeId: text("store_id").references(() => stores.id, {
+  userId: text("user_id").references(() => users.id, {
     onDelete: "cascade",
   }),
   type: adminTransactionType("type"),

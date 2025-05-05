@@ -10,7 +10,7 @@ type RequestType = InferRequestType<
   (typeof client.api.orders)[":orderId"]["$patch"]
 >["json"];
 
-export const useUpdateOrder = (orderId: string, userId: string) => {
+export const useUpdateOrder = (orderId: string, storeId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
@@ -24,7 +24,7 @@ export const useUpdateOrder = (orderId: string, userId: string) => {
     onSuccess: () => {
       toast.success("Pedido editado!");
       queryClient.invalidateQueries({ queryKey: ["orders", orderId] });
-      queryClient.invalidateQueries({ queryKey: ["orders-receipts", userId] });
+      queryClient.invalidateQueries({ queryKey: ["orders-receipts", storeId] });
     },
     onError: () => {
       toast.error("Houve um erro editar o pedido!");

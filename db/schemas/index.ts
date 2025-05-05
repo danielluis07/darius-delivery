@@ -76,6 +76,7 @@ export const updateEmployeeSchema = z.object({
 export const insertCustomerByUserSchema = z.object({
   name: z.string(),
   email: z.string().email(),
+  storeId: z.string(),
   phone: z.string(),
   userId: z.string().optional(),
   city: z.string(),
@@ -89,6 +90,7 @@ export const insertCustomerByUserSchema = z.object({
 
 export const insertLocalCustomerSchema = z.object({
   name: z.string(),
+  storeId: z.string(),
   email: z.string().email(),
   phone: z.string(),
   city: z.string(),

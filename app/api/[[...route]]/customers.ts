@@ -44,18 +44,18 @@ const app = new Hono()
     }
   )
   .get(
-    "/user/:userId",
+    "/store/:storeId",
     verifyAuth(),
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
       const auth = c.get("authUser");
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
@@ -77,7 +77,7 @@ const app = new Hono()
         })
         .from(users)
         .leftJoin(customers, eq(customers.userId, users.id))
-        .where(eq(customers.restaurantOwnerId, userId));
+        .where(eq(customers.storeId, storeId));
 
       if (!data || data.length === 0) {
         return c.json({ error: "No customers found" }, 404);
@@ -103,6 +103,7 @@ const app = new Hono()
         neighborhood,
         city,
         state,
+        storeId,
       } = c.req.valid("json");
 
       if (!auth || !auth.token?.sub) {
@@ -118,7 +119,8 @@ const app = new Hono()
         !postalCode ||
         !neighborhood ||
         !city ||
-        !state
+        !state ||
+        !storeId
       ) {
         return c.json({ error: "Missing data" }, 400);
       }
@@ -139,7 +141,7 @@ const app = new Hono()
 
       const customer = await db.insert(customers).values({
         userId: user.id,
-        restaurantOwnerId: auth.token.sub,
+        storeId,
         street,
         street_number,
         complement,

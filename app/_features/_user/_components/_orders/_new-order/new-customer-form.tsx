@@ -44,12 +44,15 @@ type FormData = z.infer<typeof insertCustomerByUserSchema>;
 
 export const NewCustomerForm = ({
   isOrderPending,
+  storeId,
 }: {
   isOrderPending: boolean;
+  storeId: string;
 }) => {
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomerByUserSchema),
     defaultValues: {
+      storeId,
       name: "",
       email: "",
       phone: "",

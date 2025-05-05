@@ -65,7 +65,7 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type Products = InferResponseType<
-  (typeof client.api.products.user)[":userId"]["$get"],
+  (typeof client.api.products.store)[":storeId"]["$get"],
   200
 >["data"];
 
@@ -88,20 +88,20 @@ type Customer =
 type FormData = z.infer<typeof updateOrderSchema>;
 
 export const OrderDetails = ({
-  userId,
+  storeId,
   orderId,
   products,
 }: {
-  userId: string;
+  storeId: string;
   orderId: string;
   products: Products;
 }) => {
   const { data, isLoading } = useGetOrder(orderId);
   const { data: deliverersData, isLoading: isDeliverersLoading } =
-    useGetDeliverers(userId);
+    useGetDeliverers(storeId);
   const { data: customers, isLoading: isCustomersLoading } =
-    useGetCustomers(userId);
-  const { mutate, isPending } = useUpdateOrder(orderId, userId);
+    useGetCustomers(storeId);
+  const { mutate, isPending } = useUpdateOrder(orderId, storeId);
   const [changeCustomer, setChangeCustomer] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer>(undefined);
   const form = useForm<FormData>({

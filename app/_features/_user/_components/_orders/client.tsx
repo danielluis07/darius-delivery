@@ -138,7 +138,7 @@ export const OrdersClient = ({ storeId }: { storeId: string }) => {
       <Card className="h-[500px] w-full mt-5">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">Pedidos</h1>
-          <Link href="/dashboard/orders/new">
+          <Link href={`/dashboard/${storeId}/orders/new`}>
             <Button>
               Novo Pedido <Plus />
             </Button>
@@ -159,12 +159,12 @@ export const OrdersClient = ({ storeId }: { storeId: string }) => {
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">Pedidos</h1>
           <div className="flex items-center gap-x-2">
-            <Link href="/dashboard/orders/new">
+            <Link href={`/dashboard/${storeId}/orders/new`}>
               <Button>
                 Novo Pedido <Plus />
               </Button>
             </Link>
-            <Link href="/dashboard/order-routing">
+            <Link href={`/dashboard/${storeId}/order-routing`}>
               <Button>
                 Roteirização <Route />
               </Button>

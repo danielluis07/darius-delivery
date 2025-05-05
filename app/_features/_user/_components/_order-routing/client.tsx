@@ -24,14 +24,14 @@ const mapContainerStyle = {
 
 export const OrderRoutingClient = ({
   apiKey,
-  userId,
   customizationlatitude,
   customizationlongitude,
+  storeId,
 }: {
   apiKey: string;
-  userId: string;
   customizationlatitude: number;
   customizationlongitude: number;
+  storeId: string;
 }) => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apiKey,
@@ -42,11 +42,11 @@ export const OrderRoutingClient = ({
   );
 
   const { data: ordersData, isLoading: ordersLoading } =
-    useGetRoutingOrders(userId);
+    useGetRoutingOrders(storeId);
   const { data: deliverersData, isLoading: deliverersLoading } =
-    useGetDeliverers(userId);
-  const { mutate } = useUpdateOrderStatus(userId);
-  const { mutate: assignDeliverers } = useAssignDeliverers(userId);
+    useGetDeliverers(storeId);
+  const { mutate } = useUpdateOrderStatus(storeId);
+  const { mutate: assignDeliverers } = useAssignDeliverers(storeId);
 
   const toggleOrderSelection = (orderId: string) => {
     setSelectedOrders((prev) =>

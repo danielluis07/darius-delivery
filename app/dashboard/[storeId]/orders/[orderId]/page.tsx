@@ -5,9 +5,9 @@ import { getProducts } from "@/app/_features/_user/_queries/_products/get-produc
 const OrderDetailsPage = async ({
   params,
 }: {
-  params: Promise<{ orderId: string }>;
+  params: Promise<{ storeId: string; orderId: string }>;
 }) => {
-  const orderId = (await params).orderId;
+  const { storeId, orderId } = await params;
 
   const session = await auth();
 
@@ -15,19 +15,14 @@ const OrderDetailsPage = async ({
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const id =
-    session.user.role === "EMPLOYEE"
-      ? session.user.restaurantOwnerId
-      : session.user.id;
-
-  if (!id) {
-    return <div>Usuário não encontrado</div>;
-  }
-
-  const products = await getProducts(id);
+  const products = await getProducts(storeId);
 
   return (
-    <OrderDetails userId={id} orderId={orderId} products={products || []} />
+    <OrderDetails
+      storeId={storeId}
+      orderId={orderId}
+      products={products || []}
+    />
   );
 };
 

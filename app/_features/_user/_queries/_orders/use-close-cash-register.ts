@@ -15,13 +15,17 @@ type ResponseType = {
   };
 };
 
-export const useCloseCashRegister = (userId: string) => {
+export const useCloseCashRegister = (storeId: string) => {
   const { openModal } = useCashReport();
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error>({
     mutationFn: async () => {
-      const res = await client.api.orders["cash-register"]["close"]["$post"]();
+      const res = await client.api.orders["cash-register"]["close"]["store"][
+        ":storeId"
+      ]["$post"]({
+        param: { storeId },
+      });
       const data = await res.json();
 
       if ("error" in data) {
@@ -32,8 +36,9 @@ export const useCloseCashRegister = (userId: string) => {
     },
     onSuccess: (data) => {
       toast.success("Caixa fechado com sucesso!");
+      console.log("Invalidating orders-receipts with storeId:", storeId); //
       // Invalidar queries relacionadas (ex.: lista de pedidos ou estado do caixa)
-      queryClient.invalidateQueries({ queryKey: ["orders-receipts", userId] });
+      queryClient.setQueryData(["orders-receipts", storeId], []);
       queryClient.invalidateQueries({ queryKey: ["cash-register"] });
       // Opcional: Armazenar o relatório no cache do React Query
       queryClient.setQueryData(

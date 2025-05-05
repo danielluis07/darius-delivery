@@ -49,12 +49,12 @@ import { useCreateOrder } from "@/app/_features/_user/_queries/_orders/use-creat
 import { toast } from "sonner";
 
 type Products = InferResponseType<
-  (typeof client.api.products.user)[":userId"]["$get"],
+  (typeof client.api.products.store)[":storeId"]["$get"],
   200
 >["data"];
 
 type OrderSettings = InferResponseType<
-  (typeof client.api.ordersettings.user)[":userId"]["$get"],
+  (typeof client.api.ordersettings.store)[":storeId"]["$get"],
   200
 >["data"];
 
@@ -86,20 +86,21 @@ type FormData = z.infer<typeof insertOrderSchema>;
 export const NewOrderForm = ({
   products,
   orderSettings,
-  userId,
+  storeId,
   apiKey,
 }: {
   products: Products;
-  userId: string;
+  storeId: string;
   orderSettings: OrderSettings | null;
   apiKey: string | null | undefined;
 }) => {
-  const { data, isLoading } = useGetCustomers(userId);
-  const { mutate, isPending } = useCreateOrder(userId);
+  const { data, isLoading } = useGetCustomers(storeId);
+  const { mutate, isPending } = useCreateOrder(storeId);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer>(undefined);
   const form = useForm<FormData>({
     resolver: zodResolver(insertOrderSchema),
     defaultValues: {
+      storeId,
       price: 0,
       quantity: 1,
       items: [
@@ -154,7 +155,7 @@ export const NewOrderForm = ({
       },
       {
         onSuccess: () => {
-          router.push("/dashboard/orders");
+          router.push(`/dashboard/${storeId}/orders`);
         },
       }
     );
@@ -174,7 +175,7 @@ export const NewOrderForm = ({
       <div className="flex gap-8">
         <Card className="w-full relative">
           <div className="absolute top-2 right-2">
-            <NewCustomerForm isOrderPending={isPending} />
+            <NewCustomerForm storeId={storeId} isOrderPending={isPending} />
           </div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>

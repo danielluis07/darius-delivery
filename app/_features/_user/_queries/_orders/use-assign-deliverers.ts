@@ -11,11 +11,11 @@ type RequestType = InferRequestType<
 >["json"];
 
 type Orders = InferResponseType<
-  (typeof client.api.orders.user)[":userId"]["$get"],
+  (typeof client.api.orders.store)[":storeId"]["$get"],
   200
 >["data"];
 
-export const useAssignDeliverers = (userId: string) => {
+export const useAssignDeliverers = (storeId: string) => {
   const queryClient = useQueryClient();
   const mutation = useMutation<
     ResponseType,
@@ -31,15 +31,15 @@ export const useAssignDeliverers = (userId: string) => {
     },
 
     onMutate: async (json) => {
-      queryClient.cancelQueries({ queryKey: ["routing-orders", userId] });
+      queryClient.cancelQueries({ queryKey: ["routing-orders", storeId] });
 
       const previousOrders = queryClient.getQueryData<Orders>([
         "orders",
-        userId,
+        storeId,
       ]);
 
       queryClient.setQueryData(
-        ["routing-orders", userId],
+        ["routing-orders", storeId],
         (oldOrders: Orders | undefined) => {
           if (!oldOrders) return [];
 
@@ -63,7 +63,7 @@ export const useAssignDeliverers = (userId: string) => {
       toast.error("Houve um erro ao enviar os pedidos!");
 
       if (context?.previousOrders) {
-        queryClient.setQueryData(["orders", userId], context.previousOrders);
+        queryClient.setQueryData(["orders", storeId], context.previousOrders);
       }
     },
 
@@ -72,8 +72,8 @@ export const useAssignDeliverers = (userId: string) => {
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["deliverers", userId] });
-      queryClient.invalidateQueries({ queryKey: ["routing-orders", userId] });
+      queryClient.invalidateQueries({ queryKey: ["deliverers", storeId] });
+      queryClient.invalidateQueries({ queryKey: ["routing-orders", storeId] });
     },
   });
 

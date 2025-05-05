@@ -3,25 +3,21 @@ import { getCustomization } from "@/app/_features/_user/_queries/_customizations
 import { getGoogleApiKey } from "@/app/_features/_user/_queries/get-google-api-key";
 import { auth } from "@/auth";
 
-const OrderRoutingPage = async () => {
+const OrderRoutingPage = async ({
+  params,
+}: {
+  params: Promise<{ storeId: string }>;
+}) => {
+  const { storeId } = await params;
   const session = await auth();
 
   if (!session || !session.user.id) {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const id =
-    session.user.role === "EMPLOYEE"
-      ? session.user.restaurantOwnerId
-      : session.user.id;
-
-  if (!id) {
-    return <div>Usuário não encontrado</div>;
-  }
-
   const [apiKey, customization] = await Promise.all([
-    getGoogleApiKey(id),
-    getCustomization(id),
+    getGoogleApiKey(storeId),
+    getCustomization(storeId),
   ]);
 
   if (!apiKey?.googleApiKey) {
@@ -47,7 +43,7 @@ const OrderRoutingPage = async () => {
   return (
     <OrderRoutingClient
       apiKey={apiKey.googleApiKey}
-      userId={id}
+      storeId={storeId}
       customizationlatitude={customization.latitude}
       customizationlongitude={customization.longitude}
     />

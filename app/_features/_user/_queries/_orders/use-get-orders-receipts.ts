@@ -1,14 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
-export const useGetOrdersReceipts = (userId: string) => {
+export const useGetOrdersReceipts = (storeId: string) => {
   const query = useQuery({
-    enabled: !!userId,
-    queryKey: ["orders-receipts", userId],
+    enabled: !!storeId,
+    queryKey: ["orders-receipts", storeId],
     queryFn: async () => {
-      const res = await client.api.orders.ordersreceipts.user[":userId"].$get({
-        param: { userId },
-      });
+      const res = await client.api.orders.ordersreceipts.store[":storeId"].$get(
+        {
+          param: { storeId },
+        }
+      );
 
       if (!res.ok) {
         throw new Error("Failed to fetch orders");

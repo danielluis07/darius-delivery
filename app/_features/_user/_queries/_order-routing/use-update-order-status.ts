@@ -8,11 +8,11 @@ type ResponseType = InferResponseType<
 >;
 
 type Orders = InferResponseType<
-  (typeof client.api.orders.user)[":userId"]["$get"],
+  (typeof client.api.orders.store)[":storeId"]["$get"],
   200
 >["data"];
 
-export const useUpdateOrderStatus = (userId?: string) => {
+export const useUpdateOrderStatus = (storeId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<
@@ -41,7 +41,7 @@ export const useUpdateOrderStatus = (userId?: string) => {
     onSuccess: (_, { orderId, status }) => {
       toast.success("Pedido atualizado!");
       queryClient.setQueryData(
-        ["routing-orders", userId],
+        ["routing-orders", storeId],
         (oldData: Orders) => {
           if (!oldData) return oldData;
           return oldData.map((order) =>
@@ -49,8 +49,8 @@ export const useUpdateOrderStatus = (userId?: string) => {
           );
         }
       );
-      queryClient.invalidateQueries({ queryKey: ["orders-receipts", userId] });
-      queryClient.invalidateQueries({ queryKey: ["routing-orders", userId] });
+      queryClient.invalidateQueries({ queryKey: ["orders-receipts", storeId] });
+      queryClient.invalidateQueries({ queryKey: ["routing-orders", storeId] });
     },
     onError: () => {
       toast.error("Houve um erro ao atualizar o pedido!");
