@@ -25,11 +25,18 @@ import {
 
 type FormData = z.infer<typeof insertDeliveryAreasSchema>;
 
-export const DeliveryAreasForm = ({ isLoading }: { isLoading: boolean }) => {
-  const { mutate, isPending } = useCreateDeliveryArea();
+export const DeliveryAreasForm = ({
+  isLoading,
+  storeId,
+}: {
+  isLoading: boolean;
+  storeId: string;
+}) => {
+  const { mutate, isPending } = useCreateDeliveryArea(storeId);
   const form = useForm<FormData>({
     resolver: zodResolver(insertDeliveryAreasSchema),
     defaultValues: {
+      storeId,
       city: "",
       state: "",
       neighborhood: "",

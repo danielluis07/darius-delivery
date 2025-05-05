@@ -6,12 +6,12 @@ import { deliveryAreasKm, deliveryAreasKmFees } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 const app = new Hono().get(
-  "/user/:userId",
-  zValidator("param", z.object({ userId: z.string().optional() })),
+  "/store/:storeId",
+  zValidator("param", z.object({ storeId: z.string().optional() })),
   async (c) => {
-    const { userId } = c.req.valid("param");
+    const { storeId } = c.req.valid("param");
 
-    if (!userId) {
+    if (!storeId) {
       return c.json({ error: "Missing user id" }, 400);
     }
 
@@ -19,7 +19,7 @@ const app = new Hono().get(
     const [deliveryArea] = await db
       .select()
       .from(deliveryAreasKm)
-      .where(eq(deliveryAreasKm.userId, userId));
+      .where(eq(deliveryAreasKm.storeId, storeId));
 
     if (!deliveryArea) {
       return c.json({ error: "No delivery area per km found" }, 404);

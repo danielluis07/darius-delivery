@@ -8,7 +8,7 @@ type RequestType = InferRequestType<
   typeof client.api.deliveryareas.$post
 >["json"];
 
-export const useCreateDeliveryArea = () => {
+export const useCreateDeliveryArea = (storeId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
@@ -19,7 +19,7 @@ export const useCreateDeliveryArea = () => {
     onSuccess: () => {
       toast.success("Área de entrega criada!");
       queryClient.invalidateQueries({
-        queryKey: ["delivery-areas"],
+        queryKey: ["delivery-areas", storeId],
       });
     },
     onError: () => {

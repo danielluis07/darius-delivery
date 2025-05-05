@@ -7,7 +7,7 @@ type ResponseType = InferResponseType<
   (typeof client.api.deliveryareas)[":id"]["$delete"]
 >;
 
-export const useDeleteDeliveryArea = (id?: string) => {
+export const useDeleteDeliveryArea = (id: string, storeId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error>({
@@ -19,7 +19,7 @@ export const useDeleteDeliveryArea = (id?: string) => {
     },
     onSuccess: () => {
       toast.success("Área de entrega deletada!");
-      queryClient.invalidateQueries({ queryKey: ["delivery-areas"] });
+      queryClient.invalidateQueries({ queryKey: ["delivery-areas", storeId] });
     },
     onError: () => {
       toast.error("Houve um erro ao deletar a área de entrega!");

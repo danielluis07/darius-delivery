@@ -4,7 +4,12 @@ import { getDeliveryAreasKm } from "@/app/_features/_user/_queries/_delivery-are
 import { getGoogleApiKey } from "@/app/_features/_user/_queries/get-google-api-key";
 import { auth } from "@/auth";
 
-const DeliveryAreaKmPage = async () => {
+const DeliveryAreaKmPage = async ({
+  params,
+}: {
+  params: Promise<{ storeId: string }>;
+}) => {
+  const { storeId } = await params;
   const session = await auth();
 
   if (!session || !session.user.id) {
@@ -12,9 +17,9 @@ const DeliveryAreaKmPage = async () => {
   }
 
   const [data, apiKey, customization] = await Promise.all([
-    getDeliveryAreasKm(session.user.id),
-    getGoogleApiKey(session.user.id),
-    getCustomization(session.user.id),
+    getDeliveryAreasKm(storeId),
+    getGoogleApiKey(storeId),
+    getCustomization(storeId),
   ]);
 
   if (!customization || !customization.latitude || !customization.longitude) {
@@ -40,6 +45,7 @@ const DeliveryAreaKmPage = async () => {
   return (
     <DeliveryAreasKmForm
       data={data}
+      storeId={storeId}
       apikey={apiKey.googleApiKey}
       customizationlatitude={customization.latitude}
       customizationlongitude={customization.longitude}

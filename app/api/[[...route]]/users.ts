@@ -2,7 +2,7 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import { employees, users } from "@/db/schema";
+import { employees, stores, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 const app = new Hono()
@@ -35,19 +35,20 @@ const app = new Hono()
     }
   )
   .get(
-    "/googleapikey/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/googleapikey/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing id" }, 400);
       }
 
       const [data] = await db
         .select({ googleApiKey: users.googleApiKey })
-        .from(users)
-        .where(eq(users.id, userId));
+        .from(stores)
+        .innerJoin(users, eq(stores.userId, users.id))
+        .where(eq(stores.id, storeId));
 
       if (!data) {
         return c.json({ error: "User not found" }, 404);
@@ -57,19 +58,20 @@ const app = new Hono()
     }
   )
   .get(
-    "/domain/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/domain/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing id" }, 400);
       }
 
       const [data] = await db
         .select({ domain: users.domain })
-        .from(users)
-        .where(eq(users.id, userId));
+        .from(stores)
+        .innerJoin(users, eq(stores.userId, users.id))
+        .where(eq(stores.id, storeId));
 
       if (!data) {
         return c.json({ error: "Domain not found" }, 404);
@@ -79,12 +81,12 @@ const app = new Hono()
     }
   )
   .get(
-    "/employees/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/employees/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing id" }, 400);
       }
 
@@ -98,7 +100,7 @@ const app = new Hono()
         })
         .from(employees)
         .innerJoin(users, eq(employees.userId, users.id))
-        .where(eq(employees.restaurantOwnerId, userId));
+        .where(eq(employees.storeId, storeId));
 
       if (!data || data.length === 0) {
         return c.json({ error: "No employees found" }, 404);
@@ -108,12 +110,12 @@ const app = new Hono()
     }
   )
   .get(
-    "/employee/:employeeId",
-    zValidator("param", z.object({ employeeId: z.string().optional() })),
+    "/employee/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
     async (c) => {
-      const { employeeId } = c.req.valid("param");
+      const { userId } = c.req.valid("param");
 
-      if (!employeeId) {
+      if (!userId) {
         return c.json({ error: "Missing id" }, 400);
       }
 
@@ -128,7 +130,7 @@ const app = new Hono()
         })
         .from(employees)
         .innerJoin(users, eq(employees.userId, users.id))
-        .where(eq(employees.userId, employeeId));
+        .where(eq(employees.userId, userId));
 
       if (!data) {
         return c.json({ error: "Employee not found" }, 404);

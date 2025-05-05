@@ -8,7 +8,7 @@ import { DeliveryAreasCellAction } from "@/app/_features/_user/_components/_deli
 import { formatCurrencyFromCents } from "@/lib/utils";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.deliveryareas.user)[":userId"]["$get"],
+  (typeof client.api.deliveryareas.store)[":storeId"]["$get"],
   200
 >["data"][0];
 

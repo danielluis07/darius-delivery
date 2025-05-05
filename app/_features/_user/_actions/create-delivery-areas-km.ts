@@ -5,11 +5,11 @@ import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { deliveryAreasKm, deliveryAreasKmFees } from "@/db/schema";
 import { insertDeliveryAreaKmSchema } from "@/db/schemas";
-import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 
 export const createDeliveryAreasKm = async (
-  values: z.infer<typeof insertDeliveryAreaKmSchema>
+  values: z.infer<typeof insertDeliveryAreaKmSchema>,
+  storeId: string
 ) => {
   try {
     const session = await auth();
@@ -33,7 +33,7 @@ export const createDeliveryAreasKm = async (
     const existingArea = await db
       .select()
       .from(deliveryAreasKm)
-      .where(eq(deliveryAreasKm.userId, session.user.id))
+      .where(eq(deliveryAreasKm.storeId, storeId))
       .limit(1);
 
     let deliveryAreaKm;
@@ -54,9 +54,9 @@ export const createDeliveryAreasKm = async (
       [deliveryAreaKm] = await db
         .insert(deliveryAreasKm)
         .values({
+          storeId,
           latitude,
           longitude,
-          userId: session.user.id,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -99,8 +99,6 @@ export const createDeliveryAreasKm = async (
     }));
 
     await db.insert(deliveryAreasKmFees).values(feeValues);
-
-    revalidatePath("/dashboard/delivery-areas");
 
     return {
       success: true,

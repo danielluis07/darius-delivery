@@ -9,25 +9,25 @@ import { verifyAuth } from "@hono/auth-js";
 
 const app = new Hono()
   .get(
-    "/user/:userId",
+    "/store/:storeId",
     verifyAuth(),
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
       const auth = c.get("authUser");
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
       const data = await db
         .select()
         .from(deliveryAreas)
-        .where(eq(deliveryAreas.user_id, userId));
+        .where(eq(deliveryAreas.storeId, storeId));
 
       if (!data || data.length === 0) {
         return c.json({ error: "No delivery areas found" }, 404);
@@ -52,9 +52,7 @@ const app = new Hono()
         return c.json({ error: "Missing data" }, 400);
       }
 
-      const data = await db
-        .insert(deliveryAreas)
-        .values({ ...values, user_id: auth.token.sub });
+      const data = await db.insert(deliveryAreas).values(values);
 
       if (!data) {
         return c.json({ error: "Failed to insert data" }, 500);

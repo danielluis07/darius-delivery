@@ -6,14 +6,14 @@ import { useGetDeliveryAreas } from "@/app/_features/_user/_queries/_delivery-ar
 import { DeliveryAreasForm } from "@/app/_features/_user/_components/_delivery-areas/delivery-areas-form";
 import { useDeleteDeliveryAreas } from "@/app/_features/_user/_queries/_delivery-areas/use-delete-delivery-areas";
 
-export const DeliveryAreasClient = ({ userId }: { userId: string }) => {
-  const { data, isLoading } = useGetDeliveryAreas(userId);
-  const { mutate } = useDeleteDeliveryAreas();
+export const DeliveryAreasClient = ({ storeId }: { storeId: string }) => {
+  const { data, isLoading } = useGetDeliveryAreas(storeId);
+  const { mutate } = useDeleteDeliveryAreas(storeId);
 
   return (
     <div className="w-full">
       <h1 className="text-xl font-bold mb-10">Áreas de entrega</h1>
-      <DeliveryAreasForm isLoading={isLoading} />
+      <DeliveryAreasForm isLoading={isLoading} storeId={storeId} />
       <DeliveryAreasDataTable
         columns={columns}
         data={data || []}

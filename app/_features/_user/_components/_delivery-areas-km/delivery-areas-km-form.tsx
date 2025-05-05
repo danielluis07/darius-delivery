@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 import { LoadingButton } from "@/components/ui/loading-button";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.deliveryareaskm.user)[":userId"]["$get"],
+  (typeof client.api.deliveryareaskm.store)[":storeId"]["$get"],
   200
 >["data"];
 
@@ -36,11 +36,13 @@ export const DeliveryAreasKmForm = ({
   apikey,
   customizationlatitude,
   customizationlongitude,
+  storeId,
 }: {
   data: ResponseType | null;
   apikey: string;
   customizationlatitude: number;
   customizationlongitude: number;
+  storeId: string;
 }) => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
@@ -74,7 +76,7 @@ export const DeliveryAreasKmForm = ({
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      createDeliveryAreasKm(values)
+      createDeliveryAreasKm(values, storeId)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
@@ -82,12 +84,12 @@ export const DeliveryAreasKmForm = ({
 
           if (res.success) {
             toast.success(res.message);
-            router.push("/dashboard");
+            router.push(`/dashboard/${storeId}`);
           }
         })
         .catch((error) => {
-          console.error("Error creating category:", error);
-          toast.error("Erro ao criar categoria");
+          console.error("Error creating delivery area:", error);
+          toast.error("Erro ao criar as áreas de entrega.");
         });
     });
   };
