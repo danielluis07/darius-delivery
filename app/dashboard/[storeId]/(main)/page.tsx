@@ -85,7 +85,7 @@ const DashboardPage = async ({
     getUserData(id),
   ]); */
 
-  return <div>hello</div>;
+  return <div>o id da loja é {storeId}</div>;
 
   /*   return (
     <div className="w-full">

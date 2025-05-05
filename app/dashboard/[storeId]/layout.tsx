@@ -5,6 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { auth } from "@/auth";
 import { getUser } from "@/lib/get-user";
 import { getStores } from "../../_features/_user/_queries/_stores/get-stores";
+import { NewStoreProvider } from "@/providers/new-store-provider";
 
 export default async function UserDashboardLayout({
   children,
@@ -32,6 +33,7 @@ export default async function UserDashboardLayout({
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
+      <NewStoreProvider />
       <UserSidebar user={user.data} stores={stores.data} storeId={storeId} />
       <main className="w-full">
         <Navbar user={session?.user} />
