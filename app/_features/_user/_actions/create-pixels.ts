@@ -8,22 +8,14 @@ import { insertPixelsSchema } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 
 export const createPixels = async (
-  values: z.infer<typeof insertPixelsSchema>
+  values: z.infer<typeof insertPixelsSchema>,
+  storeId: string
 ) => {
   try {
     const session = await auth();
     const validatedValues = insertPixelsSchema.safeParse(values);
 
     if (!session) {
-      return { success: false, message: "Not authenticated" };
-    }
-
-    const id =
-      session.user.role === "EMPLOYEE"
-        ? session.user.restaurantOwnerId
-        : session.user.id;
-
-    if (!id) {
       return { success: false, message: "Not authenticated" };
     }
 
@@ -40,7 +32,7 @@ export const createPixels = async (
     const [existingPixel] = await db
       .select()
       .from(pixels)
-      .where(eq(pixels.userId, id));
+      .where(eq(pixels.storeId, storeId));
 
     if (existingPixel) {
       const updated = await db
@@ -51,7 +43,7 @@ export const createPixels = async (
           pixel_tiktok: pixel_tiktok || existingPixel.pixel_tiktok,
           updatedAt: new Date(),
         })
-        .where(eq(pixels.userId, id));
+        .where(eq(pixels.storeId, storeId));
 
       if (updated) {
         return { success: true, message: "Pixels atualizados com sucesso" };
@@ -60,7 +52,7 @@ export const createPixels = async (
       }
     } else {
       const inserted = await db.insert(pixels).values({
-        id,
+        storeId,
         pixel_facebook: pixel_facebook || null,
         pixel_google: pixel_google || null,
         pixel_tiktok: pixel_tiktok || null,

@@ -22,13 +22,19 @@ import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 
 type Pixel = InferResponseType<
-  (typeof client.api.pixels.user)[":userId"]["$get"],
+  (typeof client.api.pixels.store)[":storeId"]["$get"],
   200
 >["data"];
 
 type FormData = z.infer<typeof insertPixelsSchema>;
 
-export const CreatePixelsForm = ({ data }: { data: Pixel | null }) => {
+export const CreatePixelsForm = ({
+  data,
+  storeId,
+}: {
+  data: Pixel | null;
+  storeId: string;
+}) => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
     resolver: zodResolver(insertPixelsSchema),
@@ -45,7 +51,7 @@ export const CreatePixelsForm = ({ data }: { data: Pixel | null }) => {
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      createPixels(values)
+      createPixels(values, storeId)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);
