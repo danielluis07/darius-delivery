@@ -19,7 +19,7 @@ export const Combos = () => {
   const [selectedCombo, setSelectedCombo] = useState<Combo | null>(null);
   const [showComboDetails, setShowComboDetails] = useState(false);
   const { onOpenSheet } = useFooterSheet();
-  const { data: combosData, isLoading } = useGetTemplateCombos(data?.userId);
+  const { data: combosData, isLoading } = useGetTemplateCombos(data?.storeId);
 
   const combos = combosData as Combo[];
 

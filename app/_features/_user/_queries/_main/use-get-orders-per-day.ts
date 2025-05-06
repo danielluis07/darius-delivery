@@ -3,18 +3,18 @@ import { client } from "@/lib/hono";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 
-export const useGetOrdersPerDay = (userId: string, dateRange?: DateRange) => {
+export const useGetOrdersPerDay = (storeId: string, dateRange?: DateRange) => {
   return useQuery({
-    enabled: !!userId && !!dateRange?.from && !!dateRange?.to,
-    queryKey: ["orders-per-day", userId, dateRange],
+    enabled: !!storeId && !!dateRange?.from && !!dateRange?.to,
+    queryKey: ["orders-per-day", storeId, dateRange],
     queryFn: async () => {
       if (!dateRange?.from || !dateRange?.to) return [];
 
       const formattedFrom = format(dateRange.from, "yyyy-MM-dd");
       const formattedTo = format(dateRange.to, "yyyy-MM-dd");
 
-      const res = await client.api.orders.ordersperday[":userId"].$get({
-        param: { userId },
+      const res = await client.api.orders.ordersperday.store[":storeId"].$get({
+        param: { storeId },
         query: { from: formattedFrom, to: formattedTo },
       });
 

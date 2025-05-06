@@ -49,7 +49,7 @@ const orderSchema = z
         image: z.string().nullable(),
         createdAt: z.union([z.string(), z.date()]).nullable(),
         updatedAt: z.union([z.string(), z.date()]).nullable(),
-        userId: z.string().nullable(),
+        storeId: z.string().nullable(),
         price: z.number(),
         description: z.string().nullable(),
         category_id: z.string().nullable().optional(),
@@ -59,10 +59,10 @@ const orderSchema = z
     ),
     totalPrice: z.number(),
     obs: z.string().optional(),
+    storeId: z.string(),
     customerId: z.string(),
     needChange: z.preprocess((val) => val === "true", z.boolean()),
     changeValue: z.number().optional(),
-    restaurantOwnerId: z.string(),
     paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
     deliveryDeadline: z.number().optional(),
     fee: z.number().optional(),
@@ -156,7 +156,6 @@ export const Cart = () => {
         0
       ),
       customerId: session?.user?.id || "",
-      restaurantOwnerId: data?.userId || "",
       asaasCustomerId: session?.user.asaasCustomerId,
       paymentMethod: undefined,
       needChange: false,
@@ -245,7 +244,7 @@ export const Cart = () => {
 
     const { success, message, fee } = await checkDeliveryArea(
       values.customerId,
-      values.restaurantOwnerId,
+      values.storeId,
       values.googleApiKey || ""
     );
 
@@ -255,6 +254,7 @@ export const Cart = () => {
     }
 
     const orderData: OrderData = {
+      storeId: data?.storeId || "",
       items: cart,
       totalPrice: cart.reduce(
         (total, item) =>
@@ -267,7 +267,6 @@ export const Cart = () => {
       changeValue: values.changeValue || undefined,
       apiKey: values.apiKey,
       deliveryDeadline: data?.orderSettings.delivery_deadline || undefined,
-      restaurantOwnerId: data?.userId || "",
       walletId: values.walletId,
       fee,
       paymentMethod: values.paymentMethod,
@@ -363,7 +362,7 @@ export const Cart = () => {
                         color: data?.colors.font || "black",
                       }}
                       onClick={() =>
-                        removeFromCart(item.id, data?.userId || "")
+                        removeFromCart(item.id, data?.storeId || "")
                       }>
                       <X />
                     </div>

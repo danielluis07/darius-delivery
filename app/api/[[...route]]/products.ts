@@ -89,7 +89,7 @@ const app = new Hono()
     }
   )
   .get(
-    "/customer/:storeId/:categoryId",
+    "/customer/store/:storeId/:categoryId",
     zValidator(
       "param",
       z.object({

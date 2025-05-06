@@ -19,8 +19,8 @@ import { FooterSheet } from "./modals/footer";
 import { cn, hexToRgba } from "@/lib/utils";
 import { useCartStore } from "@/hooks/template-1/use-cart-store";
 
-const registerMenuView = async (userId: string | undefined) => {
-  const lastView = localStorage.getItem(`menuView-${userId}`);
+const registerMenuView = async (storeId: string | undefined) => {
+  const lastView = localStorage.getItem(`menuView-${storeId}`);
   const now = Date.now(); // Obtém o timestamp atual como número
 
   // Se `lastView` for null, `parseInt(lastView, 10)` retorna NaN, então tratamos isso
@@ -32,9 +32,9 @@ const registerMenuView = async (userId: string | undefined) => {
   }
 
   // Salvar nova visualização e enviar para o backend
-  localStorage.setItem(`menuView-${userId}`, now.toString()); // Convertendo `now` para string
+  localStorage.setItem(`menuView-${storeId}`, now.toString()); // Convertendo `now` para string
   await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/restaurant-data/menu-views/user/${userId}`,
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/restaurant-data/menu-views/store/${storeId}`,
     {
       method: "POST",
     }
@@ -47,11 +47,11 @@ export const MainClient = () => {
   const { cart } = useCartStore();
   const { data, session } = useStore();
 
-  const userId = data?.userId;
+  const storeId = data?.storeId;
 
   useEffect(() => {
-    registerMenuView(userId);
-  }, [userId]);
+    registerMenuView(storeId);
+  }, [storeId]);
 
   return (
     <div className="flex h-screen items-center justify-center relative">

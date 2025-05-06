@@ -19,10 +19,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export const OrdersPerMonthChart = ({ userId }: { userId: string }) => {
+export const OrdersPerMonthChart = ({ storeId }: { storeId: string }) => {
   const [year, setYear] = useState(new Date().getFullYear().toString()); // Estado para armazenar o ano selecionado
 
-  const { data, isLoading } = useGetMonthlyOrdersByYear(userId, year);
+  const { data, isLoading } = useGetMonthlyOrdersByYear(storeId, year);
 
   const months = [
     "Jan",

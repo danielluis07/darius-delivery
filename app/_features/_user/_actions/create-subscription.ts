@@ -44,8 +44,8 @@ export const createSubscription = async (
     }
 
     const subscription = await db.insert(subscriptions).values({
+      userId: session.user.id,
       asaas_sub_id: id,
-      user_id: session.user.id,
       status,
       plan: subscriptionType,
     });
@@ -58,7 +58,7 @@ export const createSubscription = async (
     }
 
     const adminTrasnsaction = await db.insert(adminTransactions).values({
-      user_id: "c46cec32-af9a-4725-af53-117dc343ce1b",
+      userId: process.env.ADMIN_USER_ID!,
       type: "SUBSCRIPTION",
       amount: subscriptionPrice,
     });
@@ -100,7 +100,7 @@ export const createSubscription = async (
     console.error(error);
     return {
       success: false,
-      message: "Erro inesperado ao criar a customização",
+      message: "Erro inesperado ao efetuar a assinatura",
     };
   }
 };

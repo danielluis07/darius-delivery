@@ -1,4 +1,4 @@
-import { Product, Combo, ComboProduct } from "@/types";
+import { Product } from "@/types";
 import { create } from "zustand";
 
 type Pizza = Product & {

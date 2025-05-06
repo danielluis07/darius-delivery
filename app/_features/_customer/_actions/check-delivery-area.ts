@@ -10,7 +10,7 @@ import { formatAddress, getGeoCode } from "@/lib/google-geocode";
 
 export const checkDeliveryArea = async (
   customerId: string,
-  restaurantOwnerId: string,
+  storeId: string,
   googleApiKey: string
 ) => {
   try {
@@ -86,7 +86,7 @@ export const checkDeliveryArea = async (
         deliveryAreasKmFees,
         eq(deliveryAreasKm.id, deliveryAreasKmFees.deliveryAreaId)
       )
-      .where(eq(deliveryAreasKm.userId, restaurantOwnerId));
+      .where(eq(deliveryAreasKm.storeId, storeId));
 
     if (!deliveryAreas || deliveryAreas.length === 0) {
       return {

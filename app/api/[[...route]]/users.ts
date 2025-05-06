@@ -45,9 +45,8 @@ const app = new Hono()
       }
 
       const [data] = await db
-        .select({ googleApiKey: users.googleApiKey })
+        .select({ googleApiKey: stores.googleApiKey })
         .from(stores)
-        .innerJoin(users, eq(stores.userId, users.id))
         .where(eq(stores.id, storeId));
 
       if (!data) {

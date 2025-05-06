@@ -14,6 +14,7 @@ import {
   transactions,
   adminTransactions,
   combos,
+  stores,
 } from "@/db/schema";
 import {
   asc,
@@ -541,15 +542,6 @@ const app = new Hono()
       return c.json({ error: "Missing store id" }, 400);
     }
 
-    const id =
-      auth.token.role === "EMPLOYEE"
-        ? auth.token.restaurantOwnerId
-        : auth.token.sub;
-
-    if (!id) {
-      return c.json({ error: "Missing user id" }, 400);
-    }
-
     if (
       !customer_id ||
       !status ||
@@ -583,9 +575,9 @@ const app = new Hono()
         .then(([result]) => result), // Extracting first element
 
       db
-        .select({ googleApiKey: users.googleApiKey })
-        .from(users)
-        .where(eq(users.id, id))
+        .select({ googleApiKey: stores.googleApiKey })
+        .from(stores)
+        .where(eq(stores.id, storeId))
         .then(([result]) => result), // Extracting first element
     ]);
 
@@ -733,7 +725,7 @@ const app = new Hono()
             image: z.string().nullable(),
             createdAt: z.union([z.string(), z.date()]).nullable(),
             updatedAt: z.union([z.string(), z.date()]).nullable(),
-            userId: z.string().nullable(),
+            storeId: z.string().nullable(),
             price: z.number(),
             description: z.string().nullable(),
             category_id: z.string().nullable().optional(),
@@ -749,7 +741,6 @@ const app = new Hono()
         changeValue: z.number().optional(),
         fee: z.number().optional(),
         obs: z.string().optional(),
-        restaurantOwnerId: z.string(),
         storeId: z.string(),
         paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
       })
@@ -781,9 +772,9 @@ const app = new Hono()
           .then(([result]) => result), // Extracting first element
 
         db
-          .select({ googleApiKey: users.googleApiKey })
-          .from(users)
-          .where(eq(users.id, values.restaurantOwnerId))
+          .select({ googleApiKey: stores.googleApiKey })
+          .from(stores)
+          .where(eq(stores.id, values.storeId))
           .then(([result]) => result), // Extracting first element
       ]);
 
@@ -884,7 +875,7 @@ const app = new Hono()
       );
 
       await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/restaurant-data/purchased/user/${values.restaurantOwnerId}`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/restaurant-data/purchased/user/${values.storeId}`,
         { method: "POST" }
       )
         .then((res) => res.json())
@@ -914,7 +905,7 @@ const app = new Hono()
             image: z.string().nullable(),
             createdAt: z.union([z.string(), z.date()]).nullable(),
             updatedAt: z.union([z.string(), z.date()]).nullable(),
-            userId: z.string().nullable(),
+            storeId: z.string().nullable(),
             price: z.number(),
             description: z.string().nullable(),
             category_id: z.string().nullable().optional(),
@@ -924,7 +915,6 @@ const app = new Hono()
         ),
         totalPrice: z.number(),
         customerId: z.string(),
-        restaurantOwnerId: z.string(),
         storeId: z.string(),
         deliveryDeadline: z.number().optional(),
         paymentMethod: z.enum(["PIX", "CREDIT_CARD", "CASH", "CARD"]),
@@ -977,17 +967,18 @@ const app = new Hono()
 
         db
           .select({
-            googleApiKey: users.googleApiKey,
+            googleApiKey: stores.googleApiKey,
             comission: users.comissionPercentage,
           })
-          .from(users)
-          .where(eq(users.id, values.restaurantOwnerId))
+          .from(stores)
+          .innerJoin(users, eq(users.id, stores.userId))
+          .where(eq(stores.id, values.storeId))
           .then(([result]) => result),
 
         db
           .select({ id: users.id, walletId: users.walletId })
           .from(users)
-          .where(eq(users.id, process.env.ADMIN_ID!))
+          .where(eq(users.id, process.env.ADMIN_USER_ID!))
           .then(([result]) => result),
       ]);
 
@@ -1155,7 +1146,7 @@ const app = new Hono()
       }
 
       await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL}//api/restaurant-data/purchased/user/${values.restaurantOwnerId}`,
+        `${process.env.NEXT_PUBLIC_APP_URL}//api/restaurant-data/purchased/user/${values.storeId}`,
         { method: "POST" }
       )
         .then((res) => res.json())
@@ -1217,6 +1208,7 @@ const app = new Hono()
     zValidator(
       "json",
       z.object({
+        storeId: z.string(),
         delivererId: z.string().optional(),
         status: z.enum([
           "ACCEPTED",
@@ -1271,19 +1263,11 @@ const app = new Hono()
         total_price,
         street_number,
         postalCode,
+        storeId,
       } = c.req.valid("json");
 
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      const id =
-        auth.token.role === "EMPLOYEE"
-          ? auth.token.restaurantOwnerId
-          : auth.token.sub;
-
-      if (!id) {
-        return c.json({ error: "Missing user id" }, 400);
       }
 
       if (
@@ -1312,9 +1296,9 @@ const app = new Hono()
       });
 
       const [user] = await db
-        .select({ googleApiKey: users.googleApiKey })
-        .from(users)
-        .where(eq(users.id, id));
+        .select({ googleApiKey: stores.googleApiKey })
+        .from(stores)
+        .where(eq(users.id, storeId));
 
       if (!user.googleApiKey) {
         return c.json({ error: "Failed to update order" }, 500);

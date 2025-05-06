@@ -47,14 +47,10 @@ const DashboardPage = async ({
 
   const user = await getUser(session.user.id, storeId);
 
-  const id =
-    session.user.role === "EMPLOYEE"
-      ? session.user.restaurantOwnerId
-      : session.user.id;
-
-  if (!id || !user.data) {
+  if (!user.data) {
     return <div>Usuário não encontrado</div>;
   }
+
   const userPermissions = user.data.employee?.permissions;
 
   if (user.data.role === "EMPLOYEE" && !userPermissions?.includes("Início")) {
@@ -82,7 +78,7 @@ const DashboardPage = async ({
     getGoogleApiKey(storeId),
     getTotalRevenue(storeId),
     getAverageTicket(storeId),
-    getUserData(id),
+    getUserData(user.data.id),
   ]);
 
   return (
@@ -96,8 +92,8 @@ const DashboardPage = async ({
         <AverageTicket averageTicket={averageTicket} />
       </div>
       <div className="flex gap-4 mt-10">
-        <OrdersPerDayChart userId={id} />
-        <RevenuePerMonthChart userId={id} />
+        <OrdersPerDayChart storeId={storeId} />
+        <RevenuePerMonthChart storeId={storeId} />
       </div>
       <div className="grid grid-cols-4 gap-3 mt-10">
         <StatsCard
@@ -126,7 +122,7 @@ const DashboardPage = async ({
         />
       </div>
       <div className="flex items-center mt-10 gap-3">
-        <OrdersPerMonthChart userId={id} />
+        <OrdersPerMonthChart storeId={storeId} />
         <OrdersComparisonChart data={ordersComparison || []} />
       </div>
       <div className="mt-10">

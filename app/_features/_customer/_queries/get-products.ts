@@ -1,5 +1,5 @@
 import { db } from "@/db/drizzle";
-import { users, products } from "@/db/schema";
+import { users, products, stores } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export const getProductsByDomain = async (
@@ -11,7 +11,8 @@ export const getProductsByDomain = async (
         products: products,
       })
       .from(users)
-      .innerJoin(products, eq(users.id, products.userId))
+      .innerJoin(stores, eq(users.id, stores.userId))
+      .innerJoin(products, eq(stores.id, products.storeId))
       .where(eq(users.domain, domain));
 
     return data?.products ?? null;

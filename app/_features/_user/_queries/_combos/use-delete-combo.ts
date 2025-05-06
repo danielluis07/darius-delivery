@@ -8,11 +8,11 @@ type ResponseType = InferResponseType<
 >;
 
 type Combos = InferResponseType<
-  (typeof client.api.combos.user)[":userId"]["$get"],
+  (typeof client.api.combos.store)[":storeId"]["$get"],
   200
 >["data"];
 
-export const useDeleteCombo = (id: string, userId: string | undefined) => {
+export const useDeleteCombo = (id: string, storeId: string | undefined) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error>({
@@ -25,12 +25,12 @@ export const useDeleteCombo = (id: string, userId: string | undefined) => {
     onSuccess: () => {
       toast.success("Combo deletado!");
       queryClient.setQueryData(
-        ["combos", userId],
+        ["combos", storeId],
         (oldData: Combos | undefined) => {
           return oldData ? oldData.filter((combo) => combo.id !== id) : [];
         }
       );
-      queryClient.invalidateQueries({ queryKey: ["combos", userId] });
+      queryClient.invalidateQueries({ queryKey: ["combos", storeId] });
     },
     onError: () => {
       toast.error("Houve um erro ao deletar o combo!");

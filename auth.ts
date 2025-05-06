@@ -72,10 +72,6 @@ export const {
         if (token.asaasCustomerId) {
           session.user.asaasCustomerId = token.asaasCustomerId as string;
         }
-
-        if (token.restaurantOwnerId) {
-          session.user.restaurantOwnerId = token.restaurantOwnerId as string;
-        }
       }
 
       return session;
@@ -111,15 +107,6 @@ export const {
           .where(eq(customers.userId, token.sub));
 
         token.asaasCustomerId = customer?.asaasCustomerId || null;
-      }
-
-      if (existingUser.role === "EMPLOYEE") {
-        const [employee] = await db
-          .select({ restaurantOwnerId: employees.restaurantOwnerId })
-          .from(employees)
-          .where(eq(employees.userId, token.sub));
-
-        token.restaurantOwnerId = employee?.restaurantOwnerId || null;
       }
 
       return token;

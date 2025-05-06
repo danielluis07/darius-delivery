@@ -5,11 +5,11 @@ export type ExtendedAuthUser = AuthUser & {
   token?: AuthUser["token"] & {
     sub: string;
     role: "ADMIN" | "EMPLOYEE" | "USER";
-    restaurantOwnerId?: string; // Está presente apenas se for EMPLOYEE
   };
 };
 
 export type CustomizationWithTemplate = {
+  storeId: string;
   customization: typeof customizations.$inferSelect & {
     opening_hours: { day: string; open: string; close: string }[];
   };
@@ -17,7 +17,6 @@ export type CustomizationWithTemplate = {
   templateName: string;
   apiKey: string;
   googleApiKey: string;
-  userId: string;
   walletId: string;
   colors: typeof colors.$inferSelect;
 };
@@ -28,7 +27,7 @@ export type CartItem = {
   image: string | null;
   createdAt: string | Date | null;
   updatedAt: string | Date | null;
-  userId: string | null;
+  storeId: string | null;
   price: number;
   description: string | null;
   category_id: string | null;
@@ -40,7 +39,7 @@ export type CashOnDeliveryOrderData = {
   items: CartItem[];
   totalPrice: number;
   customerId: string;
-  restaurantOwnerId: string;
+  storeId: string;
   paymentMethod: "CASH" | "CARD";
 };
 
@@ -48,7 +47,7 @@ export type CashOnWebsiteOrderData = {
   items: CartItem[];
   totalPrice: number;
   customerId: string;
-  restaurantOwnerId: string;
+  storeId: string;
   asaasCustomerId: string | undefined;
   paymentMethod: "CREDIT_CARD" | "PIX";
 };
@@ -92,7 +91,7 @@ export type Product = {
   id: string;
   name: string;
   allowHalfOption: boolean;
-  userId: string | null;
+  storeId: string | null;
   image: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -125,7 +124,7 @@ export type Combo = {
   id: string;
   name: string;
   image: string | null;
-  userId: string | null;
+  storeId: string | null;
   description: string;
   price: number;
   isActive: boolean;
@@ -142,7 +141,7 @@ export type Combo = {
     price: number;
     sizes: string[] | null;
     allowHalfOption: boolean;
-    userId: string | null;
+    storeId: string | null;
     createdAt: Date | null;
     updatedAt: Date | null;
   }[];

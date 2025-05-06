@@ -26,13 +26,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export const OrdersPerDayChart = ({ userId }: { userId: string }) => {
+export const OrdersPerDayChart = ({ storeId }: { storeId: string }) => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 7), // 7 days ago
     to: addDays(new Date(), 1), // Tomorrow
   });
 
-  const { data: orders, isLoading } = useGetOrdersPerDay(userId, dateRange);
+  const { data: orders, isLoading } = useGetOrdersPerDay(storeId, dateRange);
   return (
     <Card className="w-full">
       <div className="flex items-center justify-between">

@@ -3,7 +3,13 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { customizations, users, orderSettings, colors } from "@/db/schema";
+import {
+  customizations,
+  users,
+  orderSettings,
+  colors,
+  stores,
+} from "@/db/schema";
 import { insertCustomizationSchema } from "@/db/schemas";
 import { and, eq } from "drizzle-orm";
 import { formatAddress, getGeoCode } from "@/lib/google-geocode";
@@ -61,9 +67,9 @@ export const createCustomization = async (
     }
 
     const [userData] = await db
-      .select({ googleApiKey: users.googleApiKey })
-      .from(users)
-      .where(eq(users.id, userId));
+      .select({ googleApiKey: stores.googleApiKey })
+      .from(stores)
+      .where(eq(stores.id, storeId));
 
     if (!userData?.googleApiKey) {
       return {

@@ -21,8 +21,10 @@ type FormData = z.infer<typeof insertApiKeySchema>;
 
 export const GoogleApiKeyForm = ({
   userApiKey,
+  storeId,
 }: {
   userApiKey: string | null | undefined;
+  storeId: string;
 }) => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
@@ -38,7 +40,7 @@ export const GoogleApiKeyForm = ({
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      insertGoogleApiKey(values)
+      insertGoogleApiKey(values, storeId)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);

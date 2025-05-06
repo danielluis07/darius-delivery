@@ -3,7 +3,14 @@
 import { z } from "zod";
 import { gte, lt, and, desc, eq } from "drizzle-orm"; // Replace "some-library" with the actual library name
 import { db } from "@/db/drizzle";
-import { orders, orderItems, receipts, customers, users } from "@/db/schema";
+import {
+  orders,
+  orderItems,
+  receipts,
+  customers,
+  users,
+  stores,
+} from "@/db/schema";
 import { insertOrderSchema } from "@/db/schemas";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -17,15 +24,6 @@ export const createOrder = async (
 
     if (!session) {
       return { success: false, message: "Usuário não autenticado" };
-    }
-
-    const id =
-      session.user.role === "EMPLOYEE"
-        ? session.user.restaurantOwnerId
-        : session.user.id;
-
-    if (!id) {
-      return { success: false, message: "Not authenticated" };
     }
 
     const validatedValues = insertOrderSchema.safeParse(values);
@@ -63,9 +61,10 @@ export const createOrder = async (
         .then(([result]) => result), // Extracting first element
 
       db
-        .select({ googleApiKey: users.googleApiKey })
+        .select({ googleApiKey: stores.googleApiKey })
         .from(users)
-        .where(eq(users.id, id))
+        .innerJoin(stores, eq(users.id, stores.userId))
+        .where(eq(users.id, ""))
         .then(([result]) => result), // Extracting first element
     ]);
 
@@ -117,7 +116,7 @@ export const createOrder = async (
     const [order] = await db
       .insert(orders)
       .values({
-        user_id: session.user.id,
+        storeId: session.user.id,
         daily_number: nextDailyNumber,
         customer_id,
         total_price,
@@ -146,7 +145,7 @@ export const createOrder = async (
 
     const receipt = await db.insert(receipts).values({
       order_id: order.id,
-      user_id: session.user.id,
+      storeId: session.user.id,
     });
 
     if (!receipt) {

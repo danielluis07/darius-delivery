@@ -1,6 +1,7 @@
 import { BankAccountForm } from "@/app/_features/_user/_components/_settings/bank-account-form";
 import { CancelSubBtn } from "@/app/_features/_user/_components/_settings/cancel-sub-btn";
 import { GoogleApiKeyForm } from "@/app/_features/_user/_components/_settings/google-api-key-form";
+import { getStore } from "@/app/_features/_user/_queries/_stores/get-store";
 import { getSubscription } from "@/app/_features/_user/_queries/get-subscription";
 import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
 import { auth } from "@/auth";
@@ -18,9 +19,10 @@ const SettingsPage = async ({
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const [data, subscription] = await Promise.all([
+  const [data, subscription, store] = await Promise.all([
     getUserData(session.user.id),
     getSubscription(storeId),
+    getStore(storeId),
   ]);
 
   if (!data || !data.trialEndsAt) {
@@ -47,7 +49,7 @@ const SettingsPage = async ({
           <CancelSubBtn subscriptionId={subscription?.asaas_sub_id} />
         </CardContent>
       </Card>
-      <GoogleApiKeyForm userApiKey={data?.googleApiKey} />
+      <GoogleApiKeyForm userApiKey={store?.googleApiKey} storeId={storeId} />
       <BankAccountForm
         bankAccount={data?.bankAccount}
         bankAccountDigit={data?.bankAccountDigit}

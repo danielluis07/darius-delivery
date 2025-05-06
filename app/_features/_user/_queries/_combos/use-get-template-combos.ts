@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
-export const useGetTemplateCombos = (userId?: string) => {
+export const useGetTemplateCombos = (storeId?: string) => {
   const query = useQuery({
-    enabled: !!userId, // the query will only be executed if we have the userId
-    queryKey: ["template-combos", userId],
+    enabled: !!storeId, // the query will only be executed if we have the userId
+    queryKey: ["template-combos", storeId],
     queryFn: async () => {
-      const res = await client.api.combos.template.user[":userId"].$get({
-        param: { userId },
+      const res = await client.api.combos.template.store[":storeId"].$get({
+        param: { storeId },
       });
 
       if (!res.ok) {

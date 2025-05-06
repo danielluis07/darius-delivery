@@ -90,6 +90,7 @@ export const stores = pgTable("stores", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  googleApiKey: varchar("google_api_key", { length: 255 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -140,7 +141,6 @@ export const users = pgTable("user", {
     precision: 5,
     scale: 2,
   }),
-  googleApiKey: varchar("google_api_key", { length: 255 }),
   domain: varchar("domain", { length: 255 }).unique(),
   isSubscribed: boolean("is_subscribed").default(false),
   isTrial: boolean("is_trial").default(true),
@@ -425,6 +425,9 @@ export const subscriptions = pgTable("subscriptions", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   asaas_sub_id: text("asaas_sub_id"),
+  userId: text("user_id").references(() => users.id, {
+    onDelete: "cascade",
+  }),
   storeId: text("store_id").references(() => stores.id, {
     onDelete: "cascade",
   }),

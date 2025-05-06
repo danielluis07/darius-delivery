@@ -2,17 +2,17 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.combos.user)[":userId"]["$get"],
+  (typeof client.api.combos.store)[":storeId"]["$get"],
   200
 >["data"];
 
-const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/combos/user`;
+const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/combos/store`;
 
 export const getCombos = async (
-  userId: string
+  storeId: string
 ): Promise<ResponseType | null> => {
   try {
-    const res = await fetch(`${URL}/${userId}`);
+    const res = await fetch(`${URL}/${storeId}`);
 
     if (!res.ok) {
       return null;

@@ -8,7 +8,7 @@ import placeholder from "@/public/placeholder-image.jpg";
 export const Categories = () => {
   const { data } = useStore();
   const { onOpen } = useModalStore();
-  const { data: categories, isLoading } = useGetCategories(data?.userId);
+  const { data: categories, isLoading } = useGetCategories(data?.storeId);
 
   if (isLoading) {
     return <div>Carregando...</div>;

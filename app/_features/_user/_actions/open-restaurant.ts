@@ -10,21 +10,15 @@ const formSchema = z.object({
   isOpen: z.boolean(),
 });
 
-export const openRestaurant = async (values: z.infer<typeof formSchema>) => {
+export const openRestaurant = async (
+  values: z.infer<typeof formSchema>,
+  storeId: string
+) => {
   try {
     const session = await auth();
     const validatedValues = formSchema.safeParse(values);
 
     if (!session) {
-      return { success: false, message: "Not authenticated" };
-    }
-
-    const id =
-      session.user.role === "EMPLOYEE"
-        ? session.user.restaurantOwnerId
-        : session.user.id;
-
-    if (!id) {
       return { success: false, message: "Not authenticated" };
     }
 
@@ -39,7 +33,7 @@ export const openRestaurant = async (values: z.infer<typeof formSchema>) => {
       .set({
         isOpen,
       })
-      .where(eq(customizations.user_id, id));
+      .where(eq(customizations.storeId, storeId));
 
     if (!existingCustomization) {
       return {
@@ -56,7 +50,7 @@ export const openRestaurant = async (values: z.infer<typeof formSchema>) => {
     console.error(error);
     return {
       success: false,
-      message: "Erro inesperado ao processar os pixels",
+      message: "Um erro inesperado aconteceu",
     };
   }
 };

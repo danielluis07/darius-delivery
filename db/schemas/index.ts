@@ -406,7 +406,7 @@ export const insertCustomerSchema = z
     state: z.string(),
     cpfCnpj: z.string(),
     neighborhood: z.string(),
-    restaurantOwnerId: z.string().optional(),
+    storeId: z.string().optional(),
     street: z.string(),
     postalCode: z.string(),
     street_number: z.string(),

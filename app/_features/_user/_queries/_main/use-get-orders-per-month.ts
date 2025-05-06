@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
-export const useGetMonthlyOrdersByYear = (userId: string, year: string) => {
+export const useGetMonthlyOrdersByYear = (storeId: string, year: string) => {
   return useQuery({
-    enabled: !!userId && !!year,
-    queryKey: ["monthly-orders", userId, year],
+    enabled: !!storeId && !!year,
+    queryKey: ["monthly-orders", storeId, year],
     queryFn: async () => {
-      const res = await client.api.finances.monthlyorders[":userId"][
+      const res = await client.api.finances.monthlyorders.store[":storeId"][
         ":year"
       ].$get({
-        param: { userId, year },
+        param: { storeId, year },
       });
 
       if (!res.ok) {

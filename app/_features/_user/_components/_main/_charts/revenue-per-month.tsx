@@ -20,10 +20,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export const RevenuePerMonthChart = ({ userId }: { userId: string }) => {
+export const RevenuePerMonthChart = ({ storeId }: { storeId: string }) => {
   const [year, setYear] = useState(new Date().getFullYear().toString()); // Estado para armazenar o ano selecionado
 
-  const { data, isLoading } = useGetMonthlyRevenueByYear(userId, year);
+  const { data, isLoading } = useGetMonthlyRevenueByYear(storeId, year);
 
   const months = [
     "Jan",

@@ -1,15 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
-export const useGetProducts = (userId?: string, categoryId?: string | null) => {
+export const useGetProducts = (
+  storeId?: string,
+  categoryId?: string | null
+) => {
   const query = useQuery({
-    enabled: !!userId, // the query will only be executed if we have the userId
-    queryKey: ["products", { userId, categoryId }],
+    enabled: !!storeId, // the query will only be executed if we have the storeId
+    queryKey: ["products", { storeId, categoryId }],
     queryFn: async () => {
-      const res = await client.api.products.customer[":userId"][
+      const res = await client.api.products.customer.store[":storeId"][
         ":categoryId"
       ].$get({
-        param: { userId, categoryId: categoryId || "" },
+        param: { storeId, categoryId: categoryId || "" },
       });
 
       if (!res.ok) {

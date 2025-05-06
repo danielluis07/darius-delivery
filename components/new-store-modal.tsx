@@ -25,6 +25,7 @@ import { createStore } from "@/app/_features/_user/_actions/create-store";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useNewStoreModal } from "@/hooks/use-new-store-modal";
+import { createNewStore } from "@/app/_features/_user/_actions/create-new-store";
 
 type FormData = z.infer<typeof insertStoreSchema>;
 
@@ -47,7 +48,7 @@ export const NewStoreModal = () => {
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      createStore(values)
+      createNewStore(values)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);

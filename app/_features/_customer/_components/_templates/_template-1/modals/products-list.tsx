@@ -35,7 +35,7 @@ export const ProductsList = ({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { data: products, isLoading: isProductsLoading } = useGetProducts(
-    data?.userId,
+    data?.storeId,
     categoryId
   );
 
@@ -259,7 +259,7 @@ export const ProductsList = ({
                 // Call the updated addToCart from your store
                 const wasAdded = addToCart(
                   { ...selectedProduct, halfOption }, // 1st arg: Product data (including halfOption if needed)
-                  data?.userId || "", // 2nd arg: User ID
+                  data?.storeId || "", // 2nd arg: User ID
                   selectedValues // 3rd arg: Your selected additionals state object
                 );
 

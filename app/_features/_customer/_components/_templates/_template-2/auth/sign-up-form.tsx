@@ -51,7 +51,7 @@ export const SignUpForm = () => {
       email: "",
       password: "",
       repeat_password: "",
-      restaurantOwnerId: data?.userId || "",
+      storeId: data?.storeId || "",
       phone: "",
       postalCode: "",
       street: "",

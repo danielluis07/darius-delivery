@@ -3,13 +3,14 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { users } from "@/db/schema";
+import { stores, users } from "@/db/schema";
 import { insertApiKeySchema } from "@/db/schemas";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 
 export const insertGoogleApiKey = async (
-  values: z.infer<typeof insertApiKeySchema>
+  values: z.infer<typeof insertApiKeySchema>,
+  storeId: string
 ) => {
   try {
     const session = await auth();
@@ -30,11 +31,11 @@ export const insertGoogleApiKey = async (
     }
 
     const key = await db
-      .update(users)
+      .update(stores)
       .set({
         googleApiKey: apiKey,
       })
-      .where(eq(users.id, session.user.id));
+      .where(eq(stores.id, storeId));
 
     if (!key) {
       return {

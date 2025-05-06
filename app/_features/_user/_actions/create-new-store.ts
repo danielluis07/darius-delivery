@@ -3,11 +3,10 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { stores, subscriptions } from "@/db/schema";
+import { stores } from "@/db/schema";
 import { insertStoreSchema } from "@/db/schemas";
-import { eq, isNull, desc, and } from "drizzle-orm";
 
-export const createStore = async (
+export const createNewStore = async (
   values: z.infer<typeof insertStoreSchema>
 ) => {
   try {
@@ -28,7 +27,7 @@ export const createStore = async (
       return { success: false, message: "Preencha o nome" };
     }
 
-    const [store] = await db
+    const [data] = await db
       .insert(stores)
       .values({
         name,
@@ -38,43 +37,20 @@ export const createStore = async (
         id: stores.id,
       });
 
-    if (!store) {
+    if (!data) {
       return { success: false, message: "Erro ao criar loja" };
-    }
-
-    const [subscription] = await db
-      .select({ id: subscriptions.id })
-      .from(subscriptions)
-      .where(
-        and(
-          eq(subscriptions.userId, session.user.id),
-          isNull(subscriptions.storeId)
-        )
-      )
-      .orderBy(desc(subscriptions.createdAt));
-
-    if (subscription) {
-      await db
-        .update(subscriptions)
-        .set({ storeId: store.id })
-        .where(eq(subscriptions.id, subscription.id));
-    } else {
-      return {
-        success: false,
-        message: "Assinatura não encontrada",
-      };
     }
 
     return {
       success: true,
       message: "Loja criada com sucesso",
-      storeId: store.id,
+      storeId: data.id,
     };
   } catch (error) {
     console.error(error);
     return {
       success: false,
-      message: "Erro inesperado ao criar a loja",
+      message: "Erro inesperado ao processar os pixels",
     };
   }
 };

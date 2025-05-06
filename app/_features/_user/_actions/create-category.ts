@@ -19,15 +19,6 @@ export const createCategory = async (
       return { success: false, message: "Not authenticated" };
     }
 
-    const id =
-      session.user.role === "EMPLOYEE"
-        ? session.user.restaurantOwnerId
-        : session.user.id;
-
-    if (!id) {
-      return { success: false, message: "Not authenticated" };
-    }
-
     if (!validatedValues.success) {
       return { success: false, message: "Campos inválidos" };
     }
