@@ -9,8 +9,6 @@ const CategoriesPage = async ({
   const { storeId } = await params;
   const session = await auth();
 
-  console.log("storeId", storeId);
-
   if (!session || !session.user.id) {
     return <div>Você não está autorizado a acessar essa página</div>;
   }
