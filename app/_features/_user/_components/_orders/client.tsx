@@ -51,7 +51,7 @@ import { CloseCashRegister } from "@/app/_features/_user/_components/_orders/clo
 import { useConfirmContext } from "@/context/confirm-context";
 
 export type Receipt = InferResponseType<
-  (typeof client.api.receipts.user)[":userId"]["$get"],
+  (typeof client.api.receipts.store)[":storeId"]["$get"],
   200
 >["data"];
 
