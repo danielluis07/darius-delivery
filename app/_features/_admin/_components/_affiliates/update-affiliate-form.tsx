@@ -14,11 +14,9 @@ import { Input } from "@/components/ui/input";
 import { useForm, FieldErrors } from "react-hook-form";
 import { updateAffiliateSchema } from "@/db/schemas";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
-import { useState, useTransition } from "react";
+import { formatPhoneNumber } from "@/lib/utils";
+import { useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { updateEmployee } from "@/app/_features/_user/_actions/update-employee";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 import { Check, Copy } from "lucide-react";
@@ -37,7 +35,6 @@ export const UpdateAffiliateForm = ({
   userId: string;
   data: Affiliate;
 }) => {
-  const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
   const textToCopy = `https://dariusdelivery.com.br/${data.referralCode}`;
   const form = useForm<FormData>({
@@ -50,6 +47,8 @@ export const UpdateAffiliateForm = ({
     },
   });
 
+  console.log(userId);
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(textToCopy);
@@ -61,35 +60,15 @@ export const UpdateAffiliateForm = ({
     }
   };
 
-  const router = useRouter();
+  // const router = useRouter();
+  const isPending = false;
 
   const onInvalid = (errors: FieldErrors<FormData>) => {
     console.log(errors);
   };
 
   const onSubmit = async (values: FormData) => {
-    startTransition(() => {
-      updateEmployee(userId, {
-        ...values,
-        phone: removeFormatting(values.phone),
-      })
-        .then((res) => {
-          if (!res.success) {
-            toast.error(res.message);
-          }
-
-          if (res.success) {
-            toast.success(res.message);
-            router.push("/dashboard/employees");
-          }
-        })
-        .catch((error) => {
-          console.error("Error while updating affiliate:", error);
-          toast.error(
-            "Erro ao atualizar afiliado. Tente novamente mais tarde."
-          );
-        });
-    });
+    console.log(values);
   };
 
   return (

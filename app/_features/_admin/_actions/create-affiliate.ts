@@ -5,7 +5,7 @@ import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { affiliates, users } from "@/db/schema";
-import { createEmployeeSchema } from "@/db/schemas";
+import { createAffiliateSchema } from "@/db/schemas";
 import { createHash } from "crypto";
 
 // Helper function to hash a password using SHA-256
@@ -17,7 +17,7 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 export const createAffiliate = async (
-  values: z.infer<typeof createEmployeeSchema>
+  values: z.infer<typeof createAffiliateSchema>
 ) => {
   try {
     const session = await auth();
@@ -26,7 +26,7 @@ export const createAffiliate = async (
       return { success: false, message: "Usuário não autenticado" };
     }
 
-    const validatedValues = createEmployeeSchema.safeParse(values);
+    const validatedValues = createAffiliateSchema.safeParse(values);
 
     if (!validatedValues.success) {
       return { success: false, message: "Campos inválidos" };
