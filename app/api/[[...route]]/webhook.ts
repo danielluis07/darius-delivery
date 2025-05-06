@@ -1,5 +1,11 @@
 import { db } from "@/db/drizzle";
-import { orders, subscriptions, transactions, users } from "@/db/schema";
+import {
+  orders,
+  stores,
+  subscriptions,
+  transactions,
+  users,
+} from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 
@@ -104,15 +110,26 @@ const app = new Hono()
         .where(eq(subscriptions.asaas_sub_id, payment.subscription))
         .returning({
           id: subscriptions.id,
-          userId: subscriptions.user_id,
+          storeId: subscriptions.storeId,
         });
+
+      if (!subscription.id || !subscription.storeId) {
+        return c.json({ error: "Assinatura não encontrada" }, 404);
+      }
+
+      const [store] = await db
+        .select({
+          userId: stores.userId,
+        })
+        .from(stores)
+        .where(eq(stores.id, subscription.storeId));
 
       await db
         .update(users)
         .set({
           isSubscribed: false,
         })
-        .where(eq(users.id, subscription.userId));
+        .where(eq(users.id, store.userId));
 
       return c.json({
         message: "Assinatura atualizada para OVERDUE",

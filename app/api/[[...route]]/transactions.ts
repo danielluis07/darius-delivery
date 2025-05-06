@@ -2,17 +2,24 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import { orders, products, transactions, users, orderItems } from "@/db/schema";
+import {
+  orders,
+  products,
+  transactions,
+  users,
+  orderItems,
+  stores,
+} from "@/db/schema";
 import { eq, sum } from "drizzle-orm";
 
 const app = new Hono()
   .get(
-    "/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
@@ -34,10 +41,11 @@ const app = new Hono()
         })
         .from(transactions)
         .innerJoin(orders, eq(transactions.order_id, orders.id))
-        .innerJoin(users, eq(orders.user_id, users.id))
+        .innerJoin(stores, eq(stores.id, storeId))
+        .innerJoin(users, eq(users.id, stores.userId))
         .innerJoin(orderItems, eq(orders.id, orderItems.order_id))
         .innerJoin(products, eq(orderItems.product_id, products.id))
-        .where(eq(transactions.user_id, userId));
+        .where(eq(transactions.storeId, storeId));
 
       if (!data || data.length === 0) {
         return c.json({ error: "No transactions found found" }, 404);
