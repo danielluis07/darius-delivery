@@ -13,7 +13,7 @@ const statusMap: Record<string, string> = {
 };
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.transactions)[":userId"]["$get"],
+  (typeof client.api.transactions.store)[":storeId"]["$get"],
   200
 >["data"][0];
 
