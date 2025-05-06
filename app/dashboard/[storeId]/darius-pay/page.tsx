@@ -21,7 +21,12 @@ import { getTotalRevenue } from "@/app/_features/_user/_queries/_finances/get-to
 import { TotalBalance } from "@/app/_features/_user/_components/_darius-pay/total-balance";
 import { PaymentsDataTable } from "@/app/_features/_user/_components/_darius-pay/_payments/data-table";
 
-const DariusPayPage = async () => {
+const DariusPayPage = async ({
+  params,
+}: {
+  params: Promise<{ storeId: string }>;
+}) => {
+  const { storeId } = await params;
   const session = await auth();
 
   if (!session || !session.user.id) {
@@ -49,9 +54,9 @@ const DariusPayPage = async () => {
   ] = await Promise.all([
     getUserData(session.user.id),
     getTransferRequests(user.apiKey),
-    getTransactions(session.user.id),
+    getTransactions(storeId),
     getAccountBalance(user.apiKey),
-    getTotalRevenue(session.user.id),
+    getTotalRevenue(storeId),
     getPayments(user.apiKey),
   ]);
 

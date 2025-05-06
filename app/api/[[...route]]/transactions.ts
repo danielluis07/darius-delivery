@@ -10,7 +10,7 @@ import {
   orderItems,
   stores,
 } from "@/db/schema";
-import { eq, sum } from "drizzle-orm";
+import { and, eq, sum } from "drizzle-orm";
 
 const app = new Hono()
   .get(
@@ -55,12 +55,12 @@ const app = new Hono()
     }
   )
   .get(
-    "/totalrevenue/:userId",
-    zValidator("param", z.object({ userId: z.string().optional() })),
+    "/totalrevenue/store/:storeId",
+    zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
-      const { userId } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
 
-      if (!userId) {
+      if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);
       }
       const [totalSalesValue] = await db
@@ -68,7 +68,12 @@ const app = new Hono()
           totalRevenue: sum(transactions.amount),
         })
         .from(transactions)
-        .where(eq(transactions.status, "COMPLETED"));
+        .where(
+          and(
+            eq(transactions.storeId, storeId),
+            eq(transactions.status, "COMPLETED")
+          )
+        );
 
       return c.json({ data: totalSalesValue.totalRevenue });
     }

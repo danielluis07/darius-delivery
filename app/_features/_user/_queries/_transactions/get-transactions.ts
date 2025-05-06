@@ -2,21 +2,21 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type TransactionsType = InferResponseType<
-  (typeof client.api.transactions)[":userId"]["$get"],
+  (typeof client.api.transactions.store)[":storeId"]["$get"],
   200
 >["data"];
 
 type TotalRevenueType = InferResponseType<
-  (typeof client.api.transactions.totalrevenue)[":userId"]["$get"],
+  (typeof client.api.transactions.totalrevenue.store)[":storeId"]["$get"],
   200
 >["data"];
 
 export const getTransactions = async (
-  userId: string
+  storeId: string
 ): Promise<TransactionsType | null> => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/transactions/${userId}`
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/transactions/store/${storeId}`
     );
 
     if (!res.ok) {
@@ -32,11 +32,11 @@ export const getTransactions = async (
 };
 
 export const getTotalRevenue = async (
-  userId: string
+  storeId: string
 ): Promise<TotalRevenueType | null> => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/transactions/totalrevenue/${userId}`
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/transactions/totalrevenue/store/${storeId}`
     );
 
     if (!res.ok) {
