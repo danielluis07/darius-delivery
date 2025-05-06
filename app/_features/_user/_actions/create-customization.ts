@@ -3,13 +3,7 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import {
-  customizations,
-  users,
-  orderSettings,
-  colors,
-  stores,
-} from "@/db/schema";
+import { customizations, orderSettings, colors, stores } from "@/db/schema";
 import { insertCustomizationSchema } from "@/db/schemas";
 import { and, eq } from "drizzle-orm";
 import { formatAddress, getGeoCode } from "@/lib/google-geocode";

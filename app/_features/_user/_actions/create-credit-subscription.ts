@@ -47,7 +47,7 @@ export const createCreditCardSubscription = async (
 
     const subscription = await db.insert(subscriptions).values({
       asaas_sub_id: id,
-      user_id: session.user.id,
+      userId: session.user.id,
       status,
       plan: subscriptionType,
     });
@@ -60,7 +60,7 @@ export const createCreditCardSubscription = async (
     }
 
     const adminTrasnsaction = await db.insert(adminTransactions).values({
-      user_id: "c46cec32-af9a-4725-af53-117dc343ce1b",
+      userId: process.env.ADMIN_USER_ID,
       type: "SUBSCRIPTION",
       amount: subscriptionPrice,
     });

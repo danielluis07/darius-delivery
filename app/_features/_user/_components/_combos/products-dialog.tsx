@@ -16,7 +16,7 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type CategoriesWithProducts = InferResponseType<
-  (typeof client.api.categories)["with-products"]["user"][":userId"]["$get"],
+  (typeof client.api.categories)["with-products"]["store"][":storeId"]["$get"],
   200
 >["data"];
 

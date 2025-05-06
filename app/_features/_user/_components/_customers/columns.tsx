@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { formatPhoneNumber } from "@/lib/utils";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.customers.user)[":userId"]["$get"],
+  (typeof client.api.customers.store)[":storeId"]["$get"],
   200
 >["data"][0];
 

@@ -24,7 +24,6 @@ import {
   Route,
   ShoppingBasket,
   Users,
-  CircleDollarSign,
   MapPin,
   Lock,
   ChartPie,

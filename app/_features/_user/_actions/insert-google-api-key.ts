@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { stores, users } from "@/db/schema";
+import { stores } from "@/db/schema";
 import { insertApiKeySchema } from "@/db/schemas";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";

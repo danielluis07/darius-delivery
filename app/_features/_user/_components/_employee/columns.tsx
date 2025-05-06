@@ -9,7 +9,7 @@ import { formatPhoneNumber } from "@/lib/utils";
 import { EmployeeCellAction } from "@/app/_features/_user/_components/_employee/cell-action";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.users.employees)[":userId"]["$get"],
+  (typeof client.api.users.employees.store)[":storeId"]["$get"],
   200
 >["data"][0];
 

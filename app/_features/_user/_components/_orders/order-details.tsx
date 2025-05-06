@@ -107,6 +107,7 @@ export const OrderDetails = ({
   const form = useForm<FormData>({
     resolver: zodResolver(updateOrderSchema),
     defaultValues: {
+      storeId,
       status: undefined,
       delivererId: "",
       payment_status: undefined,

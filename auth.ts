@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import { db } from "@/db/drizzle";
 import authConfig from "@/auth.config";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { users, account, customers, employees } from "@/db/schema";
+import { users, account, customers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export const {

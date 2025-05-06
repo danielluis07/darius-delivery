@@ -2,7 +2,7 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { db } from "@/db/drizzle";
-import { users, subscriptions, affiliates } from "@/db/schema";
+import { users, subscriptions, affiliates, stores } from "@/db/schema";
 import { eq, and, sql, count } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 
@@ -38,7 +38,7 @@ const app = new Hono()
     const data = await db
       .select({
         id: subscriptions.id,
-        userId: subscriptions.user_id,
+        storeId: subscriptions.storeId,
         name: users.name,
         email: users.email,
         status: subscriptions.status,
@@ -47,7 +47,8 @@ const app = new Hono()
         createdAt: subscriptions.createdAt,
       })
       .from(subscriptions)
-      .leftJoin(users, eq(subscriptions.user_id, users.id));
+      .leftJoin(stores, eq(subscriptions.storeId, stores.id))
+      .leftJoin(users, eq(users.id, stores.userId));
 
     if (!data || data.length === 0) {
       return c.json({ error: "No subscriptions found" }, 404);
