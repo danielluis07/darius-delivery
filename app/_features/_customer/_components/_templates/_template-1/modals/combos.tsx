@@ -103,7 +103,7 @@ export const Combos = () => {
                   className="cursor-pointer"
                   onClick={() => {
                     onOpenSheet();
-                    const wasAdded = addToCart(product, data?.userId || "");
+                    const wasAdded = addToCart(product, data?.storeId || "");
                     if (wasAdded) {
                       toast.success("Produto adicionado ao carrinho");
                     } else {
