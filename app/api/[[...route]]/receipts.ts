@@ -9,6 +9,7 @@ import {
   orderItems,
   products,
   customers,
+  stores,
 } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
@@ -22,18 +23,18 @@ type OrderItem = {
 };
 
 const app = new Hono().get(
-  "/user/:userId",
+  "/store/:storeId",
   verifyAuth(),
-  zValidator("param", z.object({ userId: z.string().optional() })),
+  zValidator("param", z.object({ storeId: z.string().optional() })),
   async (c) => {
-    const { userId } = c.req.valid("param");
+    const { storeId } = c.req.valid("param");
     const auth = c.get("authUser");
 
     if (!auth || !auth.token?.sub) {
       return c.json({ error: "Unauthorized" }, 401);
     }
 
-    if (!userId) {
+    if (!storeId) {
       return c.json({ error: "Missing user id" }, 400);
     }
 
@@ -67,13 +68,13 @@ const app = new Hono().get(
       ))`.as("orderItems"),
       })
       .from(receipts)
-      .leftJoin(users, eq(receipts.user_id, users.id))
+      .leftJoin(users, eq(stores.userId, users.id))
       .leftJoin(orders, eq(receipts.order_id, orders.id))
       .leftJoin(customers, eq(orders.customer_id, customers.userId))
       .leftJoin(customersUser, eq(customers.userId, customersUser.id))
       .leftJoin(orderItems, eq(orders.id, orderItems.order_id))
       .leftJoin(products, eq(orderItems.product_id, products.id))
-      .where(eq(users.id, userId))
+      .where(eq(stores.id, storeId))
       .groupBy(
         receipts.id,
         customersUser.name,
