@@ -11,7 +11,7 @@ type RequestType = InferRequestType<
 >["json"];
 
 type Data = InferResponseType<
-  (typeof client.api.customers.user)[":userId"]["$get"],
+  (typeof client.api.customers.store)[":storeId"]["$get"],
   200
 >["data"];
 export const useDeleteCustomers = () => {
