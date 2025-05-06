@@ -19,7 +19,6 @@ export const createCustomization = async (
     if (!session?.user?.id) {
       return { success: false, message: "Usuário não autenticado." };
     }
-    const userId = session.user.id;
 
     const validatedValues = insertCustomizationSchema.safeParse(values);
     if (!validatedValues.success) {
