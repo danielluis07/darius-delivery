@@ -3,7 +3,7 @@ import { InferResponseType } from "hono";
 import { create } from "zustand";
 
 type Receipt = InferResponseType<
-  (typeof client.api.receipts.user)[":userId"]["$get"],
+  (typeof client.api.receipts.store)[":storeId"]["$get"],
   200
 >["data"];
 interface DialogState {
