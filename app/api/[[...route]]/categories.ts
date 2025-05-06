@@ -44,6 +44,7 @@ const app = new Hono()
       const { storeId } = c.req.valid("param");
 
       if (!storeId) {
+        console.error("Missing store id");
         return c.json({ error: "Missing store id" }, 400);
       }
 
@@ -53,6 +54,7 @@ const app = new Hono()
         .where(eq(stores.id, storeId));
 
       if (!store) {
+        console.error("Store not found");
         return c.json({ error: "Store not found" }, 404);
       }
 
@@ -62,6 +64,7 @@ const app = new Hono()
         .where(eq(categories.storeId, storeId));
 
       if (!data || data.length === 0) {
+        console.error("No categories found for this store");
         return c.json({ error: "No categories found" }, 404);
       }
 
