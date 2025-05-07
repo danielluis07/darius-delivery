@@ -127,7 +127,7 @@ export const OrdersClient = ({ storeId }: { storeId: string }) => {
     FINISHED: "Finalizado",
     CANCELLED: "Cancelado",
     ACCEPTED: "Aceito",
-    WITHDRAWN: "Retirado",
+    WITHDRAWN: "Retirada",
     CONSUME_ON_SITE: "Consumido no local",
   };
 
@@ -467,6 +467,17 @@ const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
     PENDING: "Aguardando",
     PAID: "Pago",
   };
+
+  const statusTranslations: Record<string, string> = {
+    ACCEPTED: "Aceito",
+    PREPARING: "Em preparo",
+    IN_TRANSIT: "Em trânsito",
+    DELIVERED: "Entregue",
+    FINISHED: "Finalizado",
+    CANCELLED: "Cancelado",
+    WITHDRAWN: "Retirada",
+    CONSUME_ON_SITE: "Consumido no local",
+  };
   return (
     <Document>
       <Page size="A6" style={styles.page}>
@@ -527,6 +538,12 @@ const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
           <Text>
             {paymentTypeTranslation[receipt.orderPaymentType ?? ""] ||
               "Não informado"}
+          </Text>
+        </View>
+        <View style={styles.flexRow}>
+          <Text>Status do Pedido</Text>
+          <Text>
+            {statusTranslations[receipt.orderStatus ?? ""] || "Não informado"}
           </Text>
         </View>
         <View style={styles.flexRow}>

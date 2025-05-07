@@ -585,6 +585,7 @@ export const NewOrderForm = ({
           customer={selectedCustomer}
           items={form.watch("items")}
           obs={form.watch("obs")}
+          status={form.watch("status")}
           paymentStatus={form.watch("payment_status")}
         />
       </div>
@@ -598,6 +599,7 @@ const Receipt = ({
   customer,
   items,
   obs,
+  status,
   paymentStatus,
 }: {
   type: string;
@@ -605,6 +607,15 @@ const Receipt = ({
   customer: Customer;
   items: Items;
   obs: string | null | undefined;
+  status:
+    | "PREPARING"
+    | "WITHDRAWN"
+    | "CONSUME_ON_SITE"
+    | "ACCEPTED"
+    | "FINISHED"
+    | "IN_TRANSIT"
+    | "DELIVERED"
+    | "CANCELLED";
   paymentStatus: string;
 }) => {
   const paymentTypeTranslation: Record<string, string> = {
@@ -617,6 +628,12 @@ const Receipt = ({
   const paymentStatusTranslations: Record<string, string> = {
     PENDING: "Aguardando",
     PAID: "Pago",
+  };
+
+  const statusTranslations: Record<string, string> = {
+    PREPARING: "Preparando",
+    WITHDRAWN: "Retirada",
+    CONSUME_ON_SITE: "Consumir no local",
   };
 
   const totalPrice = items.reduce(
@@ -696,6 +713,10 @@ const Receipt = ({
       <div className="flex justify-between">
         <p>Status do Pagamento</p>
         <p>{paymentStatusTranslations[paymentStatus]}</p>
+      </div>
+      <div className="flex justify-between">
+        <p>Status do Pedido</p>
+        <p>{statusTranslations[status]}</p>
       </div>
     </div>
   );
