@@ -45,6 +45,12 @@ export const createEmployeeSchema = z.object({
   permissions: z.array(z.string()).optional(),
 });
 
+export const resetPasswordSchema = z.object({
+  newPassword: z.string().min(8, {
+    message: "A senha deve ter pelo menos 8 caracteres.",
+  }),
+});
+
 export const createAffiliateSchema = z.object({
   name: z.string(),
   email: z.string().email(),
