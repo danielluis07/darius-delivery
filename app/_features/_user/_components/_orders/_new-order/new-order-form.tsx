@@ -47,6 +47,7 @@ import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useCreateOrder } from "@/app/_features/_user/_queries/_orders/use-create-order";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 type Products = InferResponseType<
   (typeof client.api.products.store)[":storeId"]["$get"],
@@ -111,6 +112,7 @@ export const NewOrderForm = ({
           name: "",
         },
       ],
+      obs: "",
       customer_id: "",
       status: "PREPARING",
       payment_status: "PENDING",
@@ -437,6 +439,26 @@ export const NewOrderForm = ({
                 <div>
                   <FormField
                     control={form.control}
+                    name="obs"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Observação</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            className="resize-none h-24"
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <FormField
+                    control={form.control}
                     name="type"
                     render={({ field }) => (
                       <FormItem>
@@ -562,6 +584,7 @@ export const NewOrderForm = ({
           paymentType={form.watch("payment_type")}
           customer={selectedCustomer}
           items={form.watch("items")}
+          obs={form.watch("obs")}
           paymentStatus={form.watch("payment_status")}
         />
       </div>
@@ -574,12 +597,14 @@ const Receipt = ({
   paymentType,
   customer,
   items,
+  obs,
   paymentStatus,
 }: {
   type: string;
   paymentType: string;
   customer: Customer;
   items: Items;
+  obs: string | null | undefined;
   paymentStatus: string;
 }) => {
   const paymentTypeTranslation: Record<string, string> = {
@@ -652,6 +677,11 @@ const Receipt = ({
           <p className="text-gray-500">Nenhum produto adicionado</p>
         )}
       </div>
+
+      <div className="border-t border-dashed border-black my-2"></div>
+      <p>Obs: {obs}</p>
+
+      {/* total */}
 
       {/* Total */}
       <div className="border-t border-dashed border-black my-2"></div>

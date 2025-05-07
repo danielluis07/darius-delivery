@@ -140,6 +140,7 @@ const app = new Hono()
               orderPaymentType: orders.payment_type,
               orderPaymentStatus: orders.payment_status,
               orderStatus: orders.status,
+              orderObs: orders.obs,
               // Aggregate order items into a JSON array
               orderItems: sql<OrderItem[]>`json_agg(json_build_object(
                               'id', ${orderItems.id},
@@ -530,6 +531,7 @@ const app = new Hono()
       items,
       payment_type,
       delivery_deadline,
+      obs,
       pickup_deadline,
       storeId,
     } = c.req.valid("json");
@@ -648,6 +650,7 @@ const app = new Hono()
         longitude,
         placeId,
         pickup_deadline,
+        obs,
         type,
         status,
         payment_status,

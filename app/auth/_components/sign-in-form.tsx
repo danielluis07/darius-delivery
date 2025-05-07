@@ -141,7 +141,10 @@ export const SignInForm = () => {
               {/* Link para recuperação de senha */}
               <div
                 onClick={() => setStep(STEPS.FORGOT_PASSWORD)}
-                className="text-right text-sm text-muted-foreground hover:underline hover:cursor-pointer">
+                className={cn(
+                  "text-right text-sm text-muted-foreground hover:underline hover:cursor-pointer",
+                  isPending && "pointer-events-none"
+                )}>
                 Esqueceu a senha?
               </div>
 

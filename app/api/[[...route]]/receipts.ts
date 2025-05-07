@@ -60,6 +60,7 @@ const app = new Hono().get(
         orderPaymentType: orders.payment_type,
         orderPaymentStatus: orders.payment_status,
         orderStatus: orders.status,
+        orderObs: orders.obs,
         orderItems: sql<OrderItem[]>`json_agg(json_build_object(
           'id', ${orderItems.id}, 
           'productName', ${products.name}, 

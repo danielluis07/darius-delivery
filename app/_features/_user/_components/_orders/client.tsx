@@ -511,6 +511,9 @@ const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
             </Text>
           </View>
         ))}
+        <View style={styles.dashedLine}></View>
+
+        <Text>Obs: {receipt.orderObs}</Text>
 
         <View style={styles.dashedLine}></View>
         <View style={styles.flexRow}>
