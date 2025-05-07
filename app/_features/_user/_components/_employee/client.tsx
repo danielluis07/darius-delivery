@@ -3,34 +3,21 @@
 import { useGetEmployees } from "@/app/_features/_user/_queries/_employees/use-get-employees";
 import { EmployeesDataTable } from "@/app/_features/_user/_components/_employee/data-table";
 import { columns } from "@/app/_features/_user/_components/_employee/columns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 export const EmployeesClient = ({ storeId }: { storeId: string }) => {
   const { data, isPending } = useGetEmployees(storeId);
   return (
     <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Funcionários</CardTitle>
-          <Link href="/dashboard/employees/new">
-            <Button>
-              Adicionar funcionário <Plus />
-            </Button>
-          </Link>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <EmployeesDataTable
-          data={data || []}
-          columns={columns}
-          isLoading={isPending}
-          onDelete={() => {}}
-          searchKey="name"
-        />
-      </CardContent>
+      <h1 className="text-xl font-bold">Funcionários</h1>
+      <EmployeesDataTable
+        data={data || []}
+        columns={columns}
+        storeId={storeId}
+        isLoading={isPending}
+        onDelete={() => {}}
+        searchKey="name"
+      />
     </Card>
   );
 };
