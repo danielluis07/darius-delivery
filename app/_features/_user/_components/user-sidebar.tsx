@@ -207,6 +207,11 @@ export function UserSidebar({
         )
       : items;
 
+  const accessibleStores =
+    user.role === "EMPLOYEE" && user.employee?.permissions
+      ? stores?.filter((item) => user.employee?.permissions?.includes(item.id))
+      : stores;
+
   return (
     <Sidebar
       collapsible="icon"
@@ -247,7 +252,7 @@ export function UserSidebar({
               ? "flex items-center justify-center w-full h-10 px-2 py-1 mt-2 mb-2 rounded-md shadow-sm"
               : "hidden"
           )}>
-          <StoresComboBox stores={stores || []} />
+          <StoresComboBox stores={accessibleStores || []} />
         </div>
         {/*  */}
         <SidebarGroup>

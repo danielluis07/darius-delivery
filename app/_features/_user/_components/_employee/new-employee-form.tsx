@@ -18,39 +18,31 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { formatPhoneNumber, removeFormatting } from "@/lib/utils";
 import {
   MultiSelector,
-  MultiSelectorContent,
-  MultiSelectorInput,
-  MultiSelectorItem,
-  MultiSelectorList,
   MultiSelectorTrigger,
-} from "@/components/ui/multi-select-permission";
-import { useTransition } from "react";
+  MultiSelectorContent,
+  MultiSelectorList,
+  MultiSelectorItem,
+} from "@/components/ui/multi-select";
+import { useEffect, useState, useTransition } from "react";
 import { createEmployee } from "@/app/_features/_user/_actions/create-employee";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 type FormData = z.infer<typeof createEmployeeSchema>;
 
-const permissions = [
-  "Início",
-  "Categorias",
-  "Produtos",
-  "Configuração de Domínio",
-  "Personalização",
-  "Entregadores",
-  "Pedidos",
-  "Roteirização de Pedidos",
-  "Combos",
-  "Clientes",
-  "Financeiro",
-  "Áreas de Entrega",
-  "Impressão de Comandas",
-  "Pixels",
-  "Darius Pay",
-];
-
-export const NewEmployeeForm = ({ storeId }: { storeId: string }) => {
+export const NewEmployeeForm = ({
+  storeId,
+  permissions,
+}: {
+  storeId: string;
+  permissions: {
+    id: string;
+    userId: string;
+    name: string;
+  }[];
+}) => {
   const [isPending, startTransition] = useTransition();
+  const [selectedInputNames, setSelectedInputNames] = useState<string[]>([]);
   const form = useForm<FormData>({
     resolver: zodResolver(createEmployeeSchema),
     defaultValues: {
@@ -61,6 +53,18 @@ export const NewEmployeeForm = ({ storeId }: { storeId: string }) => {
       permissions: [],
     },
   });
+
+  const formPermissions = form.watch("permissions");
+
+  useEffect(() => {
+    const selectedNames = permissions
+      .filter((permission) =>
+        form.watch("permissions")?.includes(permission.id)
+      )
+      .map((permission) => permission.name);
+
+    setSelectedInputNames(selectedNames);
+  }, [formPermissions, permissions, form]);
 
   const router = useRouter();
 
@@ -93,6 +97,8 @@ export const NewEmployeeForm = ({ storeId }: { storeId: string }) => {
         });
     });
   };
+
+  console.log("permissions", form.watch("permissions"));
 
   return (
     <Card>
@@ -189,21 +195,22 @@ export const NewEmployeeForm = ({ storeId }: { storeId: string }) => {
                 control={form.control}
                 name="permissions"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-2">
                     <FormLabel>Permissões</FormLabel>
                     <FormControl>
                       <MultiSelector
                         values={field.value as string[]}
                         onValuesChange={field.onChange}
                         loop>
-                        <MultiSelectorTrigger>
-                          <MultiSelectorInput placeholder="Selecionar" />
-                        </MultiSelectorTrigger>
+                        <MultiSelectorTrigger
+                          selectedNames={selectedInputNames}
+                          placeholder="Selecionar"
+                        />
                         <MultiSelectorContent>
                           <MultiSelectorList>
                             {permissions.map((permission, i) => (
-                              <MultiSelectorItem key={i} value={permission}>
-                                {permission}
+                              <MultiSelectorItem key={i} value={permission.id}>
+                                {permission.name}
                               </MultiSelectorItem>
                             ))}
                           </MultiSelectorList>

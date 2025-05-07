@@ -1,5 +1,5 @@
 {
-  "id": "76783214-0967-42b7-9cdd-908e60ae705d",
+  "id": "7cf45ee0-9488-4488-8e3a-25728d855ee5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -115,8 +115,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -158,12 +158,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "additional_groups_user_id_user_id_fk": {
-          "name": "additional_groups_user_id_user_id_fk",
+        "additional_groups_store_id_stores_id_fk": {
+          "name": "additional_groups_store_id_stores_id_fk",
           "tableFrom": "additional_groups",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -477,8 +477,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "userId": {
-          "name": "userId",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -512,12 +512,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "categories_userId_user_id_fk": {
-          "name": "categories_userId_user_id_fk",
+        "categories_store_id_stores_id_fk": {
+          "name": "categories_store_id_stores_id_fk",
           "tableFrom": "categories",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "userId"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -609,8 +609,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -743,12 +743,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "colors_user_id_user_id_fk": {
-          "name": "colors_user_id_user_id_fk",
+        "colors_store_id_stores_id_fk": {
+          "name": "colors_store_id_stores_id_fk",
           "tableFrom": "colors",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -853,6 +853,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "store_id": {
+          "name": "store_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "name": {
           "name": "name",
           "type": "text",
@@ -870,12 +876,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         },
         "type": {
           "name": "type",
@@ -914,12 +914,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "combos_user_id_user_id_fk": {
-          "name": "combos_user_id_user_id_fk",
+        "combos_store_id_stores_id_fk": {
+          "name": "combos_store_id_stores_id_fk",
           "tableFrom": "combos",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -1008,8 +1008,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "restaurantOwnerId": {
-          "name": "restaurantOwnerId",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1072,12 +1072,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "customers_restaurantOwnerId_user_id_fk": {
-          "name": "customers_restaurantOwnerId_user_id_fk",
+        "customers_store_id_stores_id_fk": {
+          "name": "customers_store_id_stores_id_fk",
           "tableFrom": "customers",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "restaurantOwnerId"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -1110,8 +1110,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1224,12 +1224,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "customizations_user_id_user_id_fk": {
-          "name": "customizations_user_id_user_id_fk",
+        "customizations_store_id_stores_id_fk": {
+          "name": "customizations_store_id_stores_id_fk",
           "tableFrom": "customizations",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -1267,8 +1267,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1314,12 +1314,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "deliverers_user_id_user_id_fk": {
-          "name": "deliverers_user_id_user_id_fk",
+        "deliverers_store_id_stores_id_fk": {
+          "name": "deliverers_store_id_stores_id_fk",
           "tableFrom": "deliverers",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -1344,8 +1344,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1391,12 +1391,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "delivery_areas_user_id_user_id_fk": {
-          "name": "delivery_areas_user_id_user_id_fk",
+        "delivery_areas_store_id_stores_id_fk": {
+          "name": "delivery_areas_store_id_stores_id_fk",
           "tableFrom": "delivery_areas",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -1421,8 +1421,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1456,12 +1456,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "delivery_areas_km_user_id_user_id_fk": {
-          "name": "delivery_areas_km_user_id_user_id_fk",
+        "delivery_areas_km_store_id_stores_id_fk": {
+          "name": "delivery_areas_km_store_id_stores_id_fk",
           "tableFrom": "delivery_areas_km",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -1557,8 +1557,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "restaurantOwnerId": {
-          "name": "restaurantOwnerId",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1586,12 +1586,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "employee_restaurantOwnerId_user_id_fk": {
-          "name": "employee_restaurantOwnerId_user_id_fk",
+        "employee_store_id_stores_id_fk": {
+          "name": "employee_store_id_stores_id_fk",
           "tableFrom": "employee",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "restaurantOwnerId"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -1713,8 +1713,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1743,12 +1743,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "order_settings_user_id_user_id_fk": {
-          "name": "order_settings_user_id_user_id_fk",
+        "order_settings_store_id_stores_id_fk": {
+          "name": "order_settings_store_id_stores_id_fk",
           "tableFrom": "order_settings",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -1773,8 +1773,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1964,12 +1964,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "orders_user_id_user_id_fk": {
-          "name": "orders_user_id_user_id_fk",
+        "orders_store_id_stores_id_fk": {
+          "name": "orders_store_id_stores_id_fk",
           "tableFrom": "orders",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -2073,8 +2073,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -2114,12 +2114,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "pixels_user_id_user_id_fk": {
-          "name": "pixels_user_id_user_id_fk",
+        "pixels_store_id_stores_id_fk": {
+          "name": "pixels_store_id_stores_id_fk",
           "tableFrom": "pixels",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -2144,8 +2144,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "userId": {
-          "name": "userId",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -2225,12 +2225,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "products_userId_user_id_fk": {
-          "name": "products_userId_user_id_fk",
+        "products_store_id_stores_id_fk": {
+          "name": "products_store_id_stores_id_fk",
           "tableFrom": "products",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "userId"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -2268,17 +2268,17 @@
           "primaryKey": true,
           "notNull": true
         },
+        "store_id": {
+          "name": "store_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "order_id": {
           "name": "order_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         },
         "receipt_number": {
           "name": "receipt_number",
@@ -2303,12 +2303,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "receipts_order_id_orders_id_fk": {
-          "name": "receipts_order_id_orders_id_fk",
+        "receipts_store_id_stores_id_fk": {
+          "name": "receipts_store_id_stores_id_fk",
           "tableFrom": "receipts",
-          "tableTo": "orders",
+          "tableTo": "stores",
           "columnsFrom": [
-            "order_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -2316,12 +2316,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "receipts_user_id_user_id_fk": {
-          "name": "receipts_user_id_user_id_fk",
+        "receipts_order_id_orders_id_fk": {
+          "name": "receipts_order_id_orders_id_fk",
           "tableFrom": "receipts",
-          "tableTo": "user",
+          "tableTo": "orders",
           "columnsFrom": [
-            "user_id"
+            "order_id"
           ],
           "columnsTo": [
             "id"
@@ -2414,8 +2414,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -2451,12 +2451,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "restaurant_data_user_id_user_id_fk": {
-          "name": "restaurant_data_user_id_user_id_fk",
+        "restaurant_data_store_id_stores_id_fk": {
+          "name": "restaurant_data_store_id_stores_id_fk",
           "tableFrom": "restaurant_data",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -2516,6 +2516,71 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.stores": {
+      "name": "stores",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "google_api_key": {
+          "name": "google_api_key",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "stores_userId_user_id_fk": {
+          "name": "stores_userId_user_id_fk",
+          "tableFrom": "stores",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.subscriptions": {
       "name": "subscriptions",
       "schema": "",
@@ -2536,7 +2601,13 @@
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "store_id": {
+          "name": "store_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "subscription_type": {
           "name": "subscription_type",
@@ -2580,6 +2651,19 @@
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "subscriptions_store_id_stores_id_fk": {
+          "name": "subscriptions_store_id_stores_id_fk",
+          "tableFrom": "subscriptions",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -2656,8 +2740,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "store_id": {
+          "name": "store_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -2705,12 +2789,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "transactions_user_id_user_id_fk": {
-          "name": "transactions_user_id_user_id_fk",
+        "transactions_store_id_stores_id_fk": {
+          "name": "transactions_store_id_stores_id_fk",
           "tableFrom": "transactions",
-          "tableTo": "user",
+          "tableTo": "stores",
           "columnsFrom": [
-            "user_id"
+            "store_id"
           ],
           "columnsTo": [
             "id"
@@ -3017,12 +3101,6 @@
         "comission_percentage": {
           "name": "comission_percentage",
           "type": "numeric(5, 2)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "google_api_key": {
-          "name": "google_api_key",
-          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },
