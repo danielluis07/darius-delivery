@@ -47,7 +47,6 @@ export function EmployeesDataTable<TData, TValue>({
   onDelete,
   isLoading,
   searchKey,
-  disabled,
   storeId,
 }: EmployeesDataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
