@@ -128,7 +128,7 @@ export const OrderRoutingClient = ({
                 lng: order.longitude || longitude,
               }}
               label={{
-                text: order.number.toString(),
+                text: order.daily_number.toString(),
                 fontSize: "14px",
                 color: "white",
               }}
@@ -171,8 +171,8 @@ export const OrderRoutingClient = ({
                           order.status === "PREPARING"
                             ? "bg-orange-500"
                             : order.status === "FINISHED"
-                            ? "bg-green-500"
-                            : "bg-red-500"
+                              ? "bg-green-500"
+                              : "bg-red-500"
                         )}>
                         {order.daily_number}
                       </div>
@@ -181,8 +181,8 @@ export const OrderRoutingClient = ({
                           order.type === "LOCAL"
                             ? "bg-purple-300"
                             : order.type === "WHATSAPP"
-                            ? "bg-green-300"
-                            : "bg-gray-300",
+                              ? "bg-green-300"
+                              : "bg-gray-300",
                           "text-sm text-white px-2 py-1 rounded-md text-center w-24"
                         )}>
                         {order.type}
