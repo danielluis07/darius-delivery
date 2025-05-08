@@ -17,7 +17,7 @@ export const useCreateOrder = (storeId: string) => {
     onSuccess: () => {
       toast.success("Pedido criado com sucesso!");
       queryClient.invalidateQueries({
-        queryKey: ["orders", storeId],
+        queryKey: ["orders-receipts", storeId],
       });
     },
     onError: () => {

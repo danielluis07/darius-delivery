@@ -488,7 +488,7 @@ const app = new Hono()
       }
 
       const totalRevenue = dailyOrders
-        .filter((order) => order.payment_status.trim().toUpperCase() === "PAID") // Agora pega qualquer pedido pago
+        .filter((order) => order.status.trim().toUpperCase() !== "CANCELLED") // Agora pega qualquer pedido pago
         .reduce((sum, order) => sum + (order.total_price || 0), 0);
 
       const report = {
