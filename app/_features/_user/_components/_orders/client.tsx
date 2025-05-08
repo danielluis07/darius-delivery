@@ -43,6 +43,7 @@ import {
   View,
   StyleSheet,
   PDFViewer,
+  pdf,
 } from "@react-pdf/renderer";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
@@ -100,6 +101,95 @@ export const OrdersClient = ({ storeId }: { storeId: string }) => {
   );
 
   const { confirm } = useConfirmContext();
+
+  const printReceipt = async (receiptData: Receipt[number]) => {
+    if (!receiptData) {
+      console.error("printReceipt: No receiptData provided.");
+      return;
+    }
+
+    try {
+      console.log("Attempting to generate PDF blob...");
+      // ... rest of your function
+      const blob = await pdf(<ReceiptPDF receipt={receiptData} />).toBlob(); // Make sure pdf and ReceiptPDF are correctly imported/available
+      console.log("PDF blob generated:", blob);
+
+      if (!blob || blob.size === 0) {
+        console.error("Generated blob is invalid or empty.");
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      console.log("Object URL created:", url);
+
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = url;
+      document.body.appendChild(iframe);
+      console.log("Iframe appended to body. src:", iframe.src);
+
+      iframe.onload = () => {
+        console.log("Iframe onload event fired.");
+        try {
+          if (iframe.contentWindow) {
+            console.log("Attempting to call iframe.contentWindow.print()");
+            iframe.contentWindow.print();
+          } else {
+            console.error("iframe.contentWindow is not accessible.");
+          }
+        } catch (printError) {
+          console.error(
+            "Error during iframe.contentWindow.print():",
+            printError
+          );
+        } finally {
+          setTimeout(() => {
+            console.log("Cleaning up iframe and object URL.");
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
+            }
+            URL.revokeObjectURL(url);
+          }, 1000);
+        }
+      };
+
+      // Inside printReceipt, in iframe.onload
+      iframe.onload = () => {
+        console.log("Iframe onload event fired.");
+        try {
+          if (iframe.contentWindow) {
+            console.log("Attempting to call iframe.contentWindow.print()");
+            iframe.contentWindow.print(); // This line triggers the browser's print dialog
+            console.log("Called iframe.contentWindow.print()");
+          } else {
+            console.error("iframe.contentWindow is not accessible.");
+          }
+        } catch (printError) {
+          console.error(
+            "Error during iframe.contentWindow.print():",
+            printError
+          );
+        } finally {
+          console.log(
+            "Print dialog initiated. Iframe cleanup will be significantly delayed for testing."
+          );
+          setTimeout(() => {
+            console.log("Performing cleanup now (after a very long delay).");
+            // FOR TESTING, COMMENT THESE LINES OUT TEMPORARILY:
+            // if (document.body.contains(iframe)) {
+            //   document.body.removeChild(iframe);
+            // }
+            // URL.revokeObjectURL(url);
+          }, 60000); // Increased to 60 seconds. Or comment out the lines above.
+        }
+      };
+    } catch (error) {
+      console.error(
+        "Error in printReceipt function (outside iframe onload):",
+        error
+      );
+    }
+  };
 
   const statusColors: Record<string, string> = {
     ACCEPTED: "bg-blue-500 text-white",
@@ -208,15 +298,18 @@ export const OrdersClient = ({ storeId }: { storeId: string }) => {
                         <div
                           className="cursor-pointer text-gray-500 hover:bg-accent hover:text-accent-foreground rounded-sm p-1"
                           onClick={() =>
-                            router.push(`/dashboard/orders/${item.order.id}`)
+                            router.push(
+                              `/dashboard/${storeId}/orders/${item.order.id}`
+                            )
                           }>
                           <ClipboardPen />
                         </div>
                         <div
                           className="cursor-pointer text-gray-500 hover:bg-accent hover:text-accent-foreground rounded-sm p-1"
-                          onClick={() =>
-                            openDialog(item.receipt as Receipt[number])
-                          }>
+                          onClick={() => {
+                            //@ts-expect-error ignore this error, we know that id is not null
+                            printReceipt(item.receipt);
+                          }}>
                           <Printer />
                         </div>
                         <DropdownMenu

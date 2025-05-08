@@ -142,6 +142,7 @@ export const OrderDetails = ({
   useEffect(() => {
     if (data) {
       reset({
+        storeId,
         status: data.order.status,
         delivererId: data.deliverer?.id,
         payment_status: data.order.payment_status,

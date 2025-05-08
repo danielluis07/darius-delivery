@@ -1298,17 +1298,17 @@ const app = new Hono()
         postalCode: postalCode,
       });
 
-      const [user] = await db
+      const [store] = await db
         .select({ googleApiKey: stores.googleApiKey })
         .from(stores)
-        .where(eq(users.id, storeId));
+        .where(eq(stores.id, storeId));
 
-      if (!user.googleApiKey) {
+      if (!store.googleApiKey) {
         return c.json({ error: "Failed to update order" }, 500);
       }
 
       const { success, latitude, longitude, message, placeId } =
-        await getGeoCode(formattedAddress, user.googleApiKey);
+        await getGeoCode(formattedAddress, store.googleApiKey);
 
       if (!success) {
         return c.json({ error: message }, 500);
