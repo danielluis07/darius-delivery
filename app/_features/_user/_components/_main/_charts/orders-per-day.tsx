@@ -42,7 +42,7 @@ export const OrdersPerDayChart = ({ storeId }: { storeId: string }) => {
       {isLoading ? (
         <Skeleton className="w-full h-[300px] mt-10" />
       ) : (
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="h-[320px]">
           <LineChart accessibilityLayer data={orders} className="mt-14">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />

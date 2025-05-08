@@ -7,7 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { useGetMonthlyRevenueByYear } from "../../../_queries/_main/use-get-revenue-per-month";
@@ -74,7 +74,7 @@ export const RevenuePerMonthChart = ({ storeId }: { storeId: string }) => {
         <Skeleton className="w-full h-[300px] mt-10" />
       ) : (
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <BarChart data={chartData}>
+          <LineChart data={chartData}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis
               dataKey="month"
@@ -88,8 +88,8 @@ export const RevenuePerMonthChart = ({ storeId }: { storeId: string }) => {
             <ChartTooltip
               content={<ChartTooltipContent hideIndicator hideLabel />}
             />
-            <Bar dataKey="total" fill="#2563eb" radius={4} />
-          </BarChart>
+            <Line dataKey="total" fill="#2563eb" radius={4} />
+          </LineChart>
         </ChartContainer>
       )}
     </Card>

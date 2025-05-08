@@ -41,7 +41,7 @@ export const OrdersComparisonChart = ({
           Comparação de pedidos de clientes antigos e novos (últimos 30 dias)
         </CardDescription>
       </CardHeader>
-      <ChartContainer config={chartConfig}>
+      <ChartContainer config={chartConfig} className="h-[272px]">
         <PieChart>
           <Pie
             data={data}
