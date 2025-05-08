@@ -80,7 +80,7 @@ export const OrdersClient = ({ storeId }: { storeId: string }) => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { data, isLoading } = useGetOrdersReceipts(storeId);
   const { mutate, isPending } = useUpdateOrderStatus(storeId);
-  const { isOpen, receipt, openDialog, closeDialog } = useDialogStore();
+  const { isOpen, receipt, closeDialog } = useDialogStore();
   const router = useRouter();
 
   const ordersData = data || [];
