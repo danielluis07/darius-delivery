@@ -223,7 +223,6 @@ const app = new Hono()
   )
   .get(
     "/:orderId",
-    verifyAuth(),
     zValidator("param", z.object({ orderId: z.string().optional() })),
     async (c) => {
       const { orderId } = c.req.valid("param");
@@ -624,13 +623,13 @@ const app = new Hono()
       .where(
         and(
           eq(orders.storeId, storeId),
-          gte(orders.createdAt, today),
-          lt(orders.createdAt, tomorrow)
+          gte(orders.createdAt, today), // Pedidos de hoje
+          lt(orders.createdAt, tomorrow), // Antes de amanhã
+          eq(orders.is_closed, false) // <<< ADICIONE ESTA CONDIÇÃO!
         )
       )
       .orderBy(desc(orders.createdAt))
       .limit(1);
-
     const nextDailyNumber = lastOrder[0] ? lastOrder[0].daily_number + 1 : 1;
 
     const total_price = items.reduce(
@@ -1213,6 +1212,7 @@ const app = new Hono()
       z.object({
         storeId: z.string(),
         delivererId: z.string().optional(),
+        customerId: z.string().optional(),
         status: z.enum([
           "ACCEPTED",
           "PREPARING",
@@ -1257,6 +1257,7 @@ const app = new Hono()
         type,
         delivery_deadline,
         pickup_deadline,
+        customerId,
         city,
         state,
         neighborhood,
@@ -1326,6 +1327,7 @@ const app = new Hono()
           total_price,
           city,
           state,
+          customer_id: customerId,
           placeId,
           obs,
           neighborhood,

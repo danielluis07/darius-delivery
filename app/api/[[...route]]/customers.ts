@@ -45,15 +45,9 @@ const app = new Hono()
   )
   .get(
     "/store/:storeId",
-    verifyAuth(),
     zValidator("param", z.object({ storeId: z.string().optional() })),
     async (c) => {
       const { storeId } = c.req.valid("param");
-      const auth = c.get("authUser");
-
-      if (!auth || !auth.token?.sub) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
 
       if (!storeId) {
         return c.json({ error: "Missing user id" }, 400);

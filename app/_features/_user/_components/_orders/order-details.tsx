@@ -30,8 +30,6 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { RiMotorbikeFill } from "react-icons/ri";
-import { useGetOrder } from "@/app/_features/_user/_queries/_orders/use-get-order";
-import { useGetDeliverers } from "@/app/_features/_user/_queries/_deliverers/use-get-deliverers";
 import Image from "next/image";
 import placeholder from "@/public/placeholder-image.jpg";
 import {
@@ -60,12 +58,27 @@ import { useUpdateOrder } from "@/app/_features/_user/_queries/_orders/use-updat
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useGetCustomers } from "../../_queries/_customers/use-get-customers";
 import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
+import { useRouter } from "next/navigation";
 
 type Products = InferResponseType<
   (typeof client.api.products.store)[":storeId"]["$get"],
+  200
+>["data"];
+
+type Customers = InferResponseType<
+  (typeof client.api.customers.store)[":storeId"]["$get"],
+  200
+>["data"];
+
+type Deliverers = InferResponseType<
+  (typeof client.api.deliverers.store)[":storeId"]["$get"],
+  200
+>["data"];
+
+type Order = InferResponseType<
+  (typeof client.api.orders)[":orderId"]["$get"],
   200
 >["data"];
 
@@ -91,16 +104,17 @@ export const OrderDetails = ({
   storeId,
   orderId,
   products,
+  deliverers,
+  customers,
+  data,
 }: {
   storeId: string;
   orderId: string;
   products: Products;
+  deliverers: Deliverers;
+  customers: Customers;
+  data: Order;
 }) => {
-  const { data, isLoading } = useGetOrder(orderId);
-  const { data: deliverersData, isLoading: isDeliverersLoading } =
-    useGetDeliverers(storeId);
-  const { data: customers, isLoading: isCustomersLoading } =
-    useGetCustomers(storeId);
   const { mutate, isPending } = useUpdateOrder(orderId, storeId);
   const [changeCustomer, setChangeCustomer] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer>(undefined);
@@ -108,58 +122,24 @@ export const OrderDetails = ({
     resolver: zodResolver(updateOrderSchema),
     defaultValues: {
       storeId,
-      status: undefined,
-      delivererId: "",
-      payment_status: undefined,
-      type: undefined,
-      customer_id: "",
-      delivery_deadline: 0,
-      pickup_deadline: 0,
-      items: [
-        {
-          productId: "",
-          quantity: 1,
-          price: 0,
-          name: "",
-        },
-      ],
-      obs: "",
-      city: "",
-      state: "",
-      neighborhood: "",
-      street: "",
-      street_number: "",
-      postalCode: "",
+      status: data.order.status,
+      delivererId: data.deliverer?.id,
+      payment_status: data.order.payment_status,
+      type: data.order.type,
+      delivery_deadline: data.order.delivery_deadline || 0,
+      pickup_deadline: data.order.pickup_deadline || 0,
+      items: data.products,
+      obs: data.order.obs || "",
+      city: data.order.city || "",
+      state: data.order.state || "",
+      neighborhood: data.order.neighborhood || "",
+      street: data.order.street || "",
+      street_number: data.order.street_number || "",
+      postalCode: data.order.postalCode || "",
     },
   });
 
-  const { reset } = form;
-
-  const deliverers = deliverersData || [];
-
-  const customersData = customers || [];
-
-  useEffect(() => {
-    if (data) {
-      reset({
-        storeId,
-        status: data.order.status,
-        delivererId: data.deliverer?.id,
-        payment_status: data.order.payment_status,
-        type: data.order.type,
-        delivery_deadline: data.order.delivery_deadline || 0,
-        pickup_deadline: data.order.pickup_deadline || 0,
-        items: data.products,
-        obs: data.order.obs || "",
-        city: data.order.city || "",
-        state: data.order.state || "",
-        neighborhood: data.order.neighborhood || "",
-        street: data.order.street || "",
-        street_number: data.order.street_number || "",
-        postalCode: data.order.postalCode || "",
-      });
-    }
-  }, [data, reset]);
+  const router = useRouter();
 
   const items = form.watch("items");
 
@@ -222,12 +202,23 @@ export const OrderDetails = ({
   };
 
   const onSubmit = (values: FormData) => {
-    mutate({ ...values, total_price: totalPrice });
+    mutate(
+      {
+        ...values,
+        total_price: totalPrice,
+        customerId: values.customer_id,
+      },
+      {
+        onSuccess: () => {
+          router.push(`/dashboard/${storeId}/orders`);
+        },
+      }
+    );
   };
 
   useEffect(() => {
-    if (customersData && data) {
-      const customer = customersData.find(
+    if (customers && data) {
+      const customer = customers.find(
         (customer) => customer.id === data.customer.id
       );
       if (customer) {
@@ -235,15 +226,7 @@ export const OrderDetails = ({
         form.setValue("customer_id", customer.id);
       }
     }
-  }, [customersData, data, form]);
-
-  if (isLoading || isDeliverersLoading || isCustomersLoading) {
-    return <div>Carregando...</div>;
-  }
-
-  if (!data) {
-    return <div>Pedido não encontrado</div>;
-  }
+  }, [customers, data, form]);
 
   return (
     <div className="w-full">
@@ -515,7 +498,7 @@ export const OrderDetails = ({
                                   !field.value && "text-muted-foreground"
                                 )}>
                                 {field.value
-                                  ? customersData.find(
+                                  ? customers.find(
                                       (customer) => customer.id === field.value
                                     )?.name
                                   : "Selecione um cliente"}
@@ -534,7 +517,7 @@ export const OrderDetails = ({
                                   Nenhum cliente encontrado.
                                 </CommandEmpty>
                                 <CommandGroup>
-                                  {customersData.map((customer) => (
+                                  {customers.map((customer) => (
                                     <CommandItem
                                       value={`${customer.name} ${customer.phone}`} // Inclui nome e telefone no filtro
                                       key={customer.id}

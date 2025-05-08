@@ -196,6 +196,7 @@ export const insertCustomerOrderSchema = baseOrderSchema.extend({
 export const updateOrderSchema = z.object({
   storeId: z.string(),
   delivererId: z.string().optional(),
+  customerId: z.string().optional(),
   status: z.enum([
     "ACCEPTED",
     "PREPARING",
