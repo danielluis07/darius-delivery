@@ -84,6 +84,8 @@ const app = new Hono()
       const { id } = c.req.valid("param");
       const values = c.req.valid("json");
 
+      console.log("values", values);
+
       if (!auth || !auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -96,10 +98,7 @@ const app = new Hono()
         return c.json({ error: "Missing id" }, 400);
       }
 
-      const data = await db
-        .update(colors)
-        .set(values)
-        .where(and(eq(colors.id, id), eq(colors.storeId, auth.token.sub)));
+      const data = await db.update(colors).set(values).where(eq(colors.id, id));
 
       if (!data) {
         return c.json({ error: "Failed to update data" }, 500);

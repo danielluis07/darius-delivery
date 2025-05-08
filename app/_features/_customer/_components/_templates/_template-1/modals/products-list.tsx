@@ -169,6 +169,27 @@ export const ProductsList = ({
               <p className="text-xs text-center font-semibold">
                 Toque para abrir/fechar as opções abaixo
               </p>
+              {/*  */}
+              <div>
+                {selectedProduct.sizes && selectedProduct.sizes.length > 0 && (
+                  <div className="flex items-center justify-center mt-2 space-x-2">
+                    {selectedProduct.sizes.map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => handleChange("size", size)}
+                        className={cn(
+                          "px-4 py-2 text-xs font-semibold rounded-lg",
+                          selectedValues["size"] === size
+                            ? "bg-gray-200"
+                            : "bg-gray-100"
+                        )}>
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/*  */}
             </div>
             {/*  */}
             {selectedProduct.additionalGroups &&

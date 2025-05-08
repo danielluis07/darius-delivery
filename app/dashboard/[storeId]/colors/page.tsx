@@ -20,8 +20,6 @@ const ColorsPage = async ({
     getTemplates(),
   ]);
 
-  console.log("colors", colors);
-
   if (!templates) {
     return <div>Templates não encontrados</div>;
   }

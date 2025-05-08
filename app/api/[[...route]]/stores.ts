@@ -93,10 +93,7 @@ const app = new Hono()
         return c.json({ error: "Missing id" }, 400);
       }
 
-      const data = await db
-        .update(stores)
-        .set(values)
-        .where(and(eq(stores.id, id), eq(stores.userId, auth.token.sub)));
+      const data = await db.update(stores).set(values).where(eq(stores.id, id));
 
       if (!data) {
         return c.json({ error: "Failed to update data" }, 500);
