@@ -39,8 +39,8 @@ export const useCloseCashRegister = (storeId: string) => {
       console.log("Invalidating orders-receipts with storeId:", storeId); //
       // Invalidar queries relacionadas (ex.: lista de pedidos ou estado do caixa)
       queryClient.setQueryData(["orders-receipts", storeId], []);
+      queryClient.setQueryData(["routing-orders", storeId], []);
       queryClient.invalidateQueries({ queryKey: ["cash-register"] });
-      queryClient.invalidateQueries({ queryKey: ["orders-receipts", storeId] });
       // Opcional: Armazenar o relatório no cache do React Query
       queryClient.setQueryData(
         ["cash-register", "report", data.report.date],
