@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import { db } from "@/db/drizzle";
 import { stores } from "@/db/schema";
 import { insertStoreSchema } from "@/db/schemas";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { verifyAuth } from "@hono/auth-js";
 
 const app = new Hono()
