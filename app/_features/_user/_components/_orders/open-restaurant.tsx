@@ -22,13 +22,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export const OpenRestaurant = ({
-  isOpen,
-  storeId,
-}: {
-  isOpen: boolean | undefined;
-  storeId: string;
-}) => {
+export const OpenRestaurant = ({ isOpen }: { isOpen: boolean | undefined }) => {
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -43,7 +37,7 @@ export const OpenRestaurant = ({
 
   const onSubmit = (values: FormData) => {
     startTransition(() => {
-      openRestaurant(values, storeId)
+      openRestaurant(values)
         .then((res) => {
           if (!res.success) {
             toast.error(res.message);

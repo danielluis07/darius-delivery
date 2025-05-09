@@ -21,7 +21,7 @@ const OrdersPage = async ({
   return (
     <div className="w-full">
       <div className="flex justify-between items-center">
-        <OpenRestaurant isOpen={customizationData?.isOpen} storeId={storeId} />
+        <OpenRestaurant isOpen={customizationData?.isOpen} />
         <OrderSettings storeId={storeId} />
       </div>
       <OrdersClient storeId={storeId} />
