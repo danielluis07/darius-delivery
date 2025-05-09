@@ -16,7 +16,7 @@ const OrdersPage = async ({
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const customizationData = await getIsRestaurantOpen(storeId);
+  const customizationData = await getIsRestaurantOpen(session.user.id);
 
   return (
     <div className="w-full">

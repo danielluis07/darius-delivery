@@ -2,17 +2,17 @@ import { client } from "@/lib/hono";
 import { InferResponseType } from "hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.customizations.isOpen.store)[":storeId"]["$get"],
+  (typeof client.api.customizations.isOpen.user)[":userId"]["$get"],
   200
 >["data"];
 
-const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/customizations/isOpen/store`;
+const URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/customizations/isOpen/user`;
 
 export const getIsRestaurantOpen = async (
-  storeId: string
+  userId: string
 ): Promise<ResponseType | null> => {
   try {
-    const res = await fetch(`${URL}/${storeId}`);
+    const res = await fetch(`${URL}/${userId}`);
 
     if (!res.ok) {
       return null;
