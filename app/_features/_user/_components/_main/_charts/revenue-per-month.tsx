@@ -13,7 +13,6 @@ import {
 } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetDailyRevenueProgression } from "../../../_queries/_main/use-get-revenue-per-month";
-import { formatCurrency } from "@/lib/utils";
 
 const dailyProgressionChartConfig = {
   previousMonth: {
