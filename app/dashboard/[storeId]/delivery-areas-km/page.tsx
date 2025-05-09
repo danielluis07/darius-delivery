@@ -1,5 +1,6 @@
 import { DeliveryAreasKmForm } from "@/app/_features/_user/_components/_delivery-areas-km/delivery-areas-km-form";
 import { getCustomization } from "@/app/_features/_user/_queries/_customizations/get-customization";
+import { getTemplateAddress } from "@/app/_features/_user/_queries/_customizations/get-template-address";
 import { getDeliveryAreasKm } from "@/app/_features/_user/_queries/_delivery-areas-km/get-delivery-areas-km";
 import { getGoogleApiKey } from "@/app/_features/_user/_queries/get-google-api-key";
 import { auth } from "@/auth";
@@ -16,13 +17,14 @@ const DeliveryAreaKmPage = async ({
     return <div>Você não está autorizado a acessar essa página</div>;
   }
 
-  const [data, apiKey, customization] = await Promise.all([
+  const [data, apiKey, customization, address] = await Promise.all([
     getDeliveryAreasKm(storeId),
     getGoogleApiKey(storeId),
     getCustomization(storeId),
+    getTemplateAddress(session.user.id),
   ]);
 
-  if (!customization || !customization.latitude || !customization.longitude) {
+  if (!customization || !address.latitude || !address.longitude) {
     return (
       <div>
         Para definir as áreas de entrega, é preciso definir o endereço de sua
@@ -47,8 +49,8 @@ const DeliveryAreaKmPage = async ({
       data={data}
       storeId={storeId}
       apikey={apiKey.googleApiKey}
-      customizationlatitude={customization.latitude}
-      customizationlongitude={customization.longitude}
+      customizationlatitude={address.latitude}
+      customizationlongitude={address.longitude}
     />
   );
 };
