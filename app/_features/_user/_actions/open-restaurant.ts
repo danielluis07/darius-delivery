@@ -10,10 +10,7 @@ const formSchema = z.object({
   isOpen: z.boolean(),
 });
 
-export const openRestaurant = async (
-  values: z.infer<typeof formSchema>,
-  storeId: string
-) => {
+export const openRestaurant = async (values: z.infer<typeof formSchema>) => {
   try {
     const session = await auth();
     const validatedValues = formSchema.safeParse(values);

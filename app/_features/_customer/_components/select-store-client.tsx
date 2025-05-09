@@ -10,7 +10,7 @@ import { colors, customizations, orderSettings } from "@/db/schema";
 import { getCustomizationByStoreId } from "@/app/_features/_customer/_queries/get-customization-by-store";
 import { useStoreSelectionStore } from "@/stores/store-selection";
 
-type Store = { id: string; name: string; [key: string]: any };
+type Store = { id: string; name: string; [key: string]: string };
 
 export type StoreData = {
   data: {
