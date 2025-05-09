@@ -353,7 +353,7 @@ export const deliverers = pgTable("deliverers", {
     .notNull(),
 });
 
-export const customizations = pgTable("customizations", {
+export const templateAddress = pgTable("template_address", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -363,7 +363,6 @@ export const customizations = pgTable("customizations", {
   template_id: text("template_id")
     .notNull()
     .references(() => templates.id, { onDelete: "cascade" }),
-  store_name: text("store_name").notNull(),
   store_phone: varchar("store_phone", { length: 255 }),
   city: text("city").notNull(),
   state: text("state").notNull(),
@@ -374,6 +373,19 @@ export const customizations = pgTable("customizations", {
   latitude: real("latitude"),
   longitude: real("longitude"),
   placeId: text("place_id"),
+});
+
+export const customizations = pgTable("customizations", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").references(() => users.id, {
+    onDelete: "cascade",
+  }),
+  template_id: text("template_id")
+    .notNull()
+    .references(() => templates.id, { onDelete: "cascade" }),
+  store_name: text("store_name").notNull(),
   isOpen: boolean("is_open").default(false).notNull(),
   payment_methods: text("payment_methods").array().default([]),
   logo: text("logo"),
@@ -385,9 +397,9 @@ export const colors = pgTable("colors", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  storeId: text("store_id").references(() => stores.id, {
-    onDelete: "cascade",
-  }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   template_id: text("template_id")
     .notNull()
     .references(() => templates.id, { onDelete: "cascade" }),

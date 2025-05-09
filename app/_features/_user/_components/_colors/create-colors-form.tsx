@@ -33,7 +33,7 @@ type TemplatesResponseType = InferResponseType<
 >["data"];
 
 type ColorsResponseType = InferResponseType<
-  (typeof client.api.colors.store)[":storeId"]["$get"],
+  (typeof client.api.colors.user)[":userId"]["$get"],
   200
 >["data"];
 
@@ -42,11 +42,9 @@ type FormData = z.infer<typeof insertColorsSchema>;
 export const ColorsForm = ({
   colors,
   templates,
-  storeId,
 }: {
   colors: ColorsResponseType | null;
   templates: TemplatesResponseType;
-  storeId: string;
 }) => {
   const create = useCreateColors();
   const update = useUpdateColors(colors?.id || "");
@@ -55,7 +53,6 @@ export const ColorsForm = ({
     resolver: zodResolver(insertColorsSchema),
     defaultValues: {
       id: colors?.id,
-      storeId: storeId,
       template_id: colors?.template_id,
       background: colors?.background || "#ffffff",
       header: colors?.header || "#ffffff",

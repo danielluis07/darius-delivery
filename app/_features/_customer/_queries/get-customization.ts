@@ -31,10 +31,10 @@ export const getCustomizationByDomain = async (
       })
       .from(users)
       .innerJoin(stores, eq(users.id, stores.userId))
-      .innerJoin(customizations, eq(stores.id, customizations.storeId))
+      .innerJoin(customizations, eq(users.id, customizations.userId))
       .innerJoin(templates, eq(customizations.template_id, templates.id))
       .innerJoin(orderSettings, eq(stores.id, orderSettings.storeId))
-      .leftJoin(colors, eq(stores.id, colors.storeId))
+      .leftJoin(colors, eq(users.id, colors.userId))
       .where(eq(users.domain, domain));
 
     // @ts-expect-error - open_hours is an array of objects

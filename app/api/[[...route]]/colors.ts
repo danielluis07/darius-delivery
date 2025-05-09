@@ -28,19 +28,19 @@ const app = new Hono()
     }
   )
   .get(
-    "/store/:storeId",
-    zValidator("param", z.object({ storeId: z.string().optional() })),
+    "/user/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
     async (c) => {
-      const { storeId } = c.req.valid("param");
+      const { userId } = c.req.valid("param");
 
-      if (!storeId) {
+      if (!userId) {
         return c.json({ error: "Missing user id" }, 400);
       }
 
       const [data] = await db
         .select()
         .from(colors)
-        .where(eq(colors.storeId, storeId));
+        .where(eq(colors.userId, userId));
 
       if (!data) {
         return c.json({ error: "No colors found" }, 404);
@@ -65,7 +65,9 @@ const app = new Hono()
         return c.json({ error: "Missing data" }, 400);
       }
 
-      const data = await db.insert(colors).values(values);
+      const data = await db
+        .insert(colors)
+        .values({ ...values, userId: auth.token.sub });
 
       if (!data) {
         return c.json({ error: "Failed to insert data" }, 500);

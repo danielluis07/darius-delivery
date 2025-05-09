@@ -16,7 +16,6 @@ import {
   stores,
 } from "@/db/schema";
 import { createInsertSchema } from "drizzle-zod";
-import { use } from "react";
 
 export const baseUserSchema = createInsertSchema(users);
 
@@ -26,7 +25,11 @@ export const insertStoreSchema = baseStoreSchema.extend({
   userId: z.string().optional(),
 });
 
-export const insertColorsSchema = createInsertSchema(colors);
+export const baseColorsSchema = createInsertSchema(colors);
+
+export const insertColorsSchema = baseColorsSchema.extend({
+  userId: z.string().optional(),
+});
 
 const baseTemplateSchema = createInsertSchema(templates);
 
@@ -372,6 +375,13 @@ export const updateProductSchema = baseCreateProductSchema.extend({
 });
 
 export const insertCustomizationSchema = baseCreateCustomizationSchema.extend({
+  store_phone: z.string(),
+  city: z.string(),
+  state: z.string(),
+  neighborhood: z.string(),
+  street: z.string(),
+  street_number: z.string(),
+  postalCode: z.string(),
   banner:
     typeof File !== "undefined"
       ? z.union([

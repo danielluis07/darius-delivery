@@ -3,7 +3,13 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { customizations, orderSettings, colors, stores } from "@/db/schema";
+import {
+  customizations,
+  orderSettings,
+  colors,
+  stores,
+  templateAddress,
+} from "@/db/schema";
 import { insertCustomizationSchema } from "@/db/schemas";
 import { and, eq } from "drizzle-orm";
 import { formatAddress, getGeoCode } from "@/lib/google-geocode";
@@ -50,7 +56,7 @@ export const createCustomization = async (
     const [existingColors] = await db
       .select({ id: colors.id })
       .from(colors)
-      .where(eq(colors.storeId, storeId));
+      .where(eq(colors.userId, session.user.id));
 
     if (!existingColors) {
       return {
@@ -116,7 +122,10 @@ export const createCustomization = async (
         .select({ banner: customizations.banner, logo: customizations.logo })
         .from(customizations)
         .where(
-          and(eq(customizations.id, id), eq(customizations.storeId, storeId))
+          and(
+            eq(customizations.id, id),
+            eq(customizations.userId, session.user.id)
+          )
         ); // Match ID and User
 
       if (!fetchedData) {
@@ -221,24 +230,28 @@ export const createCustomization = async (
       const updateData: Partial<typeof customizations.$inferInsert> = {
         // Include fields from validated data that are allowed to change
         store_name,
-        store_phone: store_phone ?? null, // Handle optional phone
         template_id,
         payment_methods,
-        city,
-        state,
-        postalCode,
-        street,
-        street_number,
-        neighborhood,
         opening_hours,
         isOpen,
         ...otherData, // Include other validated fields if they exist
         // Include recalculated/updated fields
+        banner: bannerUrl, // Use final banner URL (could be new, old, or null)
+        logo: logoDesktopUrl, // Use final logo URL
+      };
+
+      const updateAddressData = {
+        // Include fields from validated data that are allowed to change
+        street,
+        store_phone: store_phone ?? null, // Handle optional phone
+        street_number,
+        neighborhood,
+        city,
+        state,
+        postalCode,
         latitude,
         longitude,
         placeId,
-        banner: bannerUrl, // Use final banner URL (could be new, old, or null)
-        logo: logoDesktopUrl, // Use final logo URL
       };
 
       // Optional: Remove undefined fields if your DB adapter requires it
@@ -259,9 +272,31 @@ export const createCustomization = async (
         .returning({ updatedId: customizations.id });
 
       if (!updatedResult?.updatedId) {
+        console.error(
+          "Falha ao atualizar a customização no banco de dados:",
+          updatedResult
+        );
         return {
           success: false,
           message: "Falha ao atualizar a customização no banco de dados.",
+        };
+      }
+
+      // Update address data separately if needed
+      const [updatedAddressResult] = await db
+        .update(templateAddress)
+        .set(updateAddressData)
+        .where(eq(templateAddress.storeId, storeId)) // Condition already checked user ownership
+        .returning({ updatedId: templateAddress.id });
+
+      if (!updatedAddressResult?.updatedId) {
+        console.error(
+          "Falha ao atualizar o endereço no banco de dados:",
+          updatedAddressResult
+        );
+        return {
+          success: false,
+          message: "Falha ao atualizar o endereço no banco de dados.",
         };
       }
 
@@ -285,27 +320,31 @@ export const createCustomization = async (
       }
 
       const insertData: typeof customizations.$inferInsert = {
-        // Include fields from validated data
+        userId: session.user.id,
         store_name, // Already checked if mandatory
-        store_phone: store_phone ?? null,
         template_id, // Already checked if mandatory
         payment_methods, // Already checked if mandatory
-        city,
-        state,
-        postalCode,
-        street,
-        street_number,
-        neighborhood,
         opening_hours,
         isOpen,
         ...otherData, // Include other validated fields
         // Include required relationships and calculated data
+        banner: bannerUrl, // Use the (required and uploaded) banner URL
+        logo: logoDesktopUrl, // Use the (required and uploaded) logo URL
+      };
+
+      const insertAddressData = {
         storeId,
+        street,
+        template_id,
+        store_phone: store_phone ?? null,
+        street_number,
+        neighborhood,
+        city,
+        state,
+        postalCode,
         latitude,
         longitude,
         placeId,
-        banner: bannerUrl, // Use the (required and uploaded) banner URL
-        logo: logoDesktopUrl, // Use the (required and uploaded) logo URL
       };
 
       const [insertedResult] = await db
@@ -320,6 +359,23 @@ export const createCustomization = async (
         };
       }
 
+      // Insert address data separately
+      const [insertedAddressResult] = await db
+        .insert(templateAddress)
+        .values(insertAddressData)
+        .returning({ insertedId: templateAddress.id });
+
+      if (!insertedAddressResult?.insertedId) {
+        console.error(
+          "Falha ao inserir o endereço no banco de dados:",
+          insertedAddressResult
+        );
+        return {
+          success: false,
+          message: "Falha ao inserir o endereço no banco de dados.",
+        };
+      }
+
       return {
         success: true,
         message: "Customização criada com sucesso!",
@@ -327,7 +383,7 @@ export const createCustomization = async (
       };
     }
   } catch (error) {
-    console.error("Erro inesperado na action createCustomization:", error);
+    console.error("Erro inesperado ao criar a customização:", error);
     const message = "Ocorreu um erro inesperado.";
     return { success: false, message };
   }

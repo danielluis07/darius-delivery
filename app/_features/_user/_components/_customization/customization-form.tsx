@@ -59,8 +59,13 @@ type TemplatesResponseType = InferResponseType<
   200
 >["data"];
 
+type TemplateAddressResponseType = InferResponseType<
+  (typeof client.api.customizations.address.store)[":storeId"]["$get"],
+  200
+>["data"];
+
 type CustomizationResponseType = InferResponseType<
-  (typeof client.api.customizations.store)[":storeId"]["$get"],
+  (typeof client.api.customizations.user)[":userId"]["$get"],
   200
 >["data"];
 
@@ -92,35 +97,37 @@ const paymentOptions = [
 export const CustomizationForm = ({
   templates,
   customization,
+  templateAddress,
   storeId,
 }: {
   templates: TemplatesResponseType;
   customization: CustomizationResponseType;
+  templateAddress: TemplateAddressResponseType;
   storeId: string;
 }) => {
   const [isPending, startTransition] = useTransition();
   const [bannerfiles, setBannerFiles] = useState<File[] | null>(null);
   const [desktopfiles, setDesktopFiles] = useState<File[] | null>(null);
-  /*   const [bannerPreview, setBannerPreview] = useState<string | null>(
+  const [bannerPreview, setBannerPreview] = useState<string | null>(
     customization?.banner
   );
   const [desktopPreview, setDesktopPreview] = useState<string | null>(
     customization?.logo
-  ); */
+  );
   const form = useForm<FormData>({
     resolver: zodResolver(insertCustomizationSchema),
     defaultValues: {
       id: customization?.id ?? "",
       store_name: customization?.store_name ?? "",
-      store_phone: customization?.store_phone ?? "",
+      store_phone: templateAddress?.store_phone ?? "",
       banner: [],
       logo: [],
-      city: customization?.city ?? "",
-      postalCode: customization?.postalCode ?? "",
-      state: customization?.state ?? "",
-      street: customization?.street ?? "",
-      street_number: customization?.street_number ?? "",
-      neighborhood: customization?.neighborhood ?? "",
+      city: templateAddress?.city ?? "",
+      postalCode: templateAddress?.postalCode ?? "",
+      state: templateAddress?.state ?? "",
+      street: templateAddress?.street ?? "",
+      street_number: templateAddress?.street_number ?? "",
+      neighborhood: templateAddress?.neighborhood ?? "",
       template_id: customization?.template_id ?? "",
       payment_methods: customization?.payment_methods ?? [],
       opening_hours: customization?.opening_hours ?? [
@@ -481,6 +488,28 @@ export const CustomizationForm = ({
           )}
         />
 
+        {bannerPreview && (
+          <div className="relative w-full h-72">
+            <Button
+              variant="secondary"
+              className="absolute right-1 top-1 bg-error text-white"
+              onClick={() => {
+                setBannerPreview(null);
+                setBannerFiles(null);
+                form.setValue("banner", []);
+              }}>
+              Remover
+            </Button>
+            <Image
+              src={bannerPreview}
+              alt="Banner Preview"
+              fill
+              sizes="100vw"
+              className="object-contain rounded-lg"
+            />
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="logo"
@@ -535,6 +564,28 @@ export const CustomizationForm = ({
             </FormItem>
           )}
         />
+
+        {desktopPreview && (
+          <div className="relative w-full h-32">
+            <Button
+              variant="secondary"
+              className="absolute right-1 top-1 bg-error text-white"
+              onClick={() => {
+                setDesktopPreview(null);
+                setDesktopFiles(null);
+                form.setValue("logo", []);
+              }}>
+              Remover
+            </Button>
+            <Image
+              src={desktopPreview}
+              alt="Logo Preview"
+              fill
+              sizes="(max-width: 768px) 25vw, (max-width: 1200px) 10vw, 200px"
+              className="object-contain rounded-lg"
+            />
+          </div>
+        )}
 
         <FormField
           control={form.control}

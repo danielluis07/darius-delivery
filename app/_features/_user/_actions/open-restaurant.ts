@@ -18,7 +18,7 @@ export const openRestaurant = async (
     const session = await auth();
     const validatedValues = formSchema.safeParse(values);
 
-    if (!session) {
+    if (!session || !session.user.id) {
       return { success: false, message: "Not authenticated" };
     }
 
@@ -33,7 +33,7 @@ export const openRestaurant = async (
       .set({
         isOpen,
       })
-      .where(eq(customizations.storeId, storeId));
+      .where(eq(customizations.userId, session.user.id));
 
     if (!existingCustomization) {
       return {

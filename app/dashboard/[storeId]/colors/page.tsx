@@ -3,12 +3,7 @@ import { getColors } from "@/app/_features/_user/_queries/_colors/get-colors";
 import { getTemplates } from "@/app/_features/_user/_queries/get-templates";
 import { auth } from "@/auth";
 
-const ColorsPage = async ({
-  params,
-}: {
-  params: Promise<{ storeId: string }>;
-}) => {
-  const { storeId } = await params;
+const ColorsPage = async () => {
   const session = await auth();
 
   if (!session || !session.user.id) {
@@ -16,7 +11,7 @@ const ColorsPage = async ({
   }
 
   const [colors, templates] = await Promise.all([
-    getColors(storeId),
+    getColors(session.user.id),
     getTemplates(),
   ]);
 
@@ -24,7 +19,7 @@ const ColorsPage = async ({
     return <div>Templates não encontrados</div>;
   }
 
-  return <ColorsForm colors={colors} templates={templates} storeId={storeId} />;
+  return <ColorsForm colors={colors} templates={templates} />;
 };
 
 export default ColorsPage;

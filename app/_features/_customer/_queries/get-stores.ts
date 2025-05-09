@@ -11,7 +11,7 @@ export const getStores = async (domain: string) => {
       })
       .from(stores)
       .innerJoin(users, eq(stores.userId, users.id))
-      .innerJoin(customizations, eq(stores.id, customizations.storeId))
+      .innerJoin(customizations, eq(users.id, customizations.userId))
       .where(eq(users.domain, domain));
 
     return data;
