@@ -57,22 +57,23 @@ export const ColorsForm = ({
       id: colors?.id,
       storeId: storeId,
       template_id: colors?.template_id,
-      background: colors?.background,
-      header: colors?.header,
-      button: colors?.button,
-      font: colors?.font,
-      footer: colors?.footer,
-      footer_font: colors?.footer_font,
-      footer_button: colors?.footer_button,
-      product_name: colors?.product_name,
-      product_description: colors?.product_description,
-      product_price: colors?.product_price,
-      product_card_name: colors?.product_card_name,
-      product_card_price: colors?.product_card_price,
-      product_card_description: colors?.product_card_description,
-      additionals: colors?.additionals,
-      additionals_font: colors?.additionals_font,
-      cart: colors?.cart,
+      background: colors?.background || "#ffffff",
+      header: colors?.header || "#ffffff",
+      button: colors?.button || "#ffffff",
+      font: colors?.font || "#000000",
+      product_details: colors?.product_details || "#ffffff",
+      footer: colors?.footer || "#ffffff",
+      footer_font: colors?.footer_font || "#000000",
+      footer_button: colors?.footer_button || "#ffffff",
+      product_name: colors?.product_name || "#000000",
+      product_description: colors?.product_description || "#000000",
+      product_price: colors?.product_price || "#000000",
+      product_card_name: colors?.product_card_name || "#000000",
+      product_card_price: colors?.product_card_price || "#000000",
+      product_card_description: colors?.product_card_description || "#000000",
+      additionals: colors?.additionals || "#ffffff",
+      additionals_font: colors?.additionals_font || "#000000",
+      cart: colors?.cart || "#000000",
     },
   });
 
@@ -380,6 +381,23 @@ export const ColorsForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Descrição do botão do produto</FormLabel>
+                <FormControl>
+                  <ColorPicker
+                    className="size-28"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="product_details"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Detalhes do Produto</FormLabel>
                 <FormControl>
                   <ColorPicker
                     className="size-28"

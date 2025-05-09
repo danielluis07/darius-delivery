@@ -3,6 +3,8 @@ import { MainClient as Template2 } from "@/app/_features/_customer/_components/_
 import { auth } from "@/auth";
 import { getCustomizationByDomain } from "@/app/_features/_customer/_queries/get-customization";
 import { StoreProvider } from "@/context/store-context";
+import StoreManagementClient from "../_features/_customer/_components/select-store-client";
+import { getStores } from "../_features/_customer/_queries/get-stores";
 
 const DomainPage = async ({
   params,
@@ -12,16 +14,18 @@ const DomainPage = async ({
   const domain = (await params).domain;
   const session = await auth();
 
-  const data = await getCustomizationByDomain(domain);
+  const data = await getStores(domain);
 
   if (!data) {
     return <div>Customization not found</div>;
   }
 
   return (
-    <StoreProvider session={session} data={data}>
-      {data.templateName === "TEMPLATE_1" ? <Template1 /> : <Template2 />}
-    </StoreProvider>
+    <StoreManagementClient
+      userSession={session}
+      domain={domain}
+      initialStores={data}
+    />
   );
 };
 
