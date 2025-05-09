@@ -8,7 +8,6 @@ import {
   getCategoriesCount,
   getProductsCount,
 } from "@/app/_features/_user/_queries/_main/get-data-count";
-import { RevenuePerMonthChart } from "@/app/_features/_user/_components/_main/_charts/revenue-per-month";
 import { getOrdersComparison } from "@/app/_features/_user/_queries/_main/orders-comparison";
 import { OrdersComparisonChart } from "@/app/_features/_user/_components/_main/_charts/orders-comparison";
 import { StatsCard } from "@/app/_features/_user/_components/_main/stats-card";
@@ -32,6 +31,7 @@ import { getUserData } from "@/app/_features/_user/_queries/get-user-data";
 import { TrialCountdown } from "@/app/_features/_user/_components/_settings/trial-countdown";
 import { getUser } from "@/lib/get-user";
 import { redirect } from "next/navigation";
+import { RevenueComparisonChart } from "@/app/_features/_user/_components/_main/_charts/revenue-per-month";
 
 const DashboardPage = async ({
   params,
@@ -93,7 +93,7 @@ const DashboardPage = async ({
       </div>
       <div className="flex gap-4 mt-10">
         <OrdersPerDayChart storeId={storeId} />
-        <RevenuePerMonthChart storeId={storeId} />
+        <RevenueComparisonChart storeId={storeId} />
       </div>
       <div className="grid grid-cols-4 gap-3 mt-10">
         <StatsCard

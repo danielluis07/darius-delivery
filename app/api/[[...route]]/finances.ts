@@ -32,35 +32,186 @@ const app = new Hono()
     }
   )
   .get(
-    "/monthlyrevenue/store/:storeId/:year",
+    "/revenue-daily-progression/store/:storeId", // << NOVO NOME DE ROTA SUGERIDO
     zValidator(
       "param",
       z.object({
         storeId: z.string(),
-        year: z.string().regex(/^\d{4}$/), // Ano no formato YYYY
       })
     ),
     async (c) => {
-      const { storeId, year } = c.req.valid("param");
+      const { storeId } = c.req.valid("param");
+      const today = new Date(); // Usaremos 'today' para lógica do mês atual
 
-      // Buscar receita total agrupada por mês para o ano específico
-      const revenuePerMonth = await db
-        .select({
-          month: sql`TO_CHAR(${transactions.createdAt}, 'MM')`.as("month"),
-          total: sum(transactions.amount),
-        })
-        .from(transactions)
-        .where(
-          and(
-            eq(transactions.storeId, storeId), // Filtrar pelo usuário correto
-            eq(transactions.status, "COMPLETED"), // Somente transações concluídas
-            sql`TO_CHAR(${transactions.createdAt}, 'YYYY') = ${year}` // Filtrar pelo ano escolhido
-          )
-        )
-        .groupBy(sql`TO_CHAR(${transactions.createdAt}, 'MM')`)
-        .orderBy(sql`TO_CHAR(${transactions.createdAt}, 'MM')`);
+      const currentYearStr = today.getFullYear().toString();
+      const currentMonthStr = (today.getMonth() + 1)
+        .toString()
+        .padStart(2, "0");
+      const currentDayOfMonth = today.getDate();
 
-      return c.json({ data: revenuePerMonth });
+      let previousYearAsNumber = today.getFullYear();
+      let previousMonthAsNumber = today.getMonth(); // 0 para Janeiro
+      if (previousMonthAsNumber === 0) {
+        previousMonthAsNumber = 12; // Dezembro
+        previousYearAsNumber -= 1;
+      }
+      const previousMonthStr = previousMonthAsNumber
+        .toString()
+        .padStart(2, "0");
+      const previousYearStr = previousYearAsNumber.toString();
+
+      // Nova função para buscar receita ACUMULADA ATÉ UM CERTO DIA do mês
+      const getCumulativeRevenueUpToDay = async (
+        year: string,
+        month: string,
+        day: number // Dia do mês (10, 20 ou 30)
+      ): Promise<number | null> => {
+        // Retorna número ou null
+        const result = await db
+          .select({
+            total: sum(transactions.amount), // transactions.amount em centavos
+          })
+          .from(transactions)
+          .where(
+            and(
+              eq(transactions.storeId, storeId),
+              eq(transactions.status, "COMPLETED"),
+              sql`TO_CHAR(${transactions.createdAt}, 'YYYY') = ${year}`,
+              sql`TO_CHAR(${transactions.createdAt}, 'MM') = ${month}`,
+              sql`EXTRACT(DAY FROM ${transactions.createdAt}) <= ${day}` // Acumula até este dia
+            )
+          );
+
+        const revenueData = Array.isArray(result) ? result[0] : result;
+        const totalInCents =
+          revenueData && revenueData.total ? parseFloat(revenueData.total) : 0;
+
+        // Se não houver receita, totalInCents será 0.
+        // Considerar se 0 é diferente de 'dados não disponíveis ainda' (null).
+        // Para a lógica atual de "se o dia não chegou, é null", este 0 é para quando o dia chegou mas não houve receita.
+        return totalInCents / 100; // Converte para unidade principal
+      };
+
+      const monthNames = [
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
+      ];
+
+      const previousMonthFullName = `${monthNames[previousMonthAsNumber - 1]} ${previousYearStr}`; // Ajuste no índice de monthNames
+      const prevMonthData: {
+        name: string;
+        day10: number | null;
+        day20: number | null;
+        day30: number | null;
+      } = {
+        name: previousMonthFullName,
+        day10: await getCumulativeRevenueUpToDay(
+          previousYearStr,
+          previousMonthStr,
+          10
+        ),
+        day20: await getCumulativeRevenueUpToDay(
+          previousYearStr,
+          previousMonthStr,
+          20
+        ),
+        day30: await getCumulativeRevenueUpToDay(
+          previousYearStr,
+          previousMonthStr,
+          30
+        ),
+      };
+
+      const currentMonthFullName = `${monthNames[today.getMonth()]} ${currentYearStr}`;
+      const currMonthData: {
+        name: string;
+        day10: number | null;
+        day20: number | null;
+        day30: number | null;
+      } = {
+        name: currentMonthFullName,
+        day10: null,
+        day20: null,
+        day30: null,
+      };
+
+      if (currentDayOfMonth >= 1) {
+        if (currentDayOfMonth < 10) {
+          currMonthData.day10 = await getCumulativeRevenueUpToDay(
+            currentYearStr,
+            currentMonthStr,
+            currentDayOfMonth
+          );
+        } else {
+          currMonthData.day10 = await getCumulativeRevenueUpToDay(
+            currentYearStr,
+            currentMonthStr,
+            10
+          );
+        }
+
+        if (currentDayOfMonth >= 10) {
+          if (currentDayOfMonth < 20) {
+            currMonthData.day20 = await getCumulativeRevenueUpToDay(
+              currentYearStr,
+              currentMonthStr,
+              currentDayOfMonth
+            );
+          } else {
+            currMonthData.day20 = await getCumulativeRevenueUpToDay(
+              currentYearStr,
+              currentMonthStr,
+              20
+            );
+          }
+        }
+
+        if (currentDayOfMonth >= 20) {
+          const lastDayOfCurrentMonth = new Date(
+            today.getFullYear(),
+            today.getMonth() + 1,
+            0
+          ).getDate();
+
+          if (
+            currentDayOfMonth < lastDayOfCurrentMonth &&
+            currentDayOfMonth < 30
+          ) {
+            currMonthData.day30 = await getCumulativeRevenueUpToDay(
+              currentYearStr,
+              currentMonthStr,
+              currentDayOfMonth
+            );
+          } else {
+            const effectiveEndOfCheckpoint30 = Math.min(
+              30,
+              lastDayOfCurrentMonth
+            );
+            currMonthData.day30 = await getCumulativeRevenueUpToDay(
+              currentYearStr,
+              currentMonthStr,
+              effectiveEndOfCheckpoint30
+            );
+          }
+        }
+      }
+
+      return c.json({
+        data: {
+          previousMonthSeries: prevMonthData,
+          currentMonthSeries: currMonthData,
+        },
+      });
     }
   )
   .get(

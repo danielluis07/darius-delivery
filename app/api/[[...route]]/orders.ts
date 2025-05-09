@@ -514,6 +514,17 @@ const app = new Hono()
           )
         );
 
+        await db.update(transactions)
+        .set({ status: "COMPLETED" })
+        .where(
+          and(
+            eq(transactions.storeId, storeId),
+            gte(transactions.createdAt, today),
+            lte(transactions.createdAt, endOfDay),
+            eq(transactions.status, "PENDING")
+          )
+        );
+
       return c.json({
         message: "Caixa fechado com sucesso",
         report,

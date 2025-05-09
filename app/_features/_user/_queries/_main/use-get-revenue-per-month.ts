@@ -1,36 +1,64 @@
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
-export const useGetMonthlyRevenueByYear = (storeId: string, year: string) => {
-  return useQuery({
-    enabled: !!storeId && !!year,
-    queryKey: ["monthly-revenue", storeId, year],
+type MonthSeriesData = {
+  name: string;
+  day10: number | null;
+  day20: number | null;
+  day30: number | null;
+};
+
+type ApiDailyProgressionResponse = {
+  data: {
+    previousMonthSeries: MonthSeriesData;
+    currentMonthSeries: MonthSeriesData;
+  };
+};
+
+export type DailyRevenueChartPoint = {
+  dayLabel: string; // "Dia 10", "Dia 20", "Dia 30"
+  previousMonth?: number | null; // dataKey para Recharts
+  currentMonth?: number | null; // dataKey para Recharts
+};
+
+export const useGetDailyRevenueProgression = (storeId: string) => {
+  return useQuery<DailyRevenueChartPoint[], Error>({
+    enabled: !!storeId,
+    queryKey: ["daily-revenue-progression", storeId],
     queryFn: async () => {
-      const res = await client.api.finances.monthlyrevenue.store[":storeId"][
-        ":year"
+      // Substitua pela sua chamada de API real ao novo endpoint
+      const res = await client.api.finances["revenue-daily-progression"].store[
+        ":storeId"
       ].$get({
-        param: { storeId, year },
+        param: { storeId },
       });
 
       if (!res.ok) {
-        throw new Error("Failed to fetch monthly revenue");
+        throw new Error("Falha ao buscar progressão diária de receita");
       }
 
-      const { data } = await res.json();
+      const apiResponse = (await res.json()) as ApiDailyProgressionResponse;
+      const { previousMonthSeries, currentMonthSeries } = apiResponse.data;
 
-      // Criar um array de 12 meses inicializado com zero
-      const months = Array.from({ length: 12 }, (_, i) => ({
-        month: (i + 1).toString().padStart(2, "0"), // "01", "02", ..., "12"
-        total: 0,
-      }));
+      const transformedData: DailyRevenueChartPoint[] = [
+        {
+          dayLabel: "Dia 10",
+          previousMonth: previousMonthSeries.day10,
+          currentMonth: currentMonthSeries.day10,
+        },
+        {
+          dayLabel: "Dia 20",
+          previousMonth: previousMonthSeries.day20,
+          currentMonth: currentMonthSeries.day20,
+        },
+        {
+          dayLabel: "Dia 30",
+          previousMonth: previousMonthSeries.day30,
+          currentMonth: currentMonthSeries.day30,
+        },
+      ];
 
-      // Preencher os meses com os dados retornados
-      data.forEach((item: { month: string; total: string | null }) => {
-        const index = parseInt(item.month, 10) - 1;
-        months[index].total = item.total ? parseFloat(item.total) : 0;
-      });
-
-      return months;
+      return transformedData;
     },
   });
 };
