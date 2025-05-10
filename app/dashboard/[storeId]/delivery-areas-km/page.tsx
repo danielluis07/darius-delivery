@@ -20,7 +20,7 @@ const DeliveryAreaKmPage = async ({
   const [data, apiKey, customization, address] = await Promise.all([
     getDeliveryAreasKm(storeId),
     getGoogleApiKey(storeId),
-    getCustomization(storeId),
+    getCustomization(session.user.id),
     getTemplateAddress(session.user.id),
   ]);
 
