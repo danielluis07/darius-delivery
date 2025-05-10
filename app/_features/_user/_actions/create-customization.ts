@@ -282,22 +282,65 @@ export const createCustomization = async (
         };
       }
 
-      // Update address data separately if needed
-      const [updatedAddressResult] = await db
-        .update(templateAddress)
-        .set(updateAddressData)
-        .where(eq(templateAddress.storeId, storeId)) // Condition already checked user ownership
-        .returning({ updatedId: templateAddress.id });
-
-      if (!updatedAddressResult?.updatedId) {
-        console.error(
-          "Falha ao atualizar o endereço no banco de dados:",
-          updatedAddressResult
+      // update only if the address exists
+      const [existingAddress] = await db
+        .select({ id: templateAddress.id })
+        .from(templateAddress)
+        .where(
+          and(
+            eq(templateAddress.storeId, storeId),
+            eq(templateAddress.template_id, template_id)
+          )
         );
-        return {
-          success: false,
-          message: "Falha ao atualizar o endereço no banco de dados.",
-        };
+
+      if (existingAddress) {
+        // Update address data separately if needed
+        const [updatedAddressResult] = await db
+          .update(templateAddress)
+          .set(updateAddressData)
+          .where(eq(templateAddress.storeId, storeId)) // Condition already checked user ownership
+          .returning({ updatedId: templateAddress.id });
+
+        if (!updatedAddressResult?.updatedId) {
+          console.error(
+            "Falha ao atualizar o endereço no banco de dados:",
+            updatedAddressResult
+          );
+          return {
+            success: false,
+            message: "Falha ao atualizar o endereço no banco de dados.",
+          };
+        }
+      } else {
+        // Insert address data separately if it doesn't exist
+        const [insertedAddressResult] = await db
+          .insert(templateAddress)
+          .values({
+            storeId,
+            street,
+            template_id,
+            store_phone: store_phone ?? null,
+            street_number,
+            neighborhood,
+            city,
+            state,
+            postalCode,
+            latitude,
+            longitude,
+            placeId,
+          })
+          .returning({ insertedId: templateAddress.id });
+
+        if (!insertedAddressResult?.insertedId) {
+          console.error(
+            "Falha ao inserir o endereço no banco de dados:",
+            insertedAddressResult
+          );
+          return {
+            success: false,
+            message: "Falha ao inserir o endereço no banco de dados.",
+          };
+        }
       }
 
       return {
