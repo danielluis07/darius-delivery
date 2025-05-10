@@ -21,7 +21,7 @@ const DeliveryAreaKmPage = async ({
     getDeliveryAreasKm(storeId),
     getGoogleApiKey(storeId),
     getCustomization(session.user.id),
-    getTemplateAddress(session.user.id),
+    getTemplateAddress(storeId),
   ]);
 
   if (!customization || !address.latitude || !address.longitude) {

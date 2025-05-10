@@ -18,8 +18,8 @@ const OrderRoutingPage = async ({
 
   const [apiKey, customization, address] = await Promise.all([
     getGoogleApiKey(storeId),
-    getCustomization(storeId),
-    getTemplateAddress(session.user.id),
+    getCustomization(session.user.id),
+    getTemplateAddress(storeId),
   ]);
 
   if (!apiKey?.googleApiKey) {
