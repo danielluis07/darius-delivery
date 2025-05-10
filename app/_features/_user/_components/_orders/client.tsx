@@ -528,7 +528,13 @@ export const OrdersClient = ({ storeId }: { storeId: string }) => {
 };
 
 const styles = StyleSheet.create({
-  page: { padding: 20, fontSize: 10, fontFamily: "Courier" },
+  page: {
+    paddingHorizontal: 8,
+    paddingVertical: 15,
+    fontSize: 10,
+    fontFamily: "Courier",
+    width: 227, // Para 80mm de largura de papel
+  },
   section: { marginBottom: 10 },
   header: { textAlign: "center", fontSize: 16, fontWeight: "bold" },
   subheader: { textAlign: "center", fontSize: 10 },
@@ -537,13 +543,32 @@ const styles = StyleSheet.create({
   flexRow: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
+    marginBottom: 2, // Adicionado um pequeno espaço entre as linhas de flexRow
   },
+  flexChildLeft: {
+    width: "65%", // Ajustado para dar um pouco mais de espaço para o valor
+    paddingRight: 5, // Pequeno espaço para não colar com o filho da direita
+  },
+  flexChildRight: {
+    width: "35%",
+    textAlign: "right",
+  },
+  // Estilos para a linha de produtos
   productRow: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 2,
+    marginBottom: 3, // Espaçamento entre os itens da lista de produtos
+  },
+  productDetails: {
+    // Para nome do produto e quantidade x preço unitário
+    width: "70%", // Ocupa a maior parte à esquerda
+    paddingRight: 5, // Espaço antes do preço total do item
+  },
+  productItemTotalPrice: {
+    // Para o preço total de um item do pedido
+    width: "30%",
+    textAlign: "right",
+    // fontWeight: 'bold', // O boldText já será aplicado no componente <Text>
   },
 });
 
@@ -571,77 +596,101 @@ const ReceiptPDF = ({ receipt }: { receipt: Receipt[number] }) => {
     WITHDRAWN: "Retirada",
     CONSUME_ON_SITE: "Consumido no local",
   };
+
+  // Função auxiliar para formatar moeda (adapte conforme sua necessidade)
+  const formatCurrencyFromCents = (valueInCents: number) => {
+    const value = valueInCents / 100;
+    return value.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  };
+
   return (
     <Document>
-      <Page size="A6" style={styles.page}>
+      <Page size={{ width: 227, height: "auto" }} style={styles.page}>
+        {" "}
+        {/* Altura 'auto' pode funcionar melhor para rolo */}
         <View style={styles.section}>
           <Text style={styles.header}>Nome da Loja</Text>
           <Text style={styles.subheader}>(11) 0000-0000</Text>
         </View>
-
         <View style={styles.flexRow}>
-          <Text style={[styles.boldText, { fontSize: 12 }]}>Pedido</Text>
-          <Text style={[styles.boldText, { fontSize: 12 }]}>
-            nº {receipt.orderNumber}
+          <Text
+            style={[styles.boldText, styles.flexChildLeft, { fontSize: 12 }]}>
+            Pedido
+          </Text>
+          <Text
+            style={[styles.boldText, styles.flexChildRight, { fontSize: 12 }]}>
+            No. {receipt.orderNumber} {/* ALTERADO */}
           </Text>
         </View>
-        <Text>Origem: Online</Text>
+        <Text style={{ marginBottom: 5 }}>Origem: Online</Text>{" "}
+        {/* Adicionado marginBottom para consistência */}
         <View style={styles.dashedLine}></View>
-
         <Text>Cliente: {receipt.customerName}</Text>
         <Text>Tel: {receipt.customerPhone}</Text>
-        <Text>
-          Rua: {receipt?.customerStreet || "N/A"} - nº{" "}
+        <Text style={{ marginBottom: 5 }}>
+          {" "}
+          {/* Adicionado marginBottom */}
+          Rua: {receipt?.customerStreet || "N/A"} - No. {/* ALTERADO */}
           {receipt?.customerStreetNumber} -{" "}
           {receipt?.customerComplement &&
             `Complemento: ${receipt?.customerComplement} - `}{" "}
           {receipt?.customerNeighborhood || "N/A"} -{" "}
           {receipt?.customerCity || "N/A"} - {receipt?.customerState || "N/A"}
         </Text>
-
         <View style={styles.dashedLine}></View>
-        <Text style={styles.boldText}>Produtos</Text>
+        <Text style={[styles.boldText, { marginBottom: 3 }]}>
+          Produtos
+        </Text>{" "}
+        {/* Adicionado marginBottom */}
         <View style={styles.dashedLine}></View>
         {receipt.orderItems.map((item, index) => (
           <View key={index} style={styles.productRow}>
-            <View>
+            <View style={styles.productDetails}>
               <Text style={styles.boldText}>{item.productName}</Text>
               <Text>
                 {item.quantity}x {formatCurrencyFromCents(item.price)}
               </Text>
             </View>
-            <Text style={styles.boldText}>
+            <Text style={[styles.boldText, styles.productItemTotalPrice]}>
               {formatCurrencyFromCents(item.quantity * item.price)}
             </Text>
           </View>
         ))}
         <View style={styles.dashedLine}></View>
-
-        <Text>Obs: {receipt.orderObs}</Text>
-
+        <Text style={{ marginBottom: 5 }}>
+          Obs: {receipt.orderObs || "Nenhuma"}
+        </Text>{" "}
+        {/* Adicionado fallback e marginBottom */}
         <View style={styles.dashedLine}></View>
         <View style={styles.flexRow}>
-          <Text style={[styles.boldText, { fontSize: 12 }]}>Total</Text>
-          <Text style={[styles.boldText, { fontSize: 12 }]}>
+          <Text
+            style={[styles.boldText, styles.flexChildLeft, { fontSize: 12 }]}>
+            Total
+          </Text>
+          <Text
+            style={[styles.boldText, styles.flexChildRight, { fontSize: 12 }]}>
             {formatCurrencyFromCents(totalPrice)}
           </Text>
         </View>
         <View style={styles.flexRow}>
-          <Text>Forma de Pagamento</Text>
-          <Text>
+          <Text style={styles.flexChildLeft}>Forma de Pagamento</Text>
+          <Text style={styles.flexChildRight}>
             {paymentTypeTranslation[receipt.orderPaymentType ?? ""] ||
               "Não informado"}
           </Text>
         </View>
         <View style={styles.flexRow}>
-          <Text>Status do Pedido</Text>
-          <Text>
+          <Text style={styles.flexChildLeft}>Status do Pedido</Text>
+          <Text style={styles.flexChildRight}>
             {statusTranslations[receipt.orderStatus ?? ""] || "Não informado"}
           </Text>
         </View>
         <View style={styles.flexRow}>
-          <Text>Status do Pagamento</Text>
-          <Text>
+          <Text style={styles.flexChildLeft}>Status do Pagamento</Text>
+          <Text style={styles.flexChildRight}>
             {paymentStatusTranslations[receipt.orderPaymentStatus ?? ""] ||
               "Não informado"}
           </Text>

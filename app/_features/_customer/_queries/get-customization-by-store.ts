@@ -13,7 +13,8 @@ import { CustomizationWithTemplate } from "@/types";
 import { eq } from "drizzle-orm";
 
 export const getCustomizationByStoreId = async (
-  domain: string
+  domain: string,
+  storeId: string
 ): Promise<CustomizationWithTemplate | null> => {
   try {
     const [data] = await db
@@ -31,13 +32,13 @@ export const getCustomizationByStoreId = async (
         googleApiKey: stores.googleApiKey,
         colors: colors,
       })
-      .from(users)
-      .innerJoin(stores, eq(users.id, stores.userId))
+      .from(stores)
+      .innerJoin(users, eq(users.domain, domain))
       .innerJoin(customizations, eq(users.id, customizations.userId))
       .innerJoin(templates, eq(customizations.template_id, templates.id))
       .innerJoin(orderSettings, eq(stores.id, orderSettings.storeId))
       .leftJoin(colors, eq(users.id, colors.userId))
-      .where(eq(users.domain, domain));
+      .where(eq(stores.id, storeId));
 
     // @ts-expect-error - open_hours is an array of objects
     return data ?? null;

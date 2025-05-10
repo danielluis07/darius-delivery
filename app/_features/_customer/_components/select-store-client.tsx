@@ -9,6 +9,23 @@ import { StoreProvider, useStore } from "@/context/store-context";
 import { colors, customizations, orderSettings } from "@/db/schema";
 import { getCustomizationByStoreId } from "@/app/_features/_customer/_queries/get-customization-by-store";
 import { useStoreSelectionStore } from "@/stores/store-selection";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Loader2, Replace } from "lucide-react";
 
 type Store = { id: string; name: string; [key: string]: string };
 
@@ -69,7 +86,8 @@ const StoreManagementClient: React.FC<StoreManagementClientProps> = ({
   userSession,
   domain,
 }) => {
-  const { selectedStoreId, setSelectedStore } = useStoreSelectionStore();
+  const { selectedStoreId, setSelectedStore, clearSelection } =
+    useStoreSelectionStore();
   const [currentStoreDetails, setCurrentStoreDetails] =
     useState<Customization | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false); // Important for UX
@@ -83,15 +101,13 @@ const StoreManagementClient: React.FC<StoreManagementClientProps> = ({
       // setCurrentStoreDetails(null); // Optionally clear previous details immediately
 
       try {
-        const data = await getCustomizationByStoreId(storeId); // Call your Server Action
+        const data = await getCustomizationByStoreId(domain, storeId); // Call your Server Action
 
         if (data) {
           setCurrentStoreDetails(data);
         } else {
           setError("Store details not found or data is invalid.");
           setCurrentStoreDetails(null);
-          // You might want to clear the persisted ID if the store is truly gone/invalid
-          // clearZustandSelection();
         }
       } catch (err) {
         console.error("Error fetching store details:", err);
@@ -99,7 +115,6 @@ const StoreManagementClient: React.FC<StoreManagementClientProps> = ({
           err instanceof Error ? err.message : "An unexpected error occurred."
         );
         setCurrentStoreDetails(null);
-        // clearZustandSelection(); // Optionally clear persisted ID on critical error
       } finally {
         setIsLoading(false);
       }
@@ -108,71 +123,80 @@ const StoreManagementClient: React.FC<StoreManagementClientProps> = ({
     if (selectedStoreId) {
       fetchStoreData(selectedStoreId);
     } else {
-      // If selectedStoreId is null, clear details and reset states
       setCurrentStoreDetails(null);
       setIsLoading(false);
       setError(null);
     }
-  }, [selectedStoreId]); // Dependency: re-run when selectedStoreId from Zustand changes
+  }, [selectedStoreId]);
 
-  // This function now only updates the Zustand store. The useEffect handles the fetch.
   const handleStoreSelect = (storeId: string) => {
     if (selectedStoreId === storeId && currentStoreDetails) {
-      // Optional: if the same store is selected and details are already loaded, do nothing
-      // Or, you might want to allow a re-fetch. For now, this prevents re-fetch if already selected.
-      // To always re-fetch, just call setSelectedStore(storeId);
       return;
     }
     setSelectedStore(storeId);
   };
 
-  return (
-    <div>
-      {!selectedStoreId && (
-        <div className="bg-white">
-          <h2>Stores for {domain}</h2>
-          {userSession?.user?.name && <p>Hello, {userSession.user.name}!</p>}
+  console.log("Selected Store ID:", selectedStoreId);
 
-          <h3>Select a Store to view its details:</h3>
-          {initialStores.length > 0 ? (
-            <ul>
-              {initialStores.map((store) => (
-                <li key={store.id}>
-                  <button
-                    onClick={() => handleStoreSelect(store.id)}
-                    disabled={isLoading && selectedStoreId === store.id}>
-                    {store.name}
-                    {selectedStoreId === store.id &&
-                      isLoading &&
-                      " (Loading...)"}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No stores available for this domain.</p>
-          )}
+  return (
+    <div className="relative">
+      {!selectedStoreId && (
+        <div className="flex justify-center items-center h-screen">
+          <Card className="w-[400px]">
+            <CardHeader>
+              <CardTitle className="text-center">Bem vindo!</CardTitle>
+              <CardDescription className="text-center">
+                Selecione uma loja para visualizar os detalhes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading && <Loader2 className="animate-spin" />}
+              {error && <p className="text-red-500">{error}</p>}
+              <div>
+                {initialStores.length > 0 && !isLoading && !error ? (
+                  <Select onValueChange={handleStoreSelect}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione uma loja" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {initialStores.map((store) => (
+                          <SelectItem key={store.id} value={store.id}>
+                            {store.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p>Nenhuma loja disponível.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Button to change/clear store selection (replaces the "test" div) */}
+      {selectedStoreId && (
+        <div className="absolute top-4 left-4 z-40">
+          <button
+            onClick={clearSelection} // *** This function must set selectedStoreId to null/undefined ***
+            className="flex items-center justify-center px-4 py-2 bg-white text-black font-medium rounded-lg shadow-md
+                     hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-opacity-75
+                     transition-all duration-200 ease-in-out 
+                     transform hover:scale-105 active:scale-95"
+            aria-label="Mudar de loja">
+            <Replace className="mr-2 h-5 w-5" /> {/* Lucide icon added here */}
+            Mudar Loja
+          </button>
         </div>
       )}
 
       {selectedStoreId && ( // Only show this section if a store has been selected or is loading
-        <>
-          {isLoading && <p>Loading details for store: {selectedStoreId}...</p>}
-          {error && <p style={{ color: "red" }}>Error: {error}</p>}
-
-          {currentStoreDetails && !isLoading && !error && (
-            <StoreProvider session={userSession} data={currentStoreDetails}>
-              <DynamicTemplateRenderer />
-            </StoreProvider>
-          )}
-          {/* Handle case where selection was made, but no data and not loading and no error (e.g. initial state before fetch completes) */}
-          {!selectedStoreId && !isLoading && !error && selectedStoreId && (
-            <p>Select a store to see its details.</p> // Or could be covered by loading state
-          )}
-        </>
-      )}
-      {!selectedStoreId && !isLoading && !error && (
-        <p>Please select a store from the list above to see its details.</p>
+        <StoreProvider session={userSession} data={currentStoreDetails}>
+          <DynamicTemplateRenderer />
+        </StoreProvider>
       )}
     </div>
   );
