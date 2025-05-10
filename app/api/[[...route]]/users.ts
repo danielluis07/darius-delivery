@@ -57,20 +57,19 @@ const app = new Hono()
     }
   )
   .get(
-    "/domain/store/:storeId",
-    zValidator("param", z.object({ storeId: z.string().optional() })),
+    "/domain/user/:userId",
+    zValidator("param", z.object({ userId: z.string().optional() })),
     async (c) => {
-      const { storeId } = c.req.valid("param");
+      const { userId } = c.req.valid("param");
 
-      if (!storeId) {
+      if (!userId) {
         return c.json({ error: "Missing id" }, 400);
       }
 
       const [data] = await db
         .select({ domain: users.domain })
-        .from(stores)
-        .innerJoin(users, eq(stores.userId, users.id))
-        .where(eq(stores.id, storeId));
+        .from(users)
+        .where(eq(users.id, userId));
 
       if (!data) {
         return c.json({ error: "Domain not found" }, 404);
